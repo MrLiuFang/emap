@@ -1,3 +1,11 @@
+.project
+.settings
+target
+.classpath
+*.log
+.DS_Store
+.iml
+.factorypath
 # Compiled class file
 *.class
 
