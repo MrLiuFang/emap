@@ -25,7 +25,6 @@ import com.pepper.core.constant.GlobalConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.role.Role;
 import com.pepper.service.authentication.AppAuthorize;
-import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.parameter.ParameterService;

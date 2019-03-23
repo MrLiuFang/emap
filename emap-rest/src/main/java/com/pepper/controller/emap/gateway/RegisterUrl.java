@@ -19,7 +19,6 @@ public class RegisterUrl extends AbsRegisterUrl {
 
 	@Override
 	protected URL getCodeSourcePath() {
-		System.out.println("emapRestRegisterUrl");
 		return RegisterUrl.class.getProtectionDomain().getCodeSource().getLocation();
 	}
 
