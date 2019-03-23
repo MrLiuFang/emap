@@ -1,0 +1,88 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.pepper</groupId>
+		<artifactId>emap</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<packaging>war</packaging>
+	<artifactId>emap-run</artifactId>
+	<version>${project.parent.version}</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>emap-business</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>emap-web</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency> -->
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>emap-rest</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>console-business</artifactId>
+			<version>${console.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>console-web</artifactId>
+			<version>${console.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>discreteness-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>discreteness-cache-business</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>discreteness-authentication</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>discreteness-file-business</artifactId>
+		</dependency>
+
+		<!-- spring cloud config client 重试机制需要引入spring-retry -->
+		<!-- <dependency> <groupId>org.springframework.retry</groupId> <artifactId>spring-retry</artifactId> 
+			</dependency> -->
+		<!-- 动态刷新配置 -->
+		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-actuator</artifactId> 
+			</dependency> -->
+		<!-- spring-cloud -->
+		<!-- <dependency> <groupId>org.springframework.cloud</groupId> <artifactId>spring-cloud-config-client</artifactId> 
+			</dependency> -->
+
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>emap-run</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
