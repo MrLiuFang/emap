@@ -16,9 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.pepper.common.emuns.Status;
 import com.pepper.core.ResultData;
-import com.pepper.core.ResultEnum.Code;
+import com.pepper.core.ResultEnum.Status;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.GlobalConstant;
@@ -77,7 +76,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 
 		if (!StringUtils.hasText(user.getAccount())) {
 			resultData.setMessage("用戶名不能爲空");
-			resultData.setStatus(Code.LOGIC_ERROR.getKey());
+			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000001);
 			return resultData;
 		}
@@ -91,27 +90,27 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 
 		if (userReal == null) {
 			resultData.setMessage("用戶名/密碼錯誤");
-			resultData.setStatus(Code.LOGIC_ERROR.getKey());
+			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000003);
 			return resultData;
 		}
-		if ((userReal.getStatus() != null && Status.DISABLE.equals(userReal.getStatus()))
+		if ((userReal.getStatus() != null && com.pepper.common.emuns.Status.DISABLE.equals(userReal.getStatus()))
 				|| userReal.getStatus() == null) {
 			resultData.setMessage("用戶已被鎖定，請聯係管理員");
-			resultData.setStatus(Code.LOGIC_ERROR.getKey());
+			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000004);
 			return resultData;
 		}
 		Role role = roleService.findByUserId(userReal.getId());
 		if (role == null) {
 			resultData.setMessage("用戶無角色，請聯係管理員");
-			resultData.setStatus(Code.LOGIC_ERROR.getKey());
+			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000005);
 			return resultData;
 		}
-		if (Status.DISABLE.equals(role.getStatus())) {
+		if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
 			resultData.setMessage("用戶所在角色已被禁用，請聯係管理員");
-			resultData.setStatus(Code.LOGIC_ERROR.getKey());
+			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000006);
 			return resultData;
 		}

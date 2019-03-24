@@ -1,10 +1,12 @@
 package com.pepper.controller.emap.front.user;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +24,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
@@ -58,7 +61,6 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Pager<AdminUser> list(String account,String mobile,String email,String name) {
-		ResultData resultData = new ResultData();
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
 		if(StringUtils.hasText(account)) {
@@ -81,7 +83,18 @@ public class UserController extends BaseControllerImpl implements BaseController
 				u.setCreateUser(role.getName());
 			}
 		}
-		resultData.setData("list", pager.getResults());
+		List<AdminUser> list = pager.getResults();
+		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
+		for(AdminUser user : list) {
+			AdminUserVo  adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(user, adminUserVo);
+			adminUserVo.setPassword("");
+			RoleUser roleUser = roleUserService.findByUserId(user.getId());
+			adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+			returnList.add(adminUserVo);
+		}
+		pager.setData("user",returnList);
+		pager.setResults(null);
 		return pager;
 	}
 	
@@ -103,15 +116,17 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public ResultData update(@RequestBody AdminUser adminUser,@RequestBody String roleId) {
+	public ResultData update(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
+		AdminUser adminUser = new AdminUser();
+		MapToBeanUtil.convert(adminUser, map);
 		adminUser.setUpdateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setUpdateUser(user.getId());
 		// 账号不允许修改
 		AdminUser old = adminUserService.findById(adminUser.getId());
 		adminUser.setAccount(old.getAccount());
-		adminUserService.updateUser(adminUser, roleId);
+		adminUserService.updateUser(adminUser, map.get("roleId").toString());
 		return resultData;
 	}
 	
@@ -123,15 +138,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 		RoleUser roleUser = roleUserService.findByUserId(userId);
 		AdminUser adminUser = adminUserService.findById(userId);
 		adminUser.setPassword("");
-		Pager<Role> pager = new Pager<>();
-		pager.setPageNo(1);
-		pager.setPageSize(Integer.MAX_VALUE);
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+"_code", new String[]{"ADMIN","SUPER_ADMIN_ROLE"});
-		pager =  roleService.findNavigator(pager);
-		
 		resultData.setData("user",adminUser);
 		resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
-		resultData.setData("roleList", pager.getResults());
 		return resultData;
 	}
 	
