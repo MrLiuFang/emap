@@ -1,5 +1,7 @@
 package com.pepper.controller.emap.core;
 
+import com.pepper.controller.emap.util.Internationalization;
+
 /**
  * 
  * @author Mr.Liu
@@ -19,7 +21,12 @@ public class ResultData extends com.pepper.core.ResultData {
 		return this.message;
 	}
 	
+	@Override
+	public void setMessage(String message) {
+		this.message = message;
+	}
+	
 	private String messageInternationalization() {
-		return "操作成功！";
+		return Internationalization.getMessageInternationalization(200);
 	}
 }
