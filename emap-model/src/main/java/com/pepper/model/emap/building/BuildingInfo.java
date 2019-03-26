@@ -1,0 +1,55 @@
+package com.pepper.model.emap.building;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicUpdate;
+
+import com.pepper.core.base.BaseModel;
+
+@Entity()
+@Table(name = "t_building_info")
+@DynamicUpdate(true)
+public class BuildingInfo extends BaseModel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2912563158909371509L;
+
+	@Column(name = "code")
+	private String code;
+	
+	@Column(name = "name")
+	private String name;
+	
+	@Column(name = "site_info_id")
+	private String siteInfoId;
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getSiteInfoId() {
+		return siteInfoId;
+	}
+
+	public void setSiteInfoId(String siteInfoId) {
+		this.siteInfoId = siteInfoId;
+	}
+	
+	
+}

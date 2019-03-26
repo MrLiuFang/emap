@@ -24,12 +24,12 @@ public class RoleController {
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public ResultData getRoleLit() {
+	public Object getRoleLit() {
 		ResultData resultData = new ResultData();
 		Pager<Role> pager = new Pager<>();
 		pager.setPageNo(1);
 		pager.setPageSize(Integer.MAX_VALUE);
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+"_code", new String[]{"ADMIN","SUPER_ADMIN_ROLE"});
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+"_code", new String[]{"ADMIN_ROLE1","SUPER_ADMIN_ROLE1"});
 		pager =  roleService.findNavigator(pager);
 		resultData.setData("role", pager.getResults());
 		return resultData;

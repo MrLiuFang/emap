@@ -9,16 +9,15 @@ import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
-import com.pepper.core.constant.GlobalConstant;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
@@ -34,7 +33,6 @@ import com.pepper.util.Md5Util;
 
 @Controller("frontUserController")
 @RequestMapping(value = "/front/user")
-@Validated
 public class UserController extends BaseControllerImpl implements BaseController {
 
 	@Reference
@@ -60,7 +58,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Pager<AdminUser> list(String account,String mobile,String email,String name) {
+	public Object list(String account,String mobile,String email,String name) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
 		if(StringUtils.hasText(account)) {
@@ -101,10 +99,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public ResultData add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
+		adminUser.setStatus(Status.NORMAL);
+		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setCreateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setCreateUser(user.getId());
@@ -116,10 +116,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public ResultData update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
+		adminUser.setPassword(null);
 		adminUser.setUpdateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setUpdateUser(user.getId());
@@ -133,7 +134,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/toEdit")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public ResultData toEdit(String userId) {
+	public Object toEdit( String userId) {
 		ResultData resultData = new ResultData();
 		RoleUser roleUser = roleUserService.findByUserId(userId);
 		AdminUser adminUser = adminUserService.findById(userId);

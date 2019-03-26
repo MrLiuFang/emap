@@ -20,7 +20,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public ResultData getUserInfo() {
+	public Object getUserInfo() {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
 		adminUser.setPassword("");

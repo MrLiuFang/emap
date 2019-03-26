@@ -10,6 +10,10 @@ import com.pepper.model.console.role.Role;
  */
 public class AdminUserVo extends AdminUser {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7298384054166818609L;
 	private Role role;
 
 	public Role getRole() {
