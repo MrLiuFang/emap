@@ -47,6 +47,14 @@
 		</dependency>
 		<dependency>
 			<groupId>com.pepper</groupId>
+			<artifactId>discreteness-file-business</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
+			<artifactId>discreteness-file-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
 			<artifactId>discreteness-authentication</artifactId>
 		</dependency>
 		<dependency>

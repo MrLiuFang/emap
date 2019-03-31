@@ -1,4 +1,4 @@
-package com.pepper.controller.emap.front.site;
+package com.pepper.controller.emap.front.department;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,47 +18,47 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
-import com.pepper.model.emap.site.SiteInfo;
+import com.pepper.model.emap.department.Department;
 import com.pepper.service.authentication.aop.Authorize;
-import com.pepper.service.emap.site.SiteInfoService;
+import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller()
-@RequestMapping(value = "/front/site")
-public class SiteController  extends BaseControllerImpl implements BaseController {
-	
-	@Reference
-	private SiteInfoService siteInfoService;
+@RequestMapping(value = "/front/department")
+public class DepartmentController  extends BaseControllerImpl implements BaseController  {
 
+	@Reference
+	private DepartmentService departmentService;
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String keyWord) {
-		Pager<SiteInfo> pager = new Pager<SiteInfo>();
-		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
-		}
+	public Object list(String name,String code,String keyWord) {
+		Pager<Department> pager = new Pager<Department>();
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
 		}
-		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_code&name",keyWord );
+		if(StringUtils.hasText(code)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
 		}
-		pager = siteInfoService.findNavigator(pager);
 		
-		pager.setData("site",pager.getResults());
+		if(StringUtils.hasText(keyWord)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"__code&name",keyWord );
+		}
+		pager = departmentService.findNavigator(pager);
+		pager.setData("staff",pager.getResults());
 		pager.setResults(null);
 		return pager;
 	}
-	
+
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
-		SiteInfo siteInfo = new SiteInfo();
-		MapToBeanUtil.convert(siteInfo, map);
-		siteInfoService.save(siteInfo);
+		Department department = new Department();
+		MapToBeanUtil.convert(department, map);
+		departmentService.save(department);
 		return resultData;
 	}
 	
@@ -67,9 +67,9 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object update(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
-		SiteInfo siteInfo = new SiteInfo();
-		MapToBeanUtil.convert(siteInfo, map);
-		siteInfoService.update(siteInfo);
+		Department department = new Department();
+		MapToBeanUtil.convert(department, map);
+		departmentService.update(department);
 		return resultData;
 	}
 	
@@ -78,7 +78,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
-		resultData.setData("site",siteInfoService.findById(id));
+		resultData.setData("department",departmentService.findById(id));
 		return resultData;
 	}
 	
@@ -98,11 +98,18 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		for(int i = 0; i <arrayNode.size(); i++) {
 			String id = arrayNode.get(i).asText();
 			try {
-				siteInfoService.deleteById(id);
+				departmentService.deleteById(id);
 			}catch (Exception e) {
 				// TODO: handle exception
 			}
 		}
 		return resultData;
 	}
+	
+//	private StaffVo convertStaffVo(Staff staff) {
+//		StaffVo staffVo = new StaffVo();
+//		BeanUtils.copyProperties(staff, staffVo);
+//		staffVo.setDepartment(departmentService.findById(staff.getDepartmentId()));
+//		return staffVo;
+//	}
 }
