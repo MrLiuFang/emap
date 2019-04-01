@@ -34,9 +34,6 @@ public class Map extends BaseModel {
 	@Column(name = "floor")
 	private String floor;
 	
-	@Column(name = "map_image_url",length= 1000)
-	private String mapImageUrl;
-	
 	@Column(name = "image_heigh")
 	private String imageHeigh;
 	
@@ -92,14 +89,6 @@ public class Map extends BaseModel {
 
 	public void setFloor(String floor) {
 		this.floor = floor;
-	}
-
-	public String getMapImageUrl() {
-		return mapImageUrl;
-	}
-
-	public void setMapImageUrl(String mapImageUrl) {
-		this.mapImageUrl = mapImageUrl;
 	}
 
 	public String getImageHeigh() {

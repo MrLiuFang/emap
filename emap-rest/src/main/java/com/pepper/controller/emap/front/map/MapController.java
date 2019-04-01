@@ -22,11 +22,13 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.map.MapImageUrl;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.util.MapToBeanUtil;
@@ -44,6 +46,29 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private MapService mapService;
+	
+	@Reference
+	private MapImageUrlService mapImageUrlService;
+	
+	@RequestMapping(value = "/addMapImageUrl")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object addMapImageUrl(@RequestBody String data) throws IOException {
+		JsonNode jsonNode = new ObjectMapper().readTree(data);
+		ResultData resultData = new ResultData();
+		if(jsonNode.has("mapId")) {
+			mapImageUrlService.deleteByMapId(jsonNode.get("mapId").asText());
+			ArrayNode arrayNode =  (ArrayNode) jsonNode.get("data");
+			for(JsonNode node : arrayNode) {
+				MapImageUrl mapImageUrl = new MapImageUrl();
+				mapImageUrl.setCode(node.get("code").asText());
+				mapImageUrl.setUrl(node.get("url").asText());
+				mapImageUrl.setMapId(jsonNode.get("mapId").asText());
+				mapImageUrlService.save(mapImageUrl);
+			}
+		}
+		return resultData;
+	}
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -74,15 +99,8 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		List<com.pepper.model.emap.map.Map> list = pager.getResults();
 		List<MapVo> returnList = new ArrayList<MapVo>();
 		for(com.pepper.model.emap.map.Map entity : list) {
-			MapVo  mapVo = new MapVo();
-			BeanUtils.copyProperties(entity, mapVo);
-			BuildingInfo buildingInfo =  buildingInfoService.findById(entity.getBuildId());
-			BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
-			BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
-			mapVo.setBuild(buildingInfoVo);
-			SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
-			buildingInfoVo.setSite(siteInfo);
-			returnList.add(mapVo);
+			
+			returnList.add(convertMapVo(entity));
 		}
 		pager.setData("map",returnList);
 		pager.setResults(null);
@@ -99,6 +117,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		mapService.save(entity);
 		return resultData;
 	}
+	
 	
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
@@ -117,16 +136,22 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		com.pepper.model.emap.map.Map  entity = mapService.findById(id);
+		resultData.setData("map",convertMapVo(entity));
+		return resultData;
+	}
+	
+	private MapVo convertMapVo(com.pepper.model.emap.map.Map map) {
 		MapVo  mapVo = new MapVo();
-		BeanUtils.copyProperties(entity, mapVo);
-		BuildingInfo buildingInfo =  buildingInfoService.findById(entity.getBuildId());
+		BeanUtils.copyProperties(map, mapVo);
+		mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+		BuildingInfo buildingInfo =  buildingInfoService.findById(map.getBuildId());
 		BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
 		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
 		mapVo.setBuild(buildingInfoVo);
 		SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
 		buildingInfoVo.setSite(siteInfo);
-		resultData.setData("map",mapVo);
-		return resultData;
+		
+		return mapVo;
 	}
 	
 	@RequestMapping(value = "/delete")
