@@ -114,6 +114,12 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1000006);
 			return resultData;
 		}
+		if(!role.getCode().equals("EMPLOYEE_ROLE")) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
+			resultData.setStatus(Status.LOGIN_FAIL.getKey());
+			resultData.setCode(1000007);
+			return resultData;
+		}
 
 		// 更新用户的最后登录时间
 		userReal.setLastLoginTime(new Date());

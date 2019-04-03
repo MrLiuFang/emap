@@ -76,16 +76,16 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord) {
 		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
 		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_areaCode",areaCode );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaCode",areaCode );
 		}
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_areaName",areaName );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaName",areaName );
 		}
 		
 		if(StringUtils.hasText(buildId)) {

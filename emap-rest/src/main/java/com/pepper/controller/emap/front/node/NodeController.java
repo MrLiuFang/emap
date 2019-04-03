@@ -71,16 +71,16 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String keyWord) {
 		Pager<Node> pager = new Pager<Node>();
 		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(source)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_source",source );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_source",source );
 		}
 		if(StringUtils.hasText(sourceCode)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_sourceCode",sourceCode );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_sourceCode",sourceCode );
 		}
 		if(StringUtils.hasText(mapId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_mapId",mapId );

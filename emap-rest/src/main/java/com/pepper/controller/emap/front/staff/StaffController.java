@@ -29,6 +29,7 @@ import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.staff.StaffService;
+import com.pepper.service.file.FileService;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller()
@@ -39,6 +40,9 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	private StaffService staffService;
 	
 	@Reference
+	private FileService fileService;
+	
+	@Reference
 	private DepartmentService departmentService;
 	
 	@RequestMapping(value = "/list")
@@ -47,16 +51,16 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	public Object list(String name,String position,String mobile,String email,String keyWord) {
 		Pager<Staff> pager = new Pager<Staff>();
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(position)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_position",position );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_position",position );
 		}
 		if(StringUtils.hasText(mobile)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_mobile",mobile );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_mobile",mobile );
 		}
 		if(StringUtils.hasText(email)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_email",email );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_email",email );
 		}
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"__position&name&mobile&email",keyWord );
@@ -132,6 +136,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		StaffVo staffVo = new StaffVo();
 		BeanUtils.copyProperties(staff, staffVo);
 		staffVo.setDepartment(departmentService.findById(staff.getDepartmentId()));
+		staffVo.setHeadPortraitUrl(fileService.getUrl(staff.getHeadPortrait()));
 		return staffVo;
 	}
 }

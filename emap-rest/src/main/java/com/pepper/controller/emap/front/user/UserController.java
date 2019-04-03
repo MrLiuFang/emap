@@ -28,6 +28,8 @@ import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
+import com.pepper.service.emap.department.DepartmentService;
+import com.pepper.service.file.FileService;
 import com.pepper.util.MapToBeanUtil;
 import com.pepper.util.Md5Util;
 
@@ -44,6 +46,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private RoleService roleService;
 	
+	@Reference
+	private DepartmentService departmentService;
+	
+	@Reference
+	private FileService fileService;
+	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -51,7 +59,17 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
 		adminUser.setPassword("");
-		resultData.setData("user", adminUser);
+		AdminUserVo  adminUserVo = new AdminUserVo();
+		BeanUtils.copyProperties(adminUser, adminUserVo);
+		adminUserVo.setPassword("");
+		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
+		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+		if(StringUtils.hasText(adminUser.getDepartmentId())) {
+			adminUserVo.setDepartment(departmentService.findById(adminUser.getDepartmentId()));
+		}
+		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
+		resultData.setData("user", adminUserVo);
+		
 		return resultData;
 	}
 	
@@ -89,6 +107,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 			adminUserVo.setPassword("");
 			RoleUser roleUser = roleUserService.findByUserId(user.getId());
 			adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+			if(StringUtils.hasText(user.getDepartmentId())) {
+				adminUserVo.setDepartment(departmentService.findById(user.getDepartmentId()));
+			}
+			adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
 			returnList.add(adminUserVo);
 		}
 		pager.setData("user",returnList);
@@ -109,6 +131,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setCreateUser(user.getId());
 		adminUser.setPassword(Md5Util.encryptPassword(Md5Util.encodeByMD5(adminUser.getPassword()),adminUser.getAccount()));
+		adminUser.setStatus(Status.NORMAL);
+		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUserService.saveUser(adminUser, map.get("roleId").toString());
 		return resultData;
 	}
@@ -141,6 +165,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setPassword("");
 		resultData.setData("user",adminUser);
 		resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
+		resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
 		return resultData;
 	}
 	

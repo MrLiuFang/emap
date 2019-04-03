@@ -36,10 +36,10 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	public Object list(String code,String name,String keyWord) {
 		Pager<SiteInfo> pager = new Pager<SiteInfo>();
 		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_code&name",keyWord );

@@ -36,10 +36,10 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	public Object list(String name,String code,String keyWord) {
 		Pager<Department> pager = new Pager<Department>();
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
 		
 		if(StringUtils.hasText(keyWord)) {

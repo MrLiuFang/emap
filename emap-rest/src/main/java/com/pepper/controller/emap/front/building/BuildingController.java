@@ -48,13 +48,13 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 	public Object list(String code,String name,String siteId,String keyWord) {
 		Pager<BuildingInfo> pager = new Pager<BuildingInfo>();
 		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_code",code );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(siteId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_siteInfoId",siteId );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_siteInfoId",siteId );
 		}
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_siteInfoId&code&name",keyWord );
