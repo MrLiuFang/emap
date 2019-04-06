@@ -11,7 +11,7 @@ import com.pepper.model.emap.map.MapImageUrl;
 public interface MapImageUrlDao extends BaseDao<MapImageUrl>  {
 
 	
-	@Query(value="delete from MapImageUrl u where mapId  = ?1  ")
+	@Query(value="delete from MapImageUrl  where mapId  = ?1  ")
 	@Modifying
 	public void deleteByMapId(String mapId);
 	

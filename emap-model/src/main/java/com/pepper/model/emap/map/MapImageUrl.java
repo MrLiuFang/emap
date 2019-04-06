@@ -26,6 +26,15 @@ public class MapImageUrl extends BaseModel {
 	
 	@Column(name = "url",length= 1000)
 	private String url;
+	
+	@Column(name = "ratate")
+	private Double ratate;
+	
+	@Column(name = "offsetX")
+	private Double offsetX;
+	
+	@Column(name = "offsetY")
+	private Double offsetY;
 
 	public String getCode() {
 		return code;
@@ -49,6 +58,30 @@ public class MapImageUrl extends BaseModel {
 
 	public void setMapId(String mapId) {
 		this.mapId = mapId;
+	}
+
+	public Double getRatate() {
+		return ratate;
+	}
+
+	public void setRatate(Double ratate) {
+		this.ratate = ratate;
+	}
+
+	public Double getOffsetX() {
+		return offsetX;
+	}
+
+	public void setOffsetX(Double offsetX) {
+		this.offsetX = offsetX;
+	}
+
+	public Double getOffsetY() {
+		return offsetY;
+	}
+
+	public void setOffsetY(Double offsetY) {
+		this.offsetY = offsetY;
 	}
 	
 	

@@ -2,6 +2,7 @@ package com.pepper.controller.emap.front.staff;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -23,11 +24,13 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
+import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.util.MapToBeanUtil;
@@ -45,25 +48,22 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	@Reference
 	private DepartmentService departmentService;
 	
+	@Reference
+	private SiteInfoService siteInfoService;
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String name,String position,String mobile,String email,String keyWord) {
+	public Object list(String name,String email,String siteId) {
 		Pager<Staff> pager = new Pager<Staff>();
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
-		if(StringUtils.hasText(position)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_position",position );
-		}
-		if(StringUtils.hasText(mobile)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_mobile",mobile );
+		if(StringUtils.hasText(siteId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_siteId",siteId );
 		}
 		if(StringUtils.hasText(email)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_email",email );
-		}
-		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"__position&name&mobile&email",keyWord );
 		}
 		pager = staffService.findNavigator(pager);
 		List<Staff> list = pager.getResults();
@@ -84,6 +84,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
+		staff.setAvailableTime(new Date());
 		staffService.save(staff);
 		return resultData;
 	}
@@ -126,7 +127,6 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 			try {
 				staffService.deleteById(id);
 			}catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 		return resultData;
@@ -135,8 +135,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	private StaffVo convertStaffVo(Staff staff) {
 		StaffVo staffVo = new StaffVo();
 		BeanUtils.copyProperties(staff, staffVo);
-		staffVo.setDepartment(departmentService.findById(staff.getDepartmentId()));
-		staffVo.setHeadPortraitUrl(fileService.getUrl(staff.getHeadPortrait()));
+		staffVo.setSite(siteInfoService.findById(staff.getSiteId()));
 		return staffVo;
 	}
 }

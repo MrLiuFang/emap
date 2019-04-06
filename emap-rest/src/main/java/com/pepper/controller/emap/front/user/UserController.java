@@ -162,10 +162,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		RoleUser roleUser = roleUserService.findByUserId(userId);
 		AdminUser adminUser = adminUserService.findById(userId);
+		if(adminUser!=null) {
 		adminUser.setPassword("");
-		resultData.setData("user",adminUser);
-		resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
-		resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
+			resultData.setData("user",adminUser);
+			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
+			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
+		}
 		return resultData;
 	}
 	

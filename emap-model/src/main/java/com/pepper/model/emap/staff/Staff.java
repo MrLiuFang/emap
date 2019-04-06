@@ -1,5 +1,7 @@
 package com.pepper.model.emap.staff;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -27,35 +29,33 @@ public class Staff extends BaseModel {
 	@Column(name = "name")
 	private String name;
 
-	@Column(name = "position")
-	private String position;
-
-	/**
-	 * 用户手机
-	 */
-	@Column(name = "mobile")
-	private String mobile;
-
 	/**
 	 * 邮箱
 	 */
 	@Column(name = "email")
 	private String email;
 
-	/**
-	 * 头像
-	 */
-	@Column(name = "head_portrait")
-	private String headPortrait;
 
-//	/**
-//	 * 性别
-//	 */
-//	@Column(name = "gender")
-//	private Gender gender; 
+	@Column(name = "password")
+	private String password;
 
-	@Column(name = "department_id")
-	private String departmentId;
+	@Column(name = "need_change_password")
+	private Boolean needChangePassword;
+	
+	@Column(name = "is_available")
+	private Boolean isAvailable;
+	
+	@Column(name = "available_time")
+	private Date availableTime;
+	
+	@Column(name = "site_id")
+	private String siteId;
+	
+	@Column(name = "password_never_expire")
+	private Boolean passwordNeverExpire;
+	
+	@Column(name = "last_login_time")
+	private Date lastLoginTime;
 
 	public String getName() {
 		return name;
@@ -63,22 +63,6 @@ public class Staff extends BaseModel {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getPosition() {
-		return position;
-	}
-
-	public void setPosition(String position) {
-		this.position = position;
-	}
-
-	public String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
 	}
 
 	public String getEmail() {
@@ -89,21 +73,59 @@ public class Staff extends BaseModel {
 		this.email = email;
 	}
 
-	public String getHeadPortrait() {
-		return headPortrait;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setHeadPortrait(String headPortrait) {
-		this.headPortrait = headPortrait;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getDepartmentId() {
-		return departmentId;
+	public Boolean getNeedChangePassword() {
+		return needChangePassword;
 	}
 
-	public void setDepartmentId(String departmentId) {
-		this.departmentId = departmentId;
+	public void setNeedChangePassword(Boolean needChangePassword) {
+		this.needChangePassword = needChangePassword;
 	}
-	
-	
+
+	public Boolean getIsAvailable() {
+		return isAvailable;
+	}
+
+	public void setIsAvailable(Boolean isAvailable) {
+		this.isAvailable = isAvailable;
+	}
+
+	public Date getAvailableTime() {
+		return availableTime;
+	}
+
+	public void setAvailableTime(Date availableTime) {
+		this.availableTime = availableTime;
+	}
+
+	public String getSiteId() {
+		return siteId;
+	}
+
+	public void setSiteId(String siteId) {
+		this.siteId = siteId;
+	}
+
+	public Boolean getPasswordNeverExpire() {
+		return passwordNeverExpire;
+	}
+
+	public void setPasswordNeverExpire(Boolean passwordNeverExpire) {
+		this.passwordNeverExpire = passwordNeverExpire;
+	}
+
+	public Date getLastLoginTime() {
+		return lastLoginTime;
+	}
+
+	public void setLastLoginTime(Date lastLoginTime) {
+		this.lastLoginTime = lastLoginTime;
+	}
 }
