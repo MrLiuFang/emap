@@ -46,10 +46,10 @@ public class Node extends BaseModel {
 	private Integer warningLevel;
 	
 	@Column(name = "x")
-	private Long x;
+	private String x;
 	
 	@Column(name = "y")
-	private Long y;
+	private String y;
 
 	
 	
@@ -125,21 +125,23 @@ public class Node extends BaseModel {
 		this.warningLevel = warningLevel;
 	}
 
-	public Long getX() {
+	public String getX() {
 		return x;
 	}
 
-	public void setX(Long x) {
+	public void setX(String x) {
 		this.x = x;
 	}
 
-	public Long getY() {
+	public String getY() {
 		return y;
 	}
 
-	public void setY(Long y) {
+	public void setY(String y) {
 		this.y = y;
 	}
+
+	
 	
 	
 }

@@ -76,7 +76,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name) {
+	public Object list(String account,String mobile,String email,String name,String departmentId) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
 		if(StringUtils.hasText(account)) {
@@ -90,6 +90,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
+		}
+		if(StringUtils.hasText(departmentId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_departmentId",departmentId );
 		}
 		pager = adminUserService.list(pager);
 		Role role = null;
@@ -163,7 +166,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		RoleUser roleUser = roleUserService.findByUserId(userId);
 		AdminUser adminUser = adminUserService.findById(userId);
 		if(adminUser!=null) {
-		adminUser.setPassword("");
+			adminUser.setPassword("");
 			resultData.setData("user",adminUser);
 			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
 			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));

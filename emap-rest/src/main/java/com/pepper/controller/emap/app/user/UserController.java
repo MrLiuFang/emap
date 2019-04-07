@@ -1,5 +1,10 @@
 package com.pepper.controller.emap.app.user;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.zookeeper.server.admin.AdminServer;
 import org.springframework.beans.BeanUtils;
@@ -11,9 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
+import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.console.enums.UserType;
+import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -73,6 +82,20 @@ public class UserController extends BaseControllerImpl implements BaseController
 			adminUser.setIsWork(Boolean.valueOf(map.get("work").toString()));
 			adminUserService.update(adminUser);
 		}
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/getUserByBepartmentId")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object getUserByBepartmentId() {
+		ResultData resultData = new ResultData();
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
+		Map<String,Object> searchParameter = new HashMap<String,Object>();
+		searchParameter.put(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
+		currentUser = adminUserService.findById(currentUser.getId());
+		searchParameter.put(SearchConstant.EQUAL+"_departmentId", currentUser.getDepartmentId());
+		resultData.setData("user", adminUserService.findAll(searchParameter));
 		return resultData;
 	}
 	

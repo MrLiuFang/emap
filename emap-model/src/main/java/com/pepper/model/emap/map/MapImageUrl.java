@@ -30,10 +30,10 @@ public class MapImageUrl extends BaseModel {
 	@Column(name = "ratate")
 	private Double ratate;
 	
-	@Column(name = "offsetX")
+	@Column(name = "offset_x")
 	private Double offsetX;
 	
-	@Column(name = "offsetY")
+	@Column(name = "offset_y")
 	private Double offsetY;
 
 	public String getCode() {

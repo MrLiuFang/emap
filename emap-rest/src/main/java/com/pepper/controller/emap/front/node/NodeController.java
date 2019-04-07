@@ -68,7 +68,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String keyWord) {
+	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId) {
 		Pager<Node> pager = new Pager<Node>();
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
@@ -88,10 +88,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		if(StringUtils.hasText(nodeTypeId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_nodeTypeId",nodeTypeId );
 		}
-		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_code&name&source&sourceCode&mapId&nodeTypeId",keyWord );
-		}
-		pager = nodeService.findNavigator(pager);
+		pager = nodeService.findNavigator(pager,null);
 		List<Node> list = pager.getResults();
 		List<NodeVo> returnList = new ArrayList<NodeVo>();
 		for(Node node : list) {

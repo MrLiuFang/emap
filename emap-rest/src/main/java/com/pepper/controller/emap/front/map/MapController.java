@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -50,24 +52,21 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@Reference
 	private MapImageUrlService mapImageUrlService;
 	
-	@RequestMapping(value = "/addMapImageUrl")
-	@Authorize(authorizeResources = false)
-	@ResponseBody
-	public Object addMapImageUrl(@RequestBody String data) throws IOException {
+
+	private void addMapImageUrl(String mapId, String data) throws IOException {
+		mapImageUrlService.deleteByMapId(mapId);
 		JsonNode jsonNode = new ObjectMapper().readTree(data);
-		ResultData resultData = new ResultData();
-		if(jsonNode.has("mapId")) {
-			mapImageUrlService.deleteByMapId(jsonNode.get("mapId").asText());
-			ArrayNode arrayNode =  (ArrayNode) jsonNode.get("data");
-			for(JsonNode node : arrayNode) {
-				MapImageUrl mapImageUrl = new MapImageUrl();
-				mapImageUrl.setCode(node.get("code").asText());
-				mapImageUrl.setUrl(node.get("url").asText());
-				mapImageUrl.setMapId(jsonNode.get("mapId").asText());
-				mapImageUrlService.save(mapImageUrl);
-			}
+		ArrayNode arrayNode =  (ArrayNode) jsonNode;
+		for(JsonNode node : arrayNode) {
+			MapImageUrl mapImageUrl = new MapImageUrl();
+			mapImageUrl.setCode(node.get("code").asText());
+			mapImageUrl.setUrl(node.get("url").asText());
+			mapImageUrl.setRatate(node.get("url").asDouble());
+			mapImageUrl.setOffsetX(node.get("offsetX").asDouble());
+			mapImageUrl.setOffsetY(node.get("offsetY").asDouble());
+			mapImageUrl.setMapId(mapId);
+			mapImageUrlService.save(mapImageUrl);
 		}
-		return resultData;
 	}
 	
 	@RequestMapping(value = "/list")
@@ -107,26 +106,36 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		return pager;
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody String data) throws JsonParseException, JsonMappingException, IOException {
 		ResultData resultData = new ResultData();
+		JsonNode jsonNode = new ObjectMapper().readTree(data);
+		Map<String,Object> map = new ObjectMapper().readValue(data, Map.class);
+		String mapImageUrl = jsonNode.get("mapImageUrl").toString();
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
-		mapService.save(entity);
+		entity = mapService.save(entity);
+		addMapImageUrl(entity.getId(),mapImageUrl);
 		return resultData;
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody String data) throws IOException {
 		ResultData resultData = new ResultData();
+		JsonNode jsonNode = new ObjectMapper().readTree(data);
+		Map<String,Object> map = new ObjectMapper().readValue(data, Map.class);
+		String mapImageUrl = jsonNode.get("mapImageUrl").toString();
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
 		mapService.update(entity);
+		addMapImageUrl(entity.getId(),mapImageUrl);
 		return resultData;
 	}
 	
