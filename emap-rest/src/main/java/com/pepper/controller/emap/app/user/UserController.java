@@ -91,11 +91,19 @@ public class UserController extends BaseControllerImpl implements BaseController
 	public Object getUserByBepartmentId() {
 		ResultData resultData = new ResultData();
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
-		Map<String,Object> searchParameter = new HashMap<String,Object>();
-		searchParameter.put(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
 		currentUser = adminUserService.findById(currentUser.getId());
-		searchParameter.put(SearchConstant.EQUAL+"_departmentId", currentUser.getDepartmentId());
-		resultData.setData("user", adminUserService.findAll(searchParameter));
+		List<AdminUser> list = adminUserService.findUserByBepartmentId(currentUser.getDepartmentId());
+		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
+		for(AdminUser user : list) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(user, adminUserVo);
+			if(StringUtils.hasText(user.getHeadPortrait())) {
+				adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
+				adminUserVo.setPassword("");
+				returnList.add(adminUserVo);
+			}
+		}
+		resultData.setData("user", returnList);
 		return resultData;
 	}
 	
