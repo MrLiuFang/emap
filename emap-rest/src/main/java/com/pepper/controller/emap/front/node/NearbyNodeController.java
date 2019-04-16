@@ -2,11 +2,12 @@ package com.pepper.controller.emap.front.node;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,12 +16,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
-import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.node.NearbyNode;
-import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.vo.NearbyNodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.node.NearbyNodeService;
@@ -40,23 +39,23 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String nodeId) {
-		Pager<NearbyNode> pager = new Pager<NearbyNode>();
-		if(StringUtils.hasText(nodeId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_nodeId",nodeId );
-		}
-		
-		pager = nearbyNodeService.findNavigator(pager);
-		List<NearbyNode> list = pager.getResults();
-		List<NearbyNodeVo> returnList = new ArrayList<NearbyNodeVo>();
+		ResultData resultData = new ResultData();
+		Map<String,Object> searchParameter = new HashMap<String,Object>();
+		searchParameter.put(SearchConstant.EQUAL+"_nodeId",nodeId);
+		List<NearbyNode> list = nearbyNodeService.findAll(searchParameter);
+		List<String> ids = new ArrayList<String>(); 
 		for(NearbyNode nearbyNode : list) {
-			NearbyNodeVo nearbyNodeVo = new NearbyNodeVo();
-			nearbyNodeVo.setNode(nodeService.findById(nearbyNode.getNodeId()));
-			returnList.add(nearbyNodeVo);
+			ids.add(nearbyNode.getNearbyNodeId());
 		}
-		
-		pager.setData("node",returnList);
-		pager.setResults(null);
-		return pager;
+		NearbyNodeVo nearbyNodeVo = new NearbyNodeVo();
+		nearbyNodeVo.setNode(nodeService.findById(nodeId));
+		if(ids.size()>0) {
+			searchParameter.clear();
+			searchParameter.put(SearchConstant.IN+"_id", ids);
+			nearbyNodeVo.setNearbyNode(nodeService.findAll(searchParameter));
+		}
+		resultData.setData(nearbyNodeVo);
+		return resultData;
 	}
 	
 	@RequestMapping(value = "/add")
@@ -70,12 +69,25 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 		}
 		
 		ArrayNode arrayNode = (ArrayNode)jsonNode.get("data");
+		List<NearbyNode> list ;
+		Map<String,List<NearbyNode>> map = new HashMap<String,List<NearbyNode>>();
 		for(int i = 0; i <arrayNode.size(); i++) {
 			String nearbyNodeId = arrayNode.get(i).asText();
 			NearbyNode nearbyNode = new NearbyNode();
 			nearbyNode.setNodeId(jsonNode.get("nodeId").asText());
 			nearbyNode.setNearbyNodeId(nearbyNodeId);
-			nearbyNodeService.save(nearbyNode);
+			list = map.get(jsonNode.get("nodeId").asText());
+			if(list==null) {
+				list = new ArrayList<NearbyNode>();
+			}
+			list.add(nearbyNode);
+			map.put(jsonNode.get("nodeId").asText(), list);
+		}
+		nearbyNodeService.deleteByNodeId(jsonNode.get("nodeId").asText());
+		for (List<NearbyNode> v : map.values()) {
+			for(NearbyNode nearbyNode : v) {
+				nearbyNodeService.save(nearbyNode);
+			}
 		}
 		return resultData;
 	}

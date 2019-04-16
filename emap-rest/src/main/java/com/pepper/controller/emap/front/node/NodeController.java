@@ -31,6 +31,7 @@ import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
@@ -64,37 +65,21 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	
 	@Reference
 	private SiteInfoService siteInfoService;
+
+	@Reference
+	private MapImageUrlService mapImageUrlService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId) {
-		Pager<Node> pager = new Pager<Node>();
-		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
-		}
-		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
-		}
-		if(StringUtils.hasText(source)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_source",source );
-		}
-		if(StringUtils.hasText(sourceCode)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_sourceCode",sourceCode );
-		}
-		if(StringUtils.hasText(mapId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_mapId",mapId );
-		}
-		if(StringUtils.hasText(nodeTypeId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_nodeTypeId",nodeTypeId );
-		}
-		pager = nodeService.findNavigator(pager,null);
+	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor) {
+		Pager<Node> pager = new Pager<Node>();	
+		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor);
 		List<Node> list = pager.getResults();
 		List<NodeVo> returnList = new ArrayList<NodeVo>();
 		for(Node node : list) {
 			returnList.add(convertNodeVo(node));
 		}
-		
 		pager.setData("node",returnList);
 		pager.setResults(null);
 		return pager;
@@ -180,6 +165,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		com.pepper.model.emap.map.Map  entity = mapService.findById(node.getMapId());
 		MapVo  mapVo = new MapVo();
 		BeanUtils.copyProperties(entity, mapVo);
+		mapVo.setMapImageUrl(mapImageUrlService.findByMapId(entity.getId()));
 		BuildingInfo buildingInfo =  buildingInfoService.findById(entity.getBuildId());
 		BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
 		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);

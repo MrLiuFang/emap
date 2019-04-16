@@ -77,7 +77,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		if(StringUtils.hasText(id)) {
 			adminUser = adminUserService.findById(id);
 			if(adminUser!=null && StringUtils.hasText(password)) {
-				adminUser.setPassword(Md5Util.encryptPassword(Md5Util.encodeByMD5(password),adminUser.getAccount()));
+				adminUser.setPassword(Md5Util.encryptPassword(Md5Util.encodeByMD5(password.toUpperCase()),adminUser.getAccount()));
 				adminUserService.update(adminUser);
 			}
 		}else {

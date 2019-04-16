@@ -31,6 +31,7 @@ import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.file.FileService;
+import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
 @Controller("appUserController")
 @RequestMapping(value = "/app/user")
@@ -50,6 +51,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private AdminUserService adminUserService;
+	
+	@Reference
+	private ValueOperationsService valueOperationsService;
 	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
@@ -106,5 +110,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 		resultData.setData("user", returnList);
 		return resultData;
 	}
+	
+	@RequestMapping(value = "/bindDeviceId")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object bindDeviceId(String deviceId) {
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
+		valueOperationsService.set("userDeviceId_"+currentUser.getId(), deviceId);
+		return new ResultData();
+	} 
 	
 }
