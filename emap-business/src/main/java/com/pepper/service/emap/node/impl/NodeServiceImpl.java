@@ -64,6 +64,11 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 		return nodeDao.findNavigator(pager, jpql.toString(),searchParameter );
 	}
 
+	@Override
+	public Node findBySourceCode(String sourceCode) {
+		return nodeDao.findBySourceCode(sourceCode);
+	}
+
 	
 
 }

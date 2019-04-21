@@ -5,4 +5,5 @@ import com.pepper.model.emap.event.ActionList;
 
 public interface ActionListDao extends BaseDao<ActionList> {
 
+
 }

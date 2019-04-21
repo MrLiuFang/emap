@@ -5,4 +5,10 @@ import com.pepper.model.emap.event.EventRule;
 
 public interface EventRuleService extends BaseService<EventRule> {
 
+	/**
+	 * 
+	 * @param nodeId
+	 * @return
+	 */
+	public EventRule findByNodeId(String nodeId);
 }

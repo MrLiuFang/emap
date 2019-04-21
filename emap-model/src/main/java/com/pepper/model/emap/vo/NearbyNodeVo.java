@@ -6,25 +6,27 @@ import com.pepper.model.emap.node.Node;
 
 public class NearbyNodeVo {
 
-	private Node node;
+	private NodeVo node;
 	
-	private List<Node> nearbyNode;
+	private List<NodeVo> nearbyNode;
 
-	public Node getNode() {
+	public NodeVo getNode() {
 		return node;
 	}
 
-	public void setNode(Node node) {
+	public void setNode(NodeVo node) {
 		this.node = node;
 	}
 
-	public List<Node> getNearbyNode() {
+	public List<NodeVo> getNearbyNode() {
 		return nearbyNode;
 	}
 
-	public void setNearbyNode(List<Node> nearbyNode) {
+	public void setNearbyNode(List<NodeVo> nearbyNode) {
 		this.nearbyNode = nearbyNode;
 	}
+
+	
 	
 	
 	

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +21,16 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.node.NearbyNode;
+import com.pepper.model.emap.node.Node;
+import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.NearbyNodeVo;
+import com.pepper.model.emap.vo.NodeTypeVo;
+import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.node.NearbyNodeService;
 import com.pepper.service.emap.node.NodeService;
+import com.pepper.service.emap.node.NodeTypeService;
+import com.pepper.service.file.FileService;
 
 @Controller()
 @RequestMapping(value = "/front/nearbyNode")
@@ -34,6 +41,12 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 	
 	@Reference
 	private NodeService nodeService;
+	
+	@Reference
+	private NodeTypeService nodeTypeService;
+	
+	@Reference
+	private FileService fileService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -48,11 +61,35 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 			ids.add(nearbyNode.getNearbyNodeId());
 		}
 		NearbyNodeVo nearbyNodeVo = new NearbyNodeVo();
-		nearbyNodeVo.setNode(nodeService.findById(nodeId));
+		Node node = nodeService.findById(nodeId);
+		if(node!=null) {
+			NodeVo  nodeVo = new NodeVo();
+			BeanUtils.copyProperties(nodeService.findById(nodeId), nodeVo);
+			NodeTypeVo nodeTypeVo = new NodeTypeVo();
+			NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
+			BeanUtils.copyProperties(nodeType, nodeTypeVo);
+			nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+			nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+			nodeVo.setNodeType(nodeTypeVo);
+			nearbyNodeVo.setNode(nodeVo);
+		}
 		if(ids.size()>0) {
 			searchParameter.clear();
 			searchParameter.put(SearchConstant.IN+"_id", ids);
-			nearbyNodeVo.setNearbyNode(nodeService.findAll(searchParameter));
+			List<Node> listNode = nodeService.findAll(searchParameter);
+			List<NodeVo> listNodeVo = new ArrayList<NodeVo>();
+			for(Node obj : listNode) {
+				NodeVo  nodeVo = new NodeVo();
+				BeanUtils.copyProperties(obj, nodeVo);
+				NodeTypeVo nodeTypeVo = new NodeTypeVo();
+				NodeType nodeType = nodeTypeService.findById(obj.getNodeTypeId());
+				BeanUtils.copyProperties(nodeType, nodeTypeVo);
+				nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+				nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+				nodeVo.setNodeType(nodeTypeVo);
+				listNodeVo.add(nodeVo);
+			}
+			nearbyNodeVo.setNearbyNode(listNodeVo);
 		}
 		resultData.setData(nearbyNodeVo);
 		return resultData;
