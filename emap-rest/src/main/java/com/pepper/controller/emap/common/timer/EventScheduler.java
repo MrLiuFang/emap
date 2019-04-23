@@ -29,7 +29,7 @@ public class EventScheduler {
 	
 
 //	@Scheduled(fixedRate = 5000)
-	public void test() {
+	public void scheduled() {
 		List<EventList> list = eventListService.findByStatusOrStatus(null, "");
 		for(EventList eventList : list) {
 			String sourceCode = eventList.getSourceCode();

@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
 
+import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventListDao;
 import com.pepper.model.emap.event.EventList;
@@ -19,6 +20,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public List<EventList> findByStatusOrStatus(String status, String status1) {
 		return eventListDao.findByStatusOrStatus(status, status1);
+	}
+
+	@Override
+	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent) {
+		return eventListDao.List(pager, warningLevel,isUrgent);
 	}
 	
 

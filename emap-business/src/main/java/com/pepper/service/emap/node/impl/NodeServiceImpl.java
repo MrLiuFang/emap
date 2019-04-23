@@ -54,7 +54,7 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 			searchParameter.put("buildId", buildId);
 		}
 		if(StringUtils.hasText(siteId)) {
-			jpql.append(" and b.siteId = :siteId");
+			jpql.append(" and s.id = :siteId");
 			searchParameter.put("siteId", siteId);
 		}
 		if(StringUtils.hasText(floor)) {

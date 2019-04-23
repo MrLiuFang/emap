@@ -1,5 +1,7 @@
 package com.pepper.service.emap.event;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -13,4 +15,9 @@ public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements He
 
 	@Resource
 	private HelpListDao helpListDao;
+
+	@Override
+	public List<HelpList> findByNodeTypeId(String id) {
+		return helpListDao.findByNodeTypeId(id);
+	}
 }

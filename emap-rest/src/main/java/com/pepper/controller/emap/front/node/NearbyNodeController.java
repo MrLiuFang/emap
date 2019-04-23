@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
@@ -52,10 +53,11 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String nodeId) {
+		Pager<NearbyNode> pager = new Pager<NearbyNode>();
 		ResultData resultData = new ResultData();
 		Map<String,Object> searchParameter = new HashMap<String,Object>();
-		searchParameter.put(SearchConstant.EQUAL+"_nodeId",nodeId);
-		List<NearbyNode> list = nearbyNodeService.findAll(searchParameter);
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_nodeId",nodeId);
+		List<NearbyNode> list = nearbyNodeService.findNavigator(pager).getResults();
 		List<String> ids = new ArrayList<String>(); 
 		for(NearbyNode nearbyNode : list) {
 			ids.add(nearbyNode.getNearbyNodeId());

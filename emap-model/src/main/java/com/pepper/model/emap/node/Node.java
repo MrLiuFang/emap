@@ -51,7 +51,8 @@ public class Node extends BaseModel {
 	@Column(name = "y")
 	private String y;
 
-	
+	@Column(name = "department_id")
+	private String departmentId;
 	
 	public String getCode() {
 		return code;
@@ -139,6 +140,14 @@ public class Node extends BaseModel {
 
 	public void setY(String y) {
 		this.y = y;
+	}
+
+	public String getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(String departmentId) {
+		this.departmentId = departmentId;
 	}
 
 	
