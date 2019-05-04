@@ -109,6 +109,18 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		return resultData;
 	}
 	
+	@RequestMapping(value = "/updateStatus")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object updateStatus(@RequestBody Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		Node node = new Node();
+		MapToBeanUtil.convert(node, map);
+		nodeService.update(node);
+		return resultData;
+	}
+	
+	
 	@RequestMapping(value = "/toEdit")
 	@Authorize(authorizeResources = false)
 	@ResponseBody

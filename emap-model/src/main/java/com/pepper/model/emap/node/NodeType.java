@@ -30,6 +30,17 @@ public class NodeType extends BaseModel {
 	@Column(name = "stop_icon")
 	private String stopIcon;
 	
+	@Column(name = "is_lock")
+	private Boolean isLock;
+	
+	public Boolean getIsLock() {
+		return isLock;
+	}
+
+	public void setIsLock(Boolean isLock) {
+		this.isLock = isLock;
+	}
+
 	public String getCode() {
 		return code;
 	}

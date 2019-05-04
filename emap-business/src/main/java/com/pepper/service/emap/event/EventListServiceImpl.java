@@ -23,8 +23,23 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
-	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent) {
-		return eventListDao.List(pager, warningLevel,isUrgent);
+	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent,String id) {
+		return eventListDao.List(pager, warningLevel,isUrgent,id);
+	}
+
+	@Override
+	public java.util.List<EventList> findBySourceCodeAndIdNot(String sourceCode, String id) {
+		return eventListDao.findBySourceCodeAndIdNot(sourceCode, id);
+	}
+
+	@Override
+	public void handover(String handoverUserId, String currentUserId) {
+		eventListDao.handover(handoverUserId, currentUserId);
+	}
+
+	@Override
+	public Pager<EventList> transferList(Pager<EventList> pager, String dispatchFrom) {
+		return eventListDao.transferList(pager, dispatchFrom);
 	}
 	
 

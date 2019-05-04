@@ -38,6 +38,12 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "status")
 	private String status;
+	
+	@Column(name = "current_handle_user")
+	private String currentHandleUser;
+	
+	@Column(name = "help_id")
+	private String helpId;
 
 	public String getEventId() {
 		return eventId;
@@ -94,7 +100,20 @@ public class EventList extends BaseModel  {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
-	
 
+	public String getCurrentHandleUser() {
+		return currentHandleUser;
+	}
+
+	public void setCurrentHandleUser(String currentHandleUser) {
+		this.currentHandleUser = currentHandleUser;
+	}
+
+	public String getHelpId() {
+		return helpId;
+	}
+
+	public void setHelpId(String helpId) {
+		this.helpId = helpId;
+	}
 }

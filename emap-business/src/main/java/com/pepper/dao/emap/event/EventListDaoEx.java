@@ -19,7 +19,14 @@ public interface EventListDaoEx {
 	 * @param warningLevel
 	 * @return
 	 */
-	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent);
+	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent,String id);
+	
+	/**
+	 * 获取我已转移的事件
+	 * @param pager
+	 * @return
+	 */
+	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom);
 	
 
 }

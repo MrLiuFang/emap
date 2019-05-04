@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -27,14 +28,25 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.node.Node;
+import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.EventListVo;
+import com.pepper.model.emap.vo.MapVo;
+import com.pepper.model.emap.vo.NodeTypeVo;
+import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
+import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.HelpListService;
+import com.pepper.service.emap.map.MapImageUrlService;
+import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.node.NodeService;
+import com.pepper.service.emap.node.NodeTypeService;
+import com.pepper.service.file.FileService;
+import com.pepper.util.MapToBeanUtil;
 
 @Controller
 @RequestMapping("/front/event")
@@ -55,16 +67,38 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Resource
 	private HelpListService helpListService;
 	
+	@Resource
+	private MapService mapService;
+	
+	@Resource
+	private MapImageUrlService mapImageUrlService;
+	
+	@Resource
+	private NodeTypeService nodeTypeService;
+	
+	@Resource
+	private AdminUserService adminUserService;
+	
+	@Resource
+	private FileService fileService;
+	
+	@RequestMapping(value = "/add")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object add(@RequestBody Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		EventList eventList = new EventList();
+		MapToBeanUtil.convert(eventList, map);
+		eventListService.save(eventList);
+		return resultData;
+	}
+	
 	@RequestMapping("/workbench/list")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object list(Boolean isUrgent) {
+	public Object list(Boolean isUrgent,String id) {
 		Pager<EventList> pager = new Pager<EventList>();
-		if(isUrgent) {
-			pager = eventListService.List(pager, Integer.valueOf(environment.getProperty("warningLevel", "0")),isUrgent);
-		}else {
-			pager = eventListService.List(pager, null,isUrgent);
-		}
+		pager = eventListService.List(pager, Integer.valueOf(environment.getProperty("warningLevel", "0")),isUrgent,id);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
@@ -74,9 +108,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/automatic/list")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object automaticList() {
+	public Object automaticList(String id) {
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_status", "A");
+		if(StringUtils.hasText(id)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
+		}
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -123,10 +160,18 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/forMe")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object eventForMe() {
+	public Object eventForMe(Boolean isHandle,String id) {
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_operator", currentUser.getId());
+		if(isHandle) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNOTNULL+"_currentHandleUser",null );
+		}else {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNULL+"_currentHandleUser", null);
+		}
+		if(StringUtils.hasText(id)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
+		}
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -146,12 +191,112 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return resultData;
 	}
 	
+	@RequestMapping("/workbench/getEmployee")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object  getEmployee(String id) {
+		ResultData resultData = new ResultData();
+		EventList eventList = eventListService.findById(id);
+		if(eventList == null) {
+			return resultData;
+		}
+		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+		if(!StringUtils.hasText(node.getDepartmentId())) {
+			resultData.setStatus(300001);
+			resultData.setMessage("该设备未设备部门!");
+		}
+		resultData.setData("employee", adminUserService.findUserByBepartmentId(node.getDepartmentId()));
+		return resultData;
+	}
+	
+	@RequestMapping("/workbench/toEmployee")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object toEmployee(@RequestBody Map<String,String> map) {
+//		String eventId,String employeeId,String helpId
+		ResultData resultData = new ResultData();
+		EventList eventList = this.eventListService.findById(map.get("eventId"));
+		eventList.setCurrentHandleUser(map.get("employeeId"));
+		eventList.setStatus("W");
+		eventList.setHelpId(map.get("helpId"));
+		eventListService.update(eventList);
+		
+		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
+		EventDispatch eventDispatch = new EventDispatch();
+		eventDispatch.setEventId(eventList.getEventId());
+		eventDispatch.setOperator(map.get("employeeId"));
+		eventDispatch.setDispatchFrom(adminuser.getId());
+		eventDispatch.setTitle(eventList.getEventName());
+		eventDispatchService.save(eventDispatch);
+		
+		String employeeId = map.get("employeeId");
+		
+		
+		return resultData;
+	}
+	
+	@RequestMapping("/workbench/historyEvent")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object historyEvent(String id) {
+		ResultData resultData = new ResultData();
+		EventList eventList = this.eventListService.findById(id);
+		if(eventList==null) {
+			return resultData;
+		}
+		List<EventList> list= this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId());
+		
+		List<EventListVo> returnList  = new ArrayList<EventListVo>();
+		for(EventList obj : list) {
+			EventListVo eventListVo = new EventListVo();
+			BeanUtils.copyProperties(obj, eventListVo);
+			if(StringUtils.hasText(obj.getOperator())) {
+				AdminUser operatorUser = this.adminUserService.findById(obj.getOperator());
+				if(operatorUser!=null) {
+					eventListVo.setOperatorVo(operatorUser);
+				}
+			}
+			if(StringUtils.hasText(obj.getCurrentHandleUser())) {
+				AdminUser currentHandleUser = this.adminUserService.findById(obj.getCurrentHandleUser());
+				if(currentHandleUser!=null) {
+					eventListVo.setCurrentHandleUserVo(currentHandleUser);
+				}
+			}
+			returnList.add(eventListVo);
+		}
+		
+		resultData.setData("historyEvent", returnList);
+		return resultData;
+	}
+	
 	private List<EventListVo> convertVo(List<EventList> list){
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
 		for(EventList eventList : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
-			eventListVo.setNode(nodeService.findBySourceCode(eventList.getSourceCode()));
+			Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+			if(node!=null) {
+				NodeVo nodeVo = new NodeVo();
+				BeanUtils.copyProperties(node, nodeVo);
+				com.pepper.model.emap.map.Map map = mapService.findById(node.getMapId());
+				if(map!=null) {
+					MapVo mapVo = new MapVo();
+					BeanUtils.copyProperties(map, mapVo);
+					nodeVo.setMap(mapVo);
+					NodeTypeVo nodeTypeVo = new NodeTypeVo();
+					NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
+					if(nodeType != null) {
+						BeanUtils.copyProperties(nodeType, nodeTypeVo);
+						nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+						nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+						nodeVo.setNodeType(nodeTypeVo);
+					}
+					mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+				}
+				
+				eventListVo.setNode(nodeVo);
+			}
+//			eventListVo.setHistoryEventList(this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId()));
 			returnList.add(eventListVo);
 		}
 		return returnList;

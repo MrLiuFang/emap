@@ -52,6 +52,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private FileService fileService;
 	
+	@Reference
+	private com.pepper.service.emap.event.EventListService eventListService;
+	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -174,4 +177,19 @@ public class UserController extends BaseControllerImpl implements BaseController
 		return resultData;
 	}
 	
+	@RequestMapping(value = "/handover")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object handover(@RequestBody Map<String,String> map) {
+		ResultData resultData = new ResultData();
+		AdminUser adminUser = adminUserService.findByAccountAndPassword(map.get("account"),map.get("password"));
+		if(adminUser==null) {
+			resultData.setCode(400001);
+			resultData.setMessage("用户认证失败！");
+			return resultData;
+		}
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
+		eventListService.handover(adminUser.getId(), currentUser.getId());
+		return resultData;
+	}
 }
