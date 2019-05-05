@@ -1,4 +1,4 @@
-package com.pepper.service.emap.event;
+package com.pepper.service.emap.event.impl;
 
 import java.util.List;
 
@@ -9,6 +9,7 @@ import org.apache.dubbo.config.annotation.Service;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.HelpListDao;
 import com.pepper.model.emap.event.HelpList;
+import com.pepper.service.emap.event.HelpListService;
 
 @Service(interfaceClass=HelpListService.class)
 public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements HelpListService {

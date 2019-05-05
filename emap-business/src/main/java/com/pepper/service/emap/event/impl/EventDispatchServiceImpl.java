@@ -1,4 +1,4 @@
-package com.pepper.service.emap.event;
+package com.pepper.service.emap.event.impl;
 
 import javax.annotation.Resource;
 
@@ -7,6 +7,7 @@ import org.apache.dubbo.config.annotation.Service;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventDispatchDao;
 import com.pepper.model.emap.event.EventDispatch;
+import com.pepper.service.emap.event.EventDispatchService;
 
 @Service(interfaceClass =EventDispatchService.class)
 public class EventDispatchServiceImpl extends BaseServiceImpl<EventDispatch> implements EventDispatchService {

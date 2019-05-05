@@ -1,4 +1,4 @@
-package com.pepper.service.emap.event;
+package com.pepper.service.emap.event.impl;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventListDao;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.service.emap.event.EventListService;
 
 @Service(interfaceClass=EventListService.class)
 public class EventListServiceImpl extends BaseServiceImpl<EventList> implements EventListService {

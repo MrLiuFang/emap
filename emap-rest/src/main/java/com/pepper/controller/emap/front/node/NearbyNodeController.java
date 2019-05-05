@@ -66,7 +66,10 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 		Node node = nodeService.findById(nodeId);
 		if(node!=null) {
 			NodeVo  nodeVo = new NodeVo();
-			BeanUtils.copyProperties(nodeService.findById(nodeId), nodeVo);
+			BeanUtils.copyProperties(node, nodeVo);
+			if(node.getStatus()!=null) {
+				nodeVo.setStatusCode(node.getStatus().getName());
+			}
 			NodeTypeVo nodeTypeVo = new NodeTypeVo();
 			NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
 			BeanUtils.copyProperties(nodeType, nodeTypeVo);
@@ -82,6 +85,9 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 			List<NodeVo> listNodeVo = new ArrayList<NodeVo>();
 			for(Node obj : listNode) {
 				NodeVo  nodeVo = new NodeVo();
+				if(obj.getStatus()!=null) {
+					nodeVo.setStatusCode(obj.getStatus().getName());
+				}
 				BeanUtils.copyProperties(obj, nodeVo);
 				NodeTypeVo nodeTypeVo = new NodeTypeVo();
 				NodeType nodeType = nodeTypeService.findById(obj.getNodeTypeId());

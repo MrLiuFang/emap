@@ -136,9 +136,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setCreateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setCreateUser(user.getId());
-		adminUser.setPassword(Md5Util.encryptPassword(Md5Util.encodeByMD5(adminUser.getPassword()),adminUser.getAccount()));
+		adminUser.setPassword(Md5Util.encryptPassword(adminUser.getPassword().toUpperCase(),adminUser.getAccount()));
 		adminUser.setStatus(Status.NORMAL);
 		adminUser.setUserType(UserType.EMPLOYEE);
+		adminUser.setIsWork(false);
 		adminUserService.saveUser(adminUser, map.get("roleId").toString());
 		return resultData;
 	}
@@ -150,12 +151,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
-		adminUser.setPassword(null);
 		adminUser.setUpdateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setUpdateUser(user.getId());
 		// 账号不允许修改
 		AdminUser old = adminUserService.findById(adminUser.getId());
+		adminUser.setPassword(old.getPassword());
 		adminUser.setAccount(old.getAccount());
 		adminUserService.updateUser(adminUser, map.get("roleId").toString());
 		return resultData;

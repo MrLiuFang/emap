@@ -12,6 +12,8 @@ public class NodeVo extends Node {
 	private MapVo map;
 	
 	private NodeTypeVo nodeType;
+	
+	private String statusCode;
 
 	public MapVo getMap() {
 		return map;
@@ -27,6 +29,14 @@ public class NodeVo extends Node {
 
 	public void setNodeType(NodeTypeVo nodeType) {
 		this.nodeType = nodeType;
+	}
+
+	public String getStatusCode() {
+		return statusCode;
+	}
+
+	public void setStatusCode(String statusCode) {
+		this.statusCode = statusCode;
 	}
 	
 	

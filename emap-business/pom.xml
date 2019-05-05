@@ -53,6 +53,11 @@
 			<groupId>org.apache.zookeeper</groupId>
 			<artifactId>zookeeper</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>cn.jpush.api</groupId>
+		    <artifactId>jpush-client</artifactId>
+		    <version>3.3.10</version>
+		</dependency>
 	</dependencies>
 
 </project>

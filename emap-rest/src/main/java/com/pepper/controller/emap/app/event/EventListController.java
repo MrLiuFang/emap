@@ -3,6 +3,7 @@ package com.pepper.controller.emap.app.event;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pepper.controller.emap.core.ResultData;
@@ -177,6 +180,31 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
 		actionListService.save(actionList);
+		return resultData;
+	}
+	
+	@RequestMapping("/toEmployee")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object toEmployee(@RequestBody String str) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Map<String,Object> map = objectMapper.readValue(str, Map.class);
+//		String eventId,String employeeId
+		ResultData resultData = new ResultData();
+		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
+		eventList.setCurrentHandleUser(map.get("employeeId").toString());
+		eventListService.update(eventList);
+		
+		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
+		EventDispatch eventDispatch = new EventDispatch();
+		eventDispatch.setEventId(eventList.getEventId());
+		eventDispatch.setOperator(map.get("employeeId").toString());
+		eventDispatch.setDispatchFrom(adminuser.getId());
+		eventDispatch.setTitle(eventList.getEventName());
+		eventDispatchService.save(eventDispatch);
+		
+		String employeeId = map.get("employeeId").toString();
+
 		return resultData;
 	}
 	

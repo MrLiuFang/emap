@@ -89,23 +89,23 @@ public class UserController extends BaseControllerImpl implements BaseController
 		return resultData;
 	}
 	
-	@RequestMapping(value = "/getUserByBepartmentId")
+	@RequestMapping(value = "/department/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object getUserByBepartmentId() {
 		ResultData resultData = new ResultData();
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		currentUser = adminUserService.findById(currentUser.getId());
-		List<AdminUser> list = adminUserService.findUserByBepartmentId(currentUser.getDepartmentId());
+		List<AdminUser> list = adminUserService.findByDepartmentId(currentUser.getDepartmentId(),currentUser.getId());
 		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
 		for(AdminUser user : list) {
 			AdminUserVo adminUserVo = new AdminUserVo();
 			BeanUtils.copyProperties(user, adminUserVo);
 			if(StringUtils.hasText(user.getHeadPortrait())) {
 				adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
-				adminUserVo.setPassword("");
-				returnList.add(adminUserVo);
 			}
+			adminUserVo.setPassword("");
+			returnList.add(adminUserVo);
 		}
 		resultData.setData("user", returnList);
 		return resultData;
@@ -114,9 +114,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/bindDeviceId")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object bindDeviceId(String deviceId) {
+	public Object bindDeviceId(@RequestBody Map<String,String> map) {
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
-		valueOperationsService.set("userDeviceId_"+currentUser.getId(), deviceId);
+		valueOperationsService.set("userDeviceId_"+currentUser.getId(), map.get("deviceId"));
 		return new ResultData();
 	} 
 	

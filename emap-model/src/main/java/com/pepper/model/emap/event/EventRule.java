@@ -56,6 +56,9 @@ public class EventRule extends BaseModel {
 	
 	@Column(name = "result")
 	private String result;
+	
+	@Column(name = "department_id")
+	private String departmentId;
 
 	public String getNodeId() {
 		return nodeId;
@@ -159,6 +162,14 @@ public class EventRule extends BaseModel {
 
 	public void setResult(String result) {
 		this.result = result;
+	}
+
+	public String getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(String departmentId) {
+		this.departmentId = departmentId;
 	}
 	
 	

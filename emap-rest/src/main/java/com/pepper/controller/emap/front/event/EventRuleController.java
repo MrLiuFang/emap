@@ -20,11 +20,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.vo.EventRuleVo;
 import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.service.authentication.aop.Authorize;
+import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.util.MapToBeanUtil;
@@ -39,6 +41,9 @@ public class EventRuleController {
 	
 	@Reference
 	private NodeService nodeService;
+	
+	@Reference
+	private DepartmentService departmentService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -123,6 +128,10 @@ public class EventRuleController {
 		if(eventRule!=null) {
 			BeanUtils.copyProperties(eventRule, eventRuleVo);
 			eventRuleVo.setNode(nodeService.findById(eventRule.getNodeId()));
+			if(StringUtils.hasText(eventRuleVo.getDepartmentId())) {
+				Department department = departmentService.findById(eventRuleVo.getDepartmentId());
+				eventRuleVo.setDepartment(department);
+			}
 		}
 		return eventRuleVo;
 	}

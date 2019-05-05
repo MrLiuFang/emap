@@ -2,10 +2,8 @@ package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Resource;
 
@@ -18,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,6 +30,7 @@ import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.EventListVo;
@@ -40,6 +41,7 @@ import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
+import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
@@ -54,6 +56,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 	@Reference
 	private EventListService eventListService;
+	
+	@Reference
+	private EventRuleService eventRuleService;
 	
 	@Reference
 	private EventDispatchService eventDispatchService;
@@ -201,36 +206,39 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			return resultData;
 		}
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-		if(!StringUtils.hasText(node.getDepartmentId())) {
+		EventRule eventRule = eventRuleService.findByNodeId(node.getId());
+		if(eventRule == null || !StringUtils.hasText(eventRule.getDepartmentId())) {
 			resultData.setStatus(300001);
 			resultData.setMessage("该设备未设备部门!");
 		}
-		resultData.setData("employee", adminUserService.findUserByBepartmentId(node.getDepartmentId()));
+		resultData.setData("employee", adminUserService.findUserByDepartmentId(eventRule.getDepartmentId()));
 		return resultData;
 	}
 	
 	@RequestMapping("/workbench/toEmployee")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object toEmployee(@RequestBody Map<String,String> map) {
-//		String eventId,String employeeId,String helpId
+	public Object toEmployee(@RequestBody String str) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Map<String,Object> map = objectMapper.readValue(str, Map.class);
+//		String eventId,String employeeId,String helpId,String content 
 		ResultData resultData = new ResultData();
-		EventList eventList = this.eventListService.findById(map.get("eventId"));
-		eventList.setCurrentHandleUser(map.get("employeeId"));
+		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
+		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventList.setStatus("W");
-		eventList.setHelpId(map.get("helpId"));
+		eventList.setHelpId(map.get("helpId").toString());
+		eventList.setContent(map.get("content").toString());
 		eventListService.update(eventList);
 		
 		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
 		EventDispatch eventDispatch = new EventDispatch();
 		eventDispatch.setEventId(eventList.getEventId());
-		eventDispatch.setOperator(map.get("employeeId"));
+		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
 		eventDispatchService.save(eventDispatch);
 		
-		String employeeId = map.get("employeeId");
-		
+		String employeeId = map.get("employeeId").toString();
 		
 		return resultData;
 	}
@@ -278,6 +286,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			if(node!=null) {
 				NodeVo nodeVo = new NodeVo();
 				BeanUtils.copyProperties(node, nodeVo);
+				if(node.getStatus()!=null) {
+					nodeVo.setStatusCode(node.getStatus().getName());
+				}
 				com.pepper.model.emap.map.Map map = mapService.findById(node.getMapId());
 				if(map!=null) {
 					MapVo mapVo = new MapVo();

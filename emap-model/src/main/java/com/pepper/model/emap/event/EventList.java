@@ -44,6 +44,9 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "help_id")
 	private String helpId;
+	
+	@Column(name = "content")
+	private String content;
 
 	public String getEventId() {
 		return eventId;
@@ -116,4 +119,14 @@ public class EventList extends BaseModel  {
 	public void setHelpId(String helpId) {
 		this.helpId = helpId;
 	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
+	
 }

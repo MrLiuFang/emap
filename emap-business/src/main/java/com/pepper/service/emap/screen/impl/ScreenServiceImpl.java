@@ -1,4 +1,4 @@
-package com.pepper.service.emap.screen;
+package com.pepper.service.emap.screen.impl;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
@@ -6,6 +6,7 @@ import org.apache.dubbo.config.annotation.Service;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.screen.ScreenDao;
 import com.pepper.model.emap.screen.Screen;
+import com.pepper.service.emap.screen.ScreenService;
 
 @Service(interfaceClass=ScreenService.class)
 public class ScreenServiceImpl extends BaseServiceImpl<Screen> implements ScreenService {

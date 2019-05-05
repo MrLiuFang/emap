@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -114,8 +115,8 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	@ResponseBody
 	public Object updateStatus(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
-		Node node = new Node();
-		MapToBeanUtil.convert(node, map);
+		Node node = nodeService.findById(map.get("id").toString());
+		node.setStatus(Status.valueOf(map.get("status").toString().toUpperCase()));
 		nodeService.update(node);
 		return resultData;
 	}
@@ -166,6 +167,9 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		NodeVo  nodeVo = new NodeVo();
 		BeanUtils.copyProperties(node, nodeVo);
+		if(node.getStatus()!=null) {
+			nodeVo.setStatusCode(node.getStatus().getName());
+		}
 		
 		NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
 		NodeTypeVo nodeTypeVo = new NodeTypeVo();
