@@ -3,6 +3,7 @@ package com.pepper.service.emap.message.impl;
 import java.util.HashMap;
 
 import org.apache.dubbo.config.annotation.Service;
+import org.springframework.util.StringUtils;
 
 import com.pepper.service.emap.message.MessageService;
 
@@ -20,6 +21,9 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public void send(String deviceId, String title, String message) {
+		if(!StringUtils.hasText(deviceId)) {
+			return ;
+		}
 		JPushClient jpushClient = new JPushClient("85501c0630cb06d57e5bd3c1", "c77dc96a2368b516a3c1d922");
 		PushPayload payload = PushPayload.newBuilder()
 				.setPlatform(Platform.android())
@@ -28,7 +32,7 @@ public class MessageServiceImpl implements MessageService {
 				.build();
 		try {
 			PushResult result = jpushClient.sendPush(payload);
-			System.out.print(result);
+//			System.out.print(result);
 		} catch (APIConnectionException | APIRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -40,8 +44,8 @@ public class MessageServiceImpl implements MessageService {
 		JPushClient jpushClient = new JPushClient("85501c0630cb06d57e5bd3c1", "c77dc96a2368b516a3c1d922");
 		PushPayload payload = PushPayload.newBuilder()
 				.setPlatform(Platform.android())
-				.setNotification(Notification.android("title","message",new HashMap<String, String>()))
-				.setAudience(Audience.registrationId("",""))
+				.setNotification(Notification.android("测试标题","测试内容",new HashMap<String, String>()))
+				.setAudience(Audience.registrationId("1104a89792ebfe63215"))
 //				.setAudience(Audience.all())
 				.build();
 		try {

@@ -43,9 +43,11 @@ import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
+import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.file.FileService;
+import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
 @Controller(value="appEventListController")
 @RequestMapping("/app/event")
@@ -89,6 +91,12 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	
 	@Reference
 	private MapImageUrlService mapImageUrlService;
+	
+	@Reference
+	private ValueOperationsService valueOperationsService;
+	
+	@Reference
+	private MessageService messageService;
 
 	@RequestMapping("/list")
 	@ResponseBody
@@ -145,6 +153,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
 			resultData.setData("helpList", helpListService.findByNodeTypeId(node.getNodeTypeId()));
 		}
+		resultData.setData("remark", eventList.getContent());
+		resultData.setData("nodeId",node.getId());
 		resultData.setData("currentHelpId", eventList.getHelpId());
 		resultData.setData("isUrgent", Integer.valueOf(environment.getProperty("warningLevel", "0"))>=eventList.getWarningLevel());
 		return resultData;
@@ -170,8 +180,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		eventList.setStatus("P");
 		eventListService.update(eventList);
 		
+		AdminUser user  = (AdminUser) this.getCurrentUser();
 		ActionList actionList = new ActionList();
-		
+		actionList.setOperator(user.getId());
 		actionList.setActionListId(eventList.getId());
 		actionList.setEventId(eventList.getEventId());
 		actionList.setStatus("P");
@@ -179,6 +190,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setImage2(image2);
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
+		actionList.setContent(jsonNode.get("content").asText(""));
+		actionList.setHelpId(jsonNode.get("helpId").asText(""));
 		actionListService.save(actionList);
 		return resultData;
 	}
@@ -192,6 +205,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //		String eventId,String employeeId
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
+		if(eventList==null) {
+			return resultData;
+		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventListService.update(eventList);
 		
@@ -202,9 +218,13 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
 		eventDispatchService.save(eventDispatch);
-		
-		String employeeId = map.get("employeeId").toString();
-
+		try {
+			String employeeId = map.get("employeeId").toString();
+			String deviceId = valueOperationsService.get("userDeviceId_"+employeeId);
+			messageService.send(deviceId, "您有新的工单",eventList.getEventName());
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
 		return resultData;
 	}
 	

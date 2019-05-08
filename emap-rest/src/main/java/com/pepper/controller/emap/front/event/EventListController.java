@@ -45,9 +45,11 @@ import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
+import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.file.FileService;
+import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
@@ -86,6 +88,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	
 	@Resource
 	private FileService fileService;
+	
+	@Reference
+	private ValueOperationsService valueOperationsService;
+	
+	@Reference
+	private MessageService messageService;
 	
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
@@ -162,10 +170,21 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return resultData;
 	}
 	
-	@RequestMapping("/workbench/forMe")
+	@RequestMapping("/workbench/forMe/handle")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object eventForMe(Boolean isHandle,String id) {
+	public Object eventForMeHandle(Boolean isHandle,String id) {
+		return eventForMeEx(true,id);
+	}
+	
+	@RequestMapping("/workbench/forMe/noHandle")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object eventForMeNoHandle(Boolean isHandle,String id) {
+		return eventForMeEx(false,id);
+	}
+	
+	private Pager<EventList> eventForMeEx(Boolean isHandle,String id){
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_operator", currentUser.getId());
@@ -177,6 +196,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTEQUAL+"_isFiled", true);
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -224,6 +244,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 //		String eventId,String employeeId,String helpId,String content 
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
+		if(eventList==null) {
+			return resultData;
+		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventList.setStatus("W");
 		eventList.setHelpId(map.get("helpId").toString());
@@ -238,7 +261,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventDispatch.setTitle(eventList.getEventName());
 		eventDispatchService.save(eventDispatch);
 		
-		String employeeId = map.get("employeeId").toString();
+		try {
+			String employeeId = map.get("employeeId").toString();
+			String deviceId = valueOperationsService.get("userDeviceId_"+employeeId);
+			messageService.send(deviceId, "您有新的工单",eventList.getEventName());
+		}catch (Exception e) {
+			// TODO: handle exception
+		}
 		
 		return resultData;
 	}
@@ -274,6 +303,22 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		
 		resultData.setData("historyEvent", returnList);
+		return resultData;
+	}
+	
+	@RequestMapping("/workbench/filed")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object filed(@RequestBody Map<String,String> map) {
+		ResultData resultData = new ResultData();
+		if(map.containsKey("id")) {
+			EventList eventList = this.eventListService.findById(map.get("id"));
+			eventList.setIsFiled(true);
+			eventList.setFiledContent(map.get("filedContent"));
+			eventListService.update(eventList);
+		}
+		
+		
 		return resultData;
 	}
 	

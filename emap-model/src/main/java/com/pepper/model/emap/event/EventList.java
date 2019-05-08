@@ -47,6 +47,12 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "content")
 	private String content;
+	
+	@Column(name = "is_filed")
+	private Boolean isFiled;
+	
+	@Column(name = "filed_content")
+	private String filedContent;
 
 	public String getEventId() {
 		return eventId;
@@ -126,6 +132,22 @@ public class EventList extends BaseModel  {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public Boolean getIsFiled() {
+		return isFiled;
+	}
+
+	public void setIsFiled(Boolean isFiled) {
+		this.isFiled = isFiled;
+	}
+
+	public String getFiledContent() {
+		return filedContent;
+	}
+
+	public void setFiledContent(String filedContent) {
+		this.filedContent = filedContent;
 	}
 	
 	

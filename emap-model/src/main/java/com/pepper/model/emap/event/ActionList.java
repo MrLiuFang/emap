@@ -70,6 +70,9 @@ public class ActionList extends BaseModel {
 	
 	@Column(name ="voice1")
 	private String voice1;
+	
+	@Column(name ="help_id")
+	private String helpId;
 
 	public String getActionListId() {
 		return actionListId;
@@ -205,6 +208,14 @@ public class ActionList extends BaseModel {
 
 	public void setVoice1(String voice1) {
 		this.voice1 = voice1;
+	}
+
+	public String getHelpId() {
+		return helpId;
+	}
+
+	public void setHelpId(String helpId) {
+		this.helpId = helpId;
 	}
 	
 	
