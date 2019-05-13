@@ -17,7 +17,7 @@ import com.pepper.core.dubbo.DubboDynamicVersion;
 		"com.pepper.core.**", "com.pepper.model.**", "com.pepper.init.data.console.**","com.pepper.register.**"})
 @EnableJpaRepositories(basePackages = "com.pepper.dao.**", repositoryFactoryBeanClass = BaseDaoFactoryBean.class)
 @EntityScan("com.pepper.model.**")
-@PropertySource(value = { "classpath:emap-run.properties" }, ignoreResourceNotFound = true, encoding = "UTF-8")
+@PropertySource(value = { "classpath:emap-run.properties"}, ignoreResourceNotFound = true, encoding = "UTF-8")
 @DubboComponentScan(basePackages = { "com.pepper.controller.**", "com.pepper.service.**", "com.pepper.util.**",
 		"com.pepper.core.**", "com.pepper.init.data.console.**" })
 @EnableScheduling

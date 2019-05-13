@@ -1,17 +1,28 @@
 package com.pepper.controller.emap.front.node;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -154,6 +165,94 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			}
 		}
 		return resultData;
+	}
+	
+	@RequestMapping(value = "/importCamera")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importCamera(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			importNode(file.getInputStream(),"camera");
+		}
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/importDoor")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importDoor(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			importNode(file.getInputStream(),"door");
+		}
+		return resultData;
+	}
+	
+	private void importNode(InputStream inputStream, String nodeType) throws IOException {
+		if (inputStream == null) {
+			return;
+		}
+		Workbook wookbook = new HSSFWorkbook(inputStream);
+        Sheet sheet = wookbook.getSheetAt(0);
+        Row rowHead = sheet.getRow(0);
+		int totalRowNum = sheet.getLastRowNum();
+		for(int i = 1 ; i <= totalRowNum ; i++)
+        {
+			Node node = new Node();
+			node.setStatus(Status.NORMAL);
+			Row row = sheet.getRow(i);
+			node.setCode(getCellValue(row.getCell(0)).toString());
+			node.setName(getCellValue(row.getCell(1)).toString());
+			node.setSource(getCellValue(row.getCell(2)).toString());
+			node.setSourceCode(getCellValue(row.getCell(3)).toString());
+			node.setMapId(getCellValue(row.getCell(4)).toString());
+			node.setNodeTypeId(getCellValue(row.getCell(5)).toString());
+			node.setParentNode(getCellValue(row.getCell(6)).toString());
+			node.setX(getCellValue(row.getCell(7)).toString());
+			node.setY(getCellValue(row.getCell(8)).toString());
+			if(nodeType.equals("camera")) {
+				node.setIp(getCellValue(row.getCell(9)).toString());
+				node.setHasPtz(row.getCell(10)==null?false:Boolean.valueOf(getCellValue(row.getCell(10)).toString()));
+				node.setUserName(getCellValue(row.getCell(11)).toString());
+				node.setPassword(getCellValue(row.getCell(12)).toString());
+				node.setSystemID(getCellValue(row.getCell(13)).toString());
+				node.setWindowsUser(getCellValue(row.getCell(14)).toString());
+				node.setWindowsPass(getCellValue(row.getCell(15)).toString());
+				node.setDomainName(getCellValue(row.getCell(16)).toString());
+			}else if(nodeType.equals("door")) {
+				node.setPaneId(getCellValue(row.getCell(9)).toString());
+				node.setPaneIp(getCellValue(row.getCell(10)).toString());
+				node.setReaderId(getCellValue(row.getCell(11)).toString());
+				node.setReaderIo(getCellValue(row.getCell(12)).toString());
+			}
+			nodeService.save(node);
+        }
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = null;
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
 	}
 	
 	/**

@@ -39,7 +39,7 @@ import com.pepper.util.MapToBeanUtil;
 @RequestMapping(value = "/front/map")
 public class MapController  extends BaseControllerImpl implements BaseController  {
 	
-	
+//	{"id":"2c92b9ad69db5aca0169db5df8c70003","mapImageUrl":[{"id":"2c92b9ad6aa279ce016aa284e0fa0003","createDate":"2019-05-11 00:12:58","updateDate":null,"createUser":"402881e869a0341f0169a03f681d005e","updateUser":null,"mapId":"2c92b9ad69db5aca0169db5df8c70003","code":"build","url":"ImageDemo/big_building.bst","ratate":0,"offsetX":0,"offsetY":0,"imageWidth":"7216","imageHeigh":"5412","maxLevel":5},{"code":"elec","url":"ImageDemo/artificial.bst","imageWidth":"3072","imageHeigh":"2048","maxLevel":"5"}],"imageHeigh":"5412","imageWidth":"7216","maxLevel":5}
 	@Reference
 	private BuildingInfoService buildingInfoService;
 	
@@ -61,9 +61,15 @@ public class MapController  extends BaseControllerImpl implements BaseController
 			MapImageUrl mapImageUrl = new MapImageUrl();
 			mapImageUrl.setCode(node.get("code").asText());
 			mapImageUrl.setUrl(node.get("url").asText());
-			mapImageUrl.setRatate(node.get("url").asDouble());
-			mapImageUrl.setOffsetX(node.get("offsetX").asDouble());
-			mapImageUrl.setOffsetY(node.get("offsetY").asDouble());
+			if(node.has("ratate")) {
+				mapImageUrl.setRatate(node.get("ratate").asDouble());
+			}
+			if(node.has("offsetX")) {
+				mapImageUrl.setOffsetX(node.get("offsetX").asDouble());
+			}
+			if(node.has("offsetY")) {
+				mapImageUrl.setOffsetY(node.get("offsetY").asDouble());
+			}
 			mapImageUrl.setMapId(mapId);
 			mapImageUrlService.save(mapImageUrl);
 		}
@@ -114,11 +120,14 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		JsonNode jsonNode = new ObjectMapper().readTree(data);
 		Map<String,Object> map = new ObjectMapper().readValue(data, Map.class);
-		String mapImageUrl = jsonNode.get("mapImageUrl").toString();
+		
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
 		entity = mapService.save(entity);
-		addMapImageUrl(entity.getId(),mapImageUrl);
+		if(jsonNode.hasNonNull("mapImageUrl")) {
+			String mapImageUrl = jsonNode.get("mapImageUrl").toString();
+			addMapImageUrl(entity.getId(),mapImageUrl);
+		}
 		return resultData;
 	}
 	

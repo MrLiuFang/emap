@@ -1,5 +1,6 @@
 package com.pepper.model.emap.screen;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -17,13 +18,15 @@ public class Screen extends BaseModel {
 	 */
 	private static final long serialVersionUID = 6903635020510199117L;
 	
+	
+	@Column(name = "building_id")
 	private String buildingId;
 	
+	@Column(name = "site_id")
 	private String siteId;
 	
-	private String mapId;
-	
-	private Integer sort;
+	@Column(name = "refresh_frequency")
+	private Integer refreshFrequency;
 
 	public String getBuildingId() {
 		return buildingId;
@@ -41,22 +44,11 @@ public class Screen extends BaseModel {
 		this.siteId = siteId;
 	}
 
-	public String getMapId() {
-		return mapId;
+	public Integer getRefreshFrequency() {
+		return refreshFrequency;
 	}
 
-	public void setMapId(String mapId) {
-		this.mapId = mapId;
+	public void setRefreshFrequency(Integer refreshFrequency) {
+		this.refreshFrequency = refreshFrequency;
 	}
-
-	public Integer getSort() {
-		return sort;
-	}
-
-	public void setSort(Integer sort) {
-		this.sort = sort;
-	}
-	
-	
-
 }

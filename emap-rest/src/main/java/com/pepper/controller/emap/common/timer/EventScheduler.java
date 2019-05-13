@@ -48,7 +48,7 @@ public class EventScheduler {
 	private EventDispatchService eventDispatchService;
 	
 
-//	@Scheduled(fixedRate = 5000)
+	@Scheduled(fixedRate = 5000)
 	public void scheduled() {
 		List<EventList> list = eventListService.findByStatusOrStatus(null, "");
 		for(EventList eventList : list) {
@@ -59,65 +59,63 @@ public class EventScheduler {
 					EventRule eventRule = eventRuleService.findByNodeId(node.getId());
 					if(eventRule != null) {
 						eventRule(eventList,eventRule);
-					}else {
-						eventList.setStatus("A");
-						updateEventListStatus(eventList);
 					}
 				}
 			}
 		}
 	}
 	
-	private void eventRule(EventList eventList,EventRule eventRule) {
-		if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()<eventRule.getWarningLevel()) {
-			eventList.setStatus("A");
-			updateEventListStatus(eventList);
-			return;
-		}
-		
-		if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-			eventList.setStatus("A");
-			updateEventListStatus(eventList);
-			return;
-		}
-		
+	private void eventRule(EventList eventList,EventRule eventRule) {		
 		try {
 			Calendar now = Calendar.getInstance();
-			String dataStr1 = now.get(Calendar.YEAR) + "-" + (now.get(Calendar.MONTH) + 1) + "-" + now.get(Calendar.DAY_OF_MONTH) +" " + eventRule.getFromDateTime()+ ":00";
-			now.add(Calendar.DAY_OF_MONTH, 1); 
-			String dataStr2 = now.get(Calendar.YEAR) + "-" + (now.get(Calendar.MONTH) + 1) + "-" + now.get(Calendar.DAY_OF_MONTH) +" " + eventRule.getToDateTime()+ ":00";
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date date1 = sdf.parse(dataStr1);
-			Date date2 = sdf.parse(dataStr2);
-			Long time = new Date().getTime();
-			if(date1.getTime() > time && time < date2.getTime()) {
-				List<AdminUser> list = adminUserService.findDepartmentManager(eventRule.getDepartmentId());
-				EventDispatch eventDispatch = new EventDispatch();
-				for(AdminUser user : list) {
-					String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-					messageService.send(deviceId, "您有新的工单",eventList.getEventName());
-					eventList.setCurrentHandleUser(user.getId());
-					eventDispatch.setOperator(user.getId());
+			Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""))/100;
+			Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""))/100;
+			Integer  time = now.get(Calendar.HOUR_OF_DAY);
+			if((time>=from&&time<=24)||(time<=to&&time>=1)) {
+				assignment(eventRule,eventList);
+			}else {
+				if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
+					eventList.setStatus("A");
+					updateEventListStatus(eventList);
+					assignment(eventRule,eventList);
+					return ;
+				}else {
+					if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
+						eventList.setStatus("A");
+						updateEventListStatus(eventList);
+						return ;
+					}
 				}
-				eventList.setStatus("W");
-				eventList.setOperator("000000000000");
-				eventList.setContent("系统自动派单");
-				updateEventListStatus(eventList);	
-				
-				
-				eventDispatch.setEventId(eventList.getEventId());
-				eventDispatch.setDispatchFrom("000000000000");
-				eventDispatch.setTitle(eventList.getEventName());
-				eventDispatchService.save(eventDispatch);
 			}
 		}catch (Exception e) {
+			//eventList.setStatus("A");
+			//updateEventListStatus(eventList);
 			e.printStackTrace();
 		}
+	}
+	
+	private void assignment(EventRule eventRule,EventList eventList) {
+		List<AdminUser> list = adminUserService.findDepartmentManager(eventRule.getDepartmentId());
+		EventDispatch eventDispatch = new EventDispatch();
+		for(AdminUser user : list) {
+			String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
+			messageService.send(deviceId, "您有新的工单",eventList.getEventName());
+			eventList.setCurrentHandleUser(user.getId());
+			eventDispatch.setOperator(user.getId());
+		}
+		eventList.setStatus("A");
+		eventList.setContent("系統自動派單");
+		if(!StringUtils.hasText(eventList.getCurrentHandleUser())) {
+			return ;
+		}
+		updateEventListStatus(eventList);	
 		
-		
-		
-		eventRule.getFromDateTime();
-//		if()
+		eventDispatch.setCreateDate(new Date());
+		eventDispatch.setEventId(eventList.getEventId());
+		eventDispatch.setEventListId(eventList.getId());
+		eventDispatch.setDispatchFrom("000000000000");
+		eventDispatch.setTitle(eventList.getEventName());
+		eventDispatchService.save(eventDispatch);
 	}
 	
 	public static void main(String agrs[]) {

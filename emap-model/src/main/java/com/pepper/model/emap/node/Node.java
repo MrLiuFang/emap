@@ -65,7 +65,7 @@ public class Node extends BaseModel {
 	private String password;
 	
 	@Column(name = "system_id")
-	private String SystemID;
+	private String systemID;
 	
 	@Column(name = "windows_user")
 	private String windowsUser;
@@ -212,11 +212,11 @@ public class Node extends BaseModel {
 	}
 
 	public String getSystemID() {
-		return SystemID;
+		return systemID;
 	}
 
 	public void setSystemID(String systemID) {
-		SystemID = systemID;
+		this.systemID = systemID;
 	}
 
 	public String getWindowsUser() {

@@ -13,6 +13,7 @@ public class HelpListVo extends HelpList {
 	
 	private NodeType nodeType;
 
+	private Boolean isCheck = false;
 
 	public NodeType getNodeType() {
 		return nodeType;
@@ -22,7 +23,16 @@ public class HelpListVo extends HelpList {
 	public void setNodeType(NodeType nodeType) {
 		this.nodeType = nodeType;
 	}
-	
-	
 
+
+	public Boolean getIsCheck() {
+		return isCheck;
+	}
+
+
+	public void setIsCheck(Boolean isCheck) {
+		this.isCheck = isCheck;
+	}
+
+	
 }

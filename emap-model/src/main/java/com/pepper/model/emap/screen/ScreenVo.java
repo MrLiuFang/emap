@@ -1,5 +1,7 @@
 package com.pepper.model.emap.screen;
 
+import java.util.List;
+
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.MapVo;
@@ -15,7 +17,7 @@ public class ScreenVo extends Screen {
 	
 	private SiteInfo site;
 	
-	private MapVo map;
+	private List<MapVo> map;
 
 	public BuildingInfo getBuild() {
 		return build;
@@ -33,14 +35,14 @@ public class ScreenVo extends Screen {
 		this.site = site;
 	}
 
-	public MapVo getMap() {
+	public List<MapVo> getMap() {
 		return map;
 	}
 
-	public void setMap(MapVo map) {
+	public void setMap(List<MapVo> map) {
 		this.map = map;
 	}
-	
+
 	
 
 }

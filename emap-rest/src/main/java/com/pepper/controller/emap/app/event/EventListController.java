@@ -2,6 +2,7 @@ package com.pepper.controller.emap.app.event;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +30,11 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.EventListVo;
+import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
@@ -97,6 +100,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	
 	@Reference
 	private MessageService messageService;
+	
 
 	@RequestMapping("/list")
 	@ResponseBody
@@ -106,7 +110,10 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 		if(!isFinish) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","W");
+			List<String> list = new ArrayList<String>();
+			list.add("W");
+			list.add("A");
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+ "_status",list);
 		}else {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","P");
 		}
@@ -134,29 +141,72 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@RequestMapping("/info")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object info(String id) {
+	public Object info(String id) throws IOException {
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);
 		if(eventList == null) {
 			return resultData;
 		}
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
-		EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getEventId(),adminUser.getId());
+		EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 		if(eventDispatch != null) {
-		AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
+			AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
+			if(dispatchFrom==null) {
+				resultData.setData("dispatchFromName", "系统自动派单");
+			}else {
+				resultData.setData("dispatchFromName", dispatchFrom.getName());
+			}
 			resultData.setData("dispatchDate", eventDispatch.getCreateDate());
-			resultData.setData("dispatchFromName", dispatchFrom.getName());
+			
+		}else{
+			
 		}
 		resultData.setData("warningLevel", eventList.getWarningLevel());
 		resultData.setData("status", eventList.getStatus());
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+		ActionList actionList = actionListService.findByActionListId(id);
+		if(actionList!=null) {
+			resultData.setData("image1", fileService.getUrl(actionList.getImage1()));
+			resultData.setData("image2", fileService.getUrl(actionList.getImage2()));
+			resultData.setData("image3", fileService.getUrl(actionList.getImage3()));
+			resultData.setData("voice1", fileService.getUrl(actionList.getVoice1()));
+			resultData.setData("content", actionList.getContent());
+		}else {
+			resultData.setData("image1", "");
+			resultData.setData("image2", "");
+			resultData.setData("image3", "");
+			resultData.setData("voice1", "");
+			resultData.setData("content", "");
+		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("helpList", helpListService.findByNodeTypeId(node.getNodeTypeId()));
+			List<HelpList> list = helpListService.findByNodeTypeId(node.getNodeTypeId());
+			List<HelpListVo> returnList = new ArrayList<HelpListVo>();
+			List<String> helpIdList = new ArrayList<String>();
+			if(actionList!=null && StringUtils.hasText(actionList.getHelpId())) {
+				ObjectMapper objectMapper = new ObjectMapper();
+				JsonNode jsonNode = objectMapper.readTree(actionList.getHelpId());
+				if(jsonNode.isArray()) {
+					Iterator<JsonNode> array =jsonNode.iterator();
+					while (array.hasNext()) {
+						helpIdList.add(array.next().asText());
+					}
+				}
+			}
+			
+			for(HelpList helpList : list) {
+				HelpListVo helpListVo = new HelpListVo();
+				BeanUtils.copyProperties(helpList, helpListVo);
+				helpListVo.setIsCheck(helpIdList.contains(helpList.getId()));
+				returnList.add(helpListVo);
+			}
+			resultData.setData("helpList", returnList);
 		}
 		resultData.setData("remark", eventList.getContent());
 		resultData.setData("nodeId",node.getId());
 		resultData.setData("currentHelpId", eventList.getHelpId());
-		resultData.setData("isUrgent", Integer.valueOf(environment.getProperty("warningLevel", "0"))>=eventList.getWarningLevel());
+		resultData.setData("isUrgent", eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
+		
+		
 		return resultData;
 	}
 	
@@ -191,7 +241,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
-		actionList.setHelpId(jsonNode.get("helpId").asText(""));
+		if(jsonNode.has("helpId")) {
+			actionList.setHelpId(jsonNode.get("helpId").toString());
+		}
 		actionListService.save(actionList);
 		return resultData;
 	}
@@ -206,6 +258,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
 		if(eventList==null) {
+			resultData.setCode(500001);
+			resultData.setMessage("要转移的事件不存在！");
 			return resultData;
 		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
@@ -214,6 +268,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
 		EventDispatch eventDispatch = new EventDispatch();
 		eventDispatch.setEventId(eventList.getEventId());
+		eventDispatch.setEventListId(eventList.getId());
 		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
@@ -268,10 +323,14 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
 			eventListVo.setIsUrgent(Integer.valueOf(environment.getProperty("warningLevel", "0"))>=eventList.getWarningLevel());
-			EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getEventId(),adminUser.getId());
+			EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 			if(eventDispatch!=null) {
 				AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
-				eventListVo.setAssignHeadPortrait(this.fileService.getUrl(dispatchFrom.getHeadPortrait()));
+				if(dispatchFrom!=null) {
+					eventListVo.setAssignHeadPortrait(this.fileService.getUrl(dispatchFrom.getHeadPortrait()));
+				}else {
+					eventListVo.setAssignHeadPortrait("");
+				}
 			}
 			returnList.add(eventListVo);
 		}

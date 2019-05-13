@@ -1,0 +1,45 @@
+package com.pepper.model.emap.screen;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.DynamicUpdate;
+
+import com.pepper.core.base.BaseModel;
+
+@Entity()
+@Table(name = "t_screen_map")
+@DynamicUpdate(true)
+public class ScreenMap extends BaseModel {
+	
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7252980146297351728L;
+
+	@Column(name = "screen_id")
+	private String screenId;
+
+	@Column(name = "map_id")
+	private String mapId;
+	
+
+	public String getMapId() {
+		return mapId;
+	}
+
+	public void setMapId(String mapId) {
+		this.mapId = mapId;
+	}
+
+	public String getScreenId() {
+		return screenId;
+	}
+
+	public void setScreenId(String screenId) {
+		this.screenId = screenId;
+	}
+	
+}

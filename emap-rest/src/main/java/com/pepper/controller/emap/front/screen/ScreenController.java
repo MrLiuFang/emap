@@ -2,6 +2,7 @@ package com.pepper.controller.emap.front.screen;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.screen.Screen;
+import com.pepper.model.emap.screen.ScreenMap;
 import com.pepper.model.emap.screen.ScreenVo;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.MapVo;
@@ -33,6 +35,7 @@ import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
+import com.pepper.service.emap.screen.ScreenMapService;
 import com.pepper.service.emap.screen.ScreenService;
 import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.util.MapToBeanUtil;
@@ -57,10 +60,13 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	@Reference
 	private MapImageUrlService mapImageUrlService;
 	
+	@Reference
+	private ScreenMapService screenMapService;
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String buildingId,String siteId,String mapId,Integer sort) {
+	public Object list(String buildingId,String siteId) {
 		Pager<Screen> pager = new Pager<Screen>();	
 		pager = screenService.findNavigator(pager);
 		if(StringUtils.hasText(buildingId)) {
@@ -69,12 +75,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		if(StringUtils.hasText(siteId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_siteId", siteId);
 		}
-		if(StringUtils.hasText(mapId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_mapId", mapId);
-		}
-		if(sort!=null) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_sort", sort);
-		}
+		
 		List<Screen> list = pager.getResults();
 		List<ScreenVo> returnList = new ArrayList<ScreenVo>();
 		for(Screen screen : list) {
@@ -88,22 +89,54 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody String str) throws IOException {
 		ResultData resultData = new ResultData();
 		Screen screen = new Screen();
-		MapToBeanUtil.convert(screen, map);
-		screenService.save(screen);
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode jsonNode = objectMapper.readTree(str);
+		screen.setBuildingId(jsonNode.get("buildingId").asText(""));
+		screen.setSiteId(jsonNode.get("siteId").asText(""));
+		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
+		screen = screenService.save(screen);
+		
+		Iterator<JsonNode> map = jsonNode.get("map").iterator();
+		while(map.hasNext()) {
+			JsonNode node = map.next();
+			ScreenMap screenMap = new ScreenMap();
+			screenMap.setScreenId(screen.getId());
+			screenMap.setMapId(node.asText());
+			screenMapService.save(screenMap);
+		}
+		
 		return resultData;
 	}
+	
 	
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody String str) throws IOException {
 		ResultData resultData = new ResultData();
-		Screen screen = new Screen();
-		MapToBeanUtil.convert(screen, map);
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode jsonNode = objectMapper.readTree(str);
+		Screen screen = screenService.findById(jsonNode.get("id").asText());
+		screen.setBuildingId(jsonNode.get("buildingId").asText(""));
+		screen.setSiteId(jsonNode.get("siteId").asText(""));
+		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
 		screenService.update(screen);
+		
+		if(jsonNode.has("map")) {
+			screenMapService.deleteByScreenId(screen.getId());
+			Iterator<JsonNode> map = jsonNode.get("map").iterator();
+			while(map.hasNext()) {
+				JsonNode node = map.next();
+				ScreenMap screenMap = new ScreenMap();
+				screenMap.setScreenId(screen.getId());
+				screenMap.setMapId(node.asText());
+				screenMapService.save(screenMap);
+			}
+		}
+		
 		return resultData;
 	}
 	
@@ -113,9 +146,10 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		Screen screen = screenService.findById(id);
-		resultData.setData("node",screen);
+		resultData.setData("screen",convertScreenVo(screen));
 		return resultData;
 	}
+	
 	
 	@RequestMapping(value = "/delete")
 	@Authorize(authorizeResources = false)
@@ -134,8 +168,8 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 			String id = arrayNode.get(i).asText();
 			try {
 				screenService.deleteById(id);
+				screenMapService.deleteByScreenId(id);
 			}catch (Exception e) {
-				// TODO: handle exception
 			}
 		}
 		return resultData;
@@ -151,12 +185,16 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		SiteInfo site = siteInfoService.findById(screen.getSiteId());
 		screenVo.setSite(site);
 		
-		com.pepper.model.emap.map.Map map = mapService.findById(screen.getMapId());
-		MapVo mapVo = new MapVo();
-		BeanUtils.copyProperties(map, mapVo);
-		mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
-		screenVo.setMap(mapVo);
-		
+		List<ScreenMap> listScreenMap=  screenMapService.findByScreenId(screen.getId());
+		List<MapVo> listMapVo = new ArrayList<MapVo>();
+		for(ScreenMap screenMap :listScreenMap  ) {
+			com.pepper.model.emap.map.Map map = mapService.findById(screenMap.getMapId());
+			MapVo mapVo = new MapVo();
+			BeanUtils.copyProperties(map, mapVo);
+			mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+			listMapVo.add(mapVo);
+		}
+		screenVo.setMap(listMapVo);
 		return  screenVo;
 	}
 }

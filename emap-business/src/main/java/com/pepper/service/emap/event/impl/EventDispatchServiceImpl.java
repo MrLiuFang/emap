@@ -17,7 +17,7 @@ public class EventDispatchServiceImpl extends BaseServiceImpl<EventDispatch> imp
 	
 	@Override
 	public EventDispatch findEventDispatch(String eventId,String operator) {
-		return eventDispatchDao.findFirstByEventIdAndOperatorOrderByCreateDateDesc(eventId,operator);
+		return eventDispatchDao.findFirstByEventListIdAndOperatorOrderByCreateDateDesc(eventId,operator);
 	}
 
 }

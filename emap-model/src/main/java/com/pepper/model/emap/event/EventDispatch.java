@@ -26,6 +26,9 @@ public class EventDispatch extends BaseModel{
 	@Column(name ="event_id")
 	private String eventId;
 	
+	@Column(name ="event_list_id")
+	private String eventListId;
+	
 	@Column(name ="handle_time")
 	private Date handleTime; 
 	
@@ -95,7 +98,16 @@ public class EventDispatch extends BaseModel{
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public String getEventListId() {
+		return eventListId;
+	}
+
+	public void setEventListId(String eventListId) {
+		this.eventListId = eventListId;
 	} 
+	
 	
 	
 }

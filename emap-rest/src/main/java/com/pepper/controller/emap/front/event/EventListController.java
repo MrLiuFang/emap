@@ -96,12 +96,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	private MessageService messageService;
 	
 	@RequestMapping(value = "/add")
-	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
 		EventList eventList = new EventList();
 		MapToBeanUtil.convert(eventList, map);
+		eventList.setIsFiled(false);
 		eventListService.save(eventList);
 		return resultData;
 	}
@@ -153,7 +153,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		ArrayNode arrayNode = (ArrayNode)jsonNode.get("id");
 		for(int i = 0; i <arrayNode.size(); i++) {
 			EventList eventList = eventListService.findById(arrayNode.get(i).asText());
-			if(StringUtils.hasText(eventList.getStatus())){
+			if(StringUtils.hasText(eventList.getOperator())){
 				resultData.setMessage(new String("操作失败！("+eventList.getEventName()+")被其它用户以处理！"));
 				resultData.setStatus(Status.LOGIC_ERROR.getKey());
 				return resultData;
@@ -249,13 +249,18 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventList.setStatus("W");
-		eventList.setHelpId(map.get("helpId").toString());
-		eventList.setContent(map.get("content").toString());
+		if(map.containsKey("helpId")) {
+			eventList.setHelpId(map.get("helpId").toString());
+		}
+		if(map.containsKey("content")) {
+			eventList.setContent(map.get("content").toString());
+		}
 		eventListService.update(eventList);
 		
 		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
 		EventDispatch eventDispatch = new EventDispatch();
 		eventDispatch.setEventId(eventList.getEventId());
+		eventDispatch.setEventListId(eventList.getId());
 		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
@@ -321,6 +326,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		return resultData;
 	}
+	
+	
 	
 	private List<EventListVo> convertVo(List<EventList> list){
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
