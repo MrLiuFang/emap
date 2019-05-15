@@ -1,6 +1,9 @@
 package com.pepper.service.emap.node;
 
+import java.util.List;
 import java.util.Map;
+
+import org.springframework.data.jpa.repository.Query;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseService;
@@ -26,4 +29,11 @@ public interface NodeService extends BaseService<Node> {
 	 * @return
 	 */
 	public Node findBySourceCode(String sourceCode);
+	
+	/**
+	 * 根据地图ID查询有事件的设备
+	 * @param mapId
+	 * @return
+	 */
+	public List<Node> findByMapIdAndHasEvent(String mapId);
 }

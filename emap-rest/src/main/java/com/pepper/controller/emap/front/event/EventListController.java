@@ -326,9 +326,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		return resultData;
 	}
-	
-	
-	
+		
 	private List<EventListVo> convertVo(List<EventList> list){
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
 		for(EventList eventList : list) {

@@ -12,12 +12,14 @@ import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.map.Map;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.file.FileService;
+import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.Md5Util;
 
 @Controller("commonUserController")
@@ -40,9 +42,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 	private FileService fileService;
 	
 	@Reference
-	protected com.pepper.service.redis.jdk.serializer.ValueOperationsService jdkValueOperationsService;
+	private com.pepper.service.redis.jdk.serializer.ValueOperationsService jdkValueOperationsService;
 	
-	@RequestMapping(value = "/headPortrait")
+	@Reference
+	private ValueOperationsService StringValueOperationsService;
+	
+	@RequestMapping(value = "/headPortrait") 
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object headPortrait(@RequestBody java.util.Map<String,Object> map) {
@@ -88,6 +93,16 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setCode(300001);
 			resultData.setMessage("密码不能为空！");
 		}
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/language")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object language(@RequestBody java.util.Map<String,String> map) {
+		ResultData resultData = new ResultData();
+		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		StringValueOperationsService.set(adminUser.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		return resultData;
 	}
 	

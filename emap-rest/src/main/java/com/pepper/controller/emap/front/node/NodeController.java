@@ -234,6 +234,32 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
         }
 	}
 	
+	
+	@RequestMapping(value = "/forMap")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object forMap(String mapId) {
+		ResultData resultData = new ResultData();
+		List<Node> list = this.nodeService.findByMapIdAndHasEvent(mapId);
+		List<NodeVo> returnList = new ArrayList<NodeVo>();
+		for(Node node : list) {
+			NodeVo  nodeVo = new NodeVo();
+			BeanUtils.copyProperties(node, nodeVo);
+			if(node.getStatus()!=null) {
+				nodeVo.setStatusCode(node.getStatus().getName());
+			}
+			NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
+			NodeTypeVo nodeTypeVo = new NodeTypeVo();
+			BeanUtils.copyProperties(nodeType, nodeTypeVo);
+			nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+			nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+			nodeVo.setNodeType(nodeTypeVo);
+			returnList.add(nodeVo);
+		}
+		resultData.setData("node", returnList);
+		return resultData;
+	}
+	
 	private Object getCellValue(Cell cell) {
 		if(cell == null) {
 			return "";
