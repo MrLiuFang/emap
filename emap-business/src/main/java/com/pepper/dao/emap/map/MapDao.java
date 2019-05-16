@@ -5,4 +5,10 @@ import com.pepper.model.emap.map.Map;
 
 public interface MapDao extends BaseDao<Map> {
 
+	/**
+	 * 根据code查询地图
+	 * @param code
+	 * @return
+	 */
+	public Map findByCode(String code);
 }

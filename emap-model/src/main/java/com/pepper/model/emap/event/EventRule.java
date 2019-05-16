@@ -18,7 +18,7 @@ public class EventRule extends BaseModel {
 	 */
 	private static final long serialVersionUID = 5654373387285472494L;
 
-	@Column(name = "node_id")
+	@Column(name = "node_id",unique = true)
 	private String nodeId;
 	
 	@Column(name = "warning_level")

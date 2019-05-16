@@ -1,10 +1,10 @@
-package com.pepper.model.emap.screen;
+package com.pepper.model.emap.vo;
 
 import java.util.List;
 
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.screen.Screen;
 import com.pepper.model.emap.site.SiteInfo;
-import com.pepper.model.emap.vo.MapVo;
 
 public class ScreenVo extends Screen {
 

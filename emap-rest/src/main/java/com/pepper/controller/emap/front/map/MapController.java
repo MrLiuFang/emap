@@ -123,6 +123,11 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
+		if(mapService.findByCode(entity.getCode())!=null) {
+			resultData.setCode(800001);
+			resultData.setMessage("该编码已存在！");
+			return resultData;
+		}
 		entity = mapService.save(entity);
 		if(jsonNode.hasNonNull("mapImageUrl")) {
 			String mapImageUrl = jsonNode.get("mapImageUrl").toString();

@@ -16,7 +16,7 @@ public class Map extends BaseModel {
 	 */
 	private static final long serialVersionUID = -2458345648543630612L;
 
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 
 	@Column(name = "name")

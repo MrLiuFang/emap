@@ -5,5 +5,10 @@ import com.pepper.model.emap.site.SiteInfo;
 
 public interface SiteInfoDao  extends BaseDao<SiteInfo> {
 
-
+	/**
+	 * 根据code查询 城区
+	 * @param code
+	 * @return
+	 */
+	public SiteInfo findByCode(String code);
 }

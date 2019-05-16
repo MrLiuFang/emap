@@ -18,7 +18,7 @@ public class NodeType extends BaseModel {
 	 */
 	private static final long serialVersionUID = 7192315061647641454L;
 
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 	
 	@Column(name = "name")

@@ -38,6 +38,12 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 		return nodeDao.findByMapIdAndHasEvent(mapId);
 	}
 
+
+	@Override
+	public Node findByCode(String code) {
+		return nodeDao.findByCode(code);
+	}
+
 	
 
 }

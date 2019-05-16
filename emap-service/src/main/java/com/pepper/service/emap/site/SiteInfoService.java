@@ -10,4 +10,10 @@ import com.pepper.model.emap.site.SiteInfo;
  */
 public interface SiteInfoService extends BaseService<SiteInfo> {
 
+	/**
+	 * 根据code查询 城区
+	 * @param code
+	 * @return
+	 */
+	public SiteInfo findByCode(String code);
 }

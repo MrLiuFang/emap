@@ -18,13 +18,13 @@ public class HelpList extends BaseModel {
 	 */
 	private static final long serialVersionUID = -1213445875503778464L;
 
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 	
 	@Column(name = "name")
 	private String name;
 	
-	@Column(name = "node_type_id")
+	@Column(name = "node_type_id",unique = true)
 	private String nodeTypeId;
 	
 	@Column(name = "warning_level")

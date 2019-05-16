@@ -82,6 +82,11 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
+		if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
+			resultData.setCode(600001);
+			resultData.setMessage("该编码已存在！");
+			return resultData;
+		}
 		buildingInfoService.save(buildingInfo);
 		return resultData;
 	}
@@ -93,6 +98,13 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
+		
+		if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
+			resultData.setCode(600001);
+			resultData.setMessage("该编码已存在！");
+			return resultData;
+		}
+		
 		buildingInfoService.update(buildingInfo);
 		return resultData;
 	}

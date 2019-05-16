@@ -24,6 +24,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.GlobalConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.role.Role;
+import com.pepper.model.emap.map.Map;
 import com.pepper.service.authentication.FrontAuthorize;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
@@ -34,6 +35,7 @@ import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.redis.string.serializer.SetOperationsService;
 import com.pepper.service.redis.string.serializer.StringRedisTemplateService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
+import com.pepper.util.MapToBeanUtil;
 
 @Controller("frontLoginController")
 @RequestMapping(value = "/front")
@@ -69,10 +71,15 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 
 	@Autowired
 	private FrontAuthorize frontAuthorize;
-
+	
+	@Reference
+	private ValueOperationsService stringValueOperationsService;
+	
 	@RequestMapping(value = "/login")
 	@ResponseBody
-	public ResultData login(@RequestBody AdminUser user) {
+	public ResultData login(@RequestBody java.util.Map<String,Object> map ) {
+		AdminUser user = new AdminUser();
+		MapToBeanUtil.convert(user, map);
 		ResultData resultData = new ResultData();
 
 		if (!StringUtils.hasText(user.getAccount())) {
@@ -126,7 +133,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		String token = setLoginInfo(userReal, resourceList);
 		resultData.setData("token", token);
 		resultData.setData("role", role);
-		
+		stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		return resultData;
 	}
 

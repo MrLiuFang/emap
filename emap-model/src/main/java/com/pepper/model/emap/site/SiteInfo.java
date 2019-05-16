@@ -21,7 +21,7 @@ public class SiteInfo extends BaseModel {
 	@Column(name = "name")
 	private String name;
 	
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 
 	public String getName() {

@@ -18,7 +18,7 @@ public class Department extends BaseModel{
 	 */
 	private static final long serialVersionUID = -1804061198775449157L;
 	
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 	
 	@Column(name = "name")

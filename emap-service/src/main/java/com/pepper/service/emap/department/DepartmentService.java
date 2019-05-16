@@ -9,5 +9,11 @@ import com.pepper.model.emap.department.Department;
  *
  */
 public interface DepartmentService extends BaseService<Department> {
+	/**
+	 * 根据code查询部门
+	 * @param code
+	 * @return
+	 */
+	public Department findByCode(String code);
 
 }

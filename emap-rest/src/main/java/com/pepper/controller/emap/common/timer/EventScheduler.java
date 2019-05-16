@@ -99,7 +99,7 @@ public class EventScheduler {
 		EventDispatch eventDispatch = new EventDispatch();
 		for(AdminUser user : list) {
 			String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-			messageService.send(deviceId, "您有新的工单",eventList.getEventName());
+			messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
 			eventList.setCurrentHandleUser(user.getId());
 			eventDispatch.setOperator(user.getId());
 		}

@@ -15,4 +15,9 @@ public class SiteInfoServiceImpl extends BaseServiceImpl<SiteInfo> implements Si
 	@Resource
 	private SiteInfoDao siteInfoDao;
 
+	@Override
+	public SiteInfo findByCode(String code) {
+		return siteInfoDao.findByCode(code);
+	}
+
 }

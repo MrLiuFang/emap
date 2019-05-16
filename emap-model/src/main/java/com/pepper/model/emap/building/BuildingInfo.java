@@ -18,7 +18,7 @@ public class BuildingInfo extends BaseModel {
 	 */
 	private static final long serialVersionUID = 2912563158909371509L;
 
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 
 	@Column(name = "name")

@@ -9,5 +9,12 @@ import com.pepper.model.emap.building.BuildingInfo;
  *
  */
 public interface BuildingInfoService extends BaseService<BuildingInfo>{
+	
+	/**
+	 * 根据Code查询建筑
+	 * @param code
+	 * @return
+	 */
+	public BuildingInfo findByCode(String code);
 
 }

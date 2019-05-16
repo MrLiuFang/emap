@@ -19,7 +19,7 @@ public class Node extends BaseModel {
 	 */
 	private static final long serialVersionUID = -2480337669147928582L;
 	
-	@Column(name = "code")
+	@Column(name = "code",unique = true)
 	private String code;
 	
 	@Column(name = "name")
@@ -28,7 +28,7 @@ public class Node extends BaseModel {
 	@Column(name = "source")
 	private String source;
 	
-	@Column(name = "source_code")
+	@Column(name = "source_code",unique = true)
 	private String sourceCode;
 	
 	@Column(name = "map_id")

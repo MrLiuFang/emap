@@ -276,7 +276,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		try {
 			String employeeId = map.get("employeeId").toString();
 			String deviceId = valueOperationsService.get("userDeviceId_"+employeeId);
-			messageService.send(deviceId, "您有新的工单",eventList.getEventName());
+			messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
 		}catch (Exception e) {
 			// TODO: handle exception
 		}

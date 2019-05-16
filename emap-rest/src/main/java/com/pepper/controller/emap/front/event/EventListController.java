@@ -226,6 +226,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			return resultData;
 		}
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+		if(node==null) {
+			return resultData;
+		}
 		EventRule eventRule = eventRuleService.findByNodeId(node.getId());
 		if(eventRule == null || !StringUtils.hasText(eventRule.getDepartmentId())) {
 			resultData.setStatus(300001);
@@ -269,7 +272,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		try {
 			String employeeId = map.get("employeeId").toString();
 			String deviceId = valueOperationsService.get("userDeviceId_"+employeeId);
-			messageService.send(deviceId, "您有新的工单",eventList.getEventName());
+			messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -324,6 +327,23 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		
 		
+		return resultData;
+	}
+	
+	@RequestMapping("/workbench/toOperator")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object toOprrator(@RequestBody Map<String,String> map) {
+		ResultData resultData = new ResultData();
+		String operatorId = map.get("operatorId").toString();
+		String eventId =  map.get("eventId").toString();
+		EventList eventList = this.eventListService.findById(eventId);
+		if(eventList == null) {
+			return resultData;
+		}
+		eventList.setOperator(operatorId);
+		
+		eventListService.update(eventList);
 		return resultData;
 	}
 		

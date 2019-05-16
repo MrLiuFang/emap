@@ -36,4 +36,11 @@ public interface NodeService extends BaseService<Node> {
 	 * @return
 	 */
 	public List<Node> findByMapIdAndHasEvent(String mapId);
+	
+	/**
+	 * 根据code查询设备
+	 * @param code
+	 * @return
+	 */
+	public Node findByCode(String code);
 }

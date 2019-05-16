@@ -45,7 +45,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	private com.pepper.service.redis.jdk.serializer.ValueOperationsService jdkValueOperationsService;
 	
 	@Reference
-	private ValueOperationsService StringValueOperationsService;
+	private ValueOperationsService stringValueOperationsService;
 	
 	@RequestMapping(value = "/headPortrait") 
 	@Authorize(authorizeResources = false)
@@ -102,7 +102,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	public Object language(@RequestBody java.util.Map<String,String> map) {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
-		StringValueOperationsService.set(adminUser.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		stringValueOperationsService.set(adminUser.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		return resultData;
 	}
 	

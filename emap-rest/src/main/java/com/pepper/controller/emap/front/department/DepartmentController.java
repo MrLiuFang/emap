@@ -58,6 +58,11 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		ResultData resultData = new ResultData();
 		Department department = new Department();
 		MapToBeanUtil.convert(department, map);
+		if(departmentService.findByCode(department.getCode())!=null) {
+			resultData.setCode(700001);
+			resultData.setMessage("该编码已存在！");
+			return resultData;
+		}
 		departmentService.save(department);
 		return resultData;
 	}
