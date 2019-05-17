@@ -2,6 +2,7 @@ package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -102,6 +103,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		EventList eventList = new EventList();
 		MapToBeanUtil.convert(eventList, map);
 		eventList.setIsFiled(false);
+		eventList.setIsOperatorTransfer(false);
 		eventListService.save(eventList);
 		return resultData;
 	}
@@ -342,10 +344,33 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			return resultData;
 		}
 		eventList.setOperator(operatorId);
-		
+		eventList.setIsOperatorTransfer(true);
+		eventList.setOperatorTransferRead(false);
 		eventListService.update(eventList);
 		return resultData;
 	}
+	
+	@RequestMapping("/workbench/toOperator/roundRobin")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object toOprratorRoundRobin() {
+		ResultData resultData = new ResultData();
+		AdminUser user = (AdminUser) this.getCurrentUser();
+		Map<String,Object> searchParameter = new HashMap<String, Object>();
+		searchParameter.put(SearchConstant.EQUAL+"_operator", user.getId());
+		searchParameter.put(SearchConstant.EQUAL+"_isOperatorTransfer", true);
+		searchParameter.put(SearchConstant.EQUAL+"_operatorTransferRead", false);
+		
+		List<EventList> list =  this.eventListService.findAll(searchParameter);
+		for(EventList eventList : list) {
+			eventList.setOperatorTransferRead(true);
+			eventListService.update(eventList);
+		}
+		resultData.setData("eventList", list);
+		return resultData;
+	}
+	
+	
 		
 	private List<EventListVo> convertVo(List<EventList> list){
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
@@ -376,6 +401,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				}
 				
 				eventListVo.setNode(nodeVo);
+			}
+			if(StringUtils.hasText(eventList.getCurrentHandleUser()) ) {
+				AdminUser currentHandleUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
+				eventListVo.setCurrentHandleUserVo(currentHandleUser);
 			}
 //			eventListVo.setHistoryEventList(this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId()));
 			returnList.add(eventListVo);

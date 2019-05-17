@@ -53,6 +53,12 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "filed_content")
 	private String filedContent;
+	
+	@Column(name = "is_operator_transfer")
+	private Boolean isOperatorTransfer;
+	
+	@Column(name = "operator_transfer_read")
+	private Boolean operatorTransferRead;
 
 	public String getEventId() {
 		return eventId;
@@ -149,6 +155,23 @@ public class EventList extends BaseModel  {
 	public void setFiledContent(String filedContent) {
 		this.filedContent = filedContent;
 	}
+
+	public Boolean getIsOperatorTransfer() {
+		return isOperatorTransfer;
+	}
+
+	public void setIsOperatorTransfer(Boolean isOperatorTransfer) {
+		this.isOperatorTransfer = isOperatorTransfer;
+	}
+
+	public Boolean getOperatorTransferRead() {
+		return operatorTransferRead;
+	}
+
+	public void setOperatorTransferRead(Boolean operatorTransferRead) {
+		this.operatorTransferRead = operatorTransferRead;
+	}
+	
 	
 	
 }

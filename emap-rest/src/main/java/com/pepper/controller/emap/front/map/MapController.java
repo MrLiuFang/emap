@@ -78,7 +78,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord) {
+	public Object list(String code,String name,String areaCode,String areaName,String buildId) {
 		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
@@ -86,18 +86,15 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
-		if(StringUtils.hasText(code)) {
+		if(StringUtils.hasText(areaCode)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaCode",areaCode );
 		}
-		if(StringUtils.hasText(name)) {
+		if(StringUtils.hasText(areaName)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaName",areaName );
 		}
 		
 		if(StringUtils.hasText(buildId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",buildId );
-		}
-		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_buildId&code&name&areaCode&areaName",keyWord );
 		}
 		pager = mapService.findNavigator(pager);
 		

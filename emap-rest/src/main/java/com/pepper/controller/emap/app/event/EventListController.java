@@ -322,7 +322,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		for(EventList eventList : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
-			eventListVo.setIsUrgent(Integer.valueOf(environment.getProperty("warningLevel", "0"))>=eventList.getWarningLevel());
+			eventListVo.setIsUrgent(eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
 			EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 			if(eventDispatch!=null) {
 				AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
