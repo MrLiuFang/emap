@@ -164,7 +164,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		resultData.setData("warningLevel", eventList.getWarningLevel());
 		resultData.setData("status", eventList.getStatus());
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-		ActionList actionList = actionListService.findByActionListId(id);
+		ActionList actionList = actionListService.findByEventListId(id);
 		if(actionList!=null) {
 			resultData.setData("image1", fileService.getUrl(actionList.getImage1()));
 			resultData.setData("image2", fileService.getUrl(actionList.getImage2()));
@@ -233,7 +233,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		AdminUser user  = (AdminUser) this.getCurrentUser();
 		ActionList actionList = new ActionList();
 		actionList.setOperator(user.getId());
-		actionList.setActionListId(eventList.getId());
+		actionList.setEventListId(eventList.getId());
 		actionList.setEventId(eventList.getEventId());
 		actionList.setStatus("P");
 		actionList.setImage1(image1);
@@ -331,7 +331,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 				}else {
 					eventListVo.setAssignHeadPortrait("");
 				}
+				eventListVo.setDispatchDate(eventDispatch.getCreateDate());
 			}
+			
 			returnList.add(eventListVo);
 		}
 		return returnList;

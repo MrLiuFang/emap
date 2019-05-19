@@ -46,7 +46,7 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom) {
 		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer();
-		jpql.append("select  distinct el from  EventList el join EventDispatch ed on el.eventId = ed.eventId where ed.dispatchFrom = :dispatchFrom ");
+		jpql.append("select  distinct el from  EventList el join EventDispatch ed on el.id = ed.eventListId where ed.dispatchFrom = :dispatchFrom ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		searchParameter.put("dispatchFrom", dispatchFrom);
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);

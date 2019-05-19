@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
@@ -83,8 +84,8 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
 		if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
-			resultData.setCode(600001);
-			resultData.setMessage("该编码已存在！");
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 			return resultData;
 		}
 		buildingInfoService.save(buildingInfo);
@@ -99,10 +100,13 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
 		
-		if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
-			resultData.setCode(600001);
-			resultData.setMessage("该编码已存在！");
-			return resultData;
+		BuildingInfo oldBuildingInfo = buildingInfoService.findById(buildingInfo.getId());
+		if(!buildingInfo.getCode().equals(oldBuildingInfo.getCode())) {
+			if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
 		}
 		
 		buildingInfoService.update(buildingInfo);

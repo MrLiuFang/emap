@@ -21,7 +21,7 @@ public class ActionList extends BaseModel {
 	private static final long serialVersionUID = 1306017114585728921L;
 
 	@Column(name ="action_list_id")
-	private String actionListId;
+	private String eventListId;
 	
 	@Column(name ="task_id")
 	private String taskId;
@@ -74,12 +74,13 @@ public class ActionList extends BaseModel {
 	@Column(name ="help_id")
 	private String helpId;
 
-	public String getActionListId() {
-		return actionListId;
+	
+	public String getEventListId() {
+		return eventListId;
 	}
 
-	public void setActionListId(String actionListId) {
-		this.actionListId = actionListId;
+	public void setEventListId(String eventListId) {
+		this.eventListId = eventListId;
 	}
 
 	public String getTaskId() {

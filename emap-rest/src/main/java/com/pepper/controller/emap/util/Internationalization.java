@@ -7,9 +7,14 @@ import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.pepper.core.base.ICurrentUser;
+import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.util.SpringContextUtil;
 import com.sun.istack.NotNull;
 
 /**
@@ -43,25 +48,36 @@ public class Internationalization {
 
 	public static String getMessageInternationalization(@NotNull final Integer code) {
 		String language = getLanguage();
-		if (language.toLowerCase().equals("zh-tw")) {
+		if (language.toLowerCase().equals("zh")) {
 			return  zhtw.getProperty(String.valueOf(code), "");
-		} else if (language.toLowerCase().equals("en-us")) {
+		} else if (language.toLowerCase().equals("en")) {
 			return  enus.getProperty(String.valueOf(code), "");
 		} else {
 			return zhtw.getProperty(String.valueOf(code), "");
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static String getLanguage() {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
 				.getRequest();
+		String language = "";
 		if (request.getParameter("language") != null) {
-			return request.getParameter("language").toString();
+			language = request.getParameter("language").toString();
 		}
-		if (request.getHeader("language") != null) {
-			return request.getHeader("language").toString();
+		if (!StringUtils.hasText(language) && request.getHeader("language") != null) {
+			language = request.getHeader("language").toString();
 		}
-		return "zh-tw";
+//		if (!StringUtils.hasText(language)){
+//			RedisTemplate<String, String> redisTemplate = (RedisTemplate<String, String>) SpringContextUtil.getBean("redisTemplate");
+//			ICurrentUser iCurrentUser = (ICurrentUser) SpringContextUtil.getBean("currentUserUtil");
+//			AdminUser adminUser =  (AdminUser)iCurrentUser.getCurrentUser();
+//			language = redisTemplate.opsForValue().get(adminUser.getId()+"_language");
+//		}
+		if (!StringUtils.hasText(language)){
+			language = "zh";
+		}
+		return language;
 	}
 
 }

@@ -77,7 +77,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
-	public ResultData login(@RequestBody java.util.Map<String,Object> map ) {
+	public Object login(@RequestBody java.util.Map<String,Object> map ) {
 		AdminUser user = new AdminUser();
 		MapToBeanUtil.convert(user, map);
 		ResultData resultData = new ResultData();
@@ -133,7 +133,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		String token = setLoginInfo(userReal, resourceList);
 		resultData.setData("token", token);
 		resultData.setData("role", role);
-		stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		if(map.containsKey("language")) {
+			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		}
 		return resultData;
 	}
 

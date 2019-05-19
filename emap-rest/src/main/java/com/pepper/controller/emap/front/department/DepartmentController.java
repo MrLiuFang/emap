@@ -14,10 +14,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
@@ -59,8 +61,8 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		Department department = new Department();
 		MapToBeanUtil.convert(department, map);
 		if(departmentService.findByCode(department.getCode())!=null) {
-			resultData.setCode(700001);
-			resultData.setMessage("该编码已存在！");
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 			return resultData;
 		}
 		departmentService.save(department);
@@ -74,6 +76,15 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		ResultData resultData = new ResultData();
 		Department department = new Department();
 		MapToBeanUtil.convert(department, map);
+		
+		Department oldDepartment = departmentService.findById(department.getId());
+		if(!department.getCode().equals(oldDepartment.getCode())) {
+			if(departmentService.findByCode(department.getCode())!=null) {
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
 		departmentService.update(department);
 		return resultData;
 	}

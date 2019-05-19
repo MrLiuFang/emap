@@ -19,11 +19,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.map.MapImageUrl;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
@@ -121,8 +123,8 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
 		if(mapService.findByCode(entity.getCode())!=null) {
-			resultData.setCode(800001);
-			resultData.setMessage("该编码已存在！");
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 			return resultData;
 		}
 		entity = mapService.save(entity);
@@ -145,6 +147,16 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		String mapImageUrl = jsonNode.get("mapImageUrl").toString();
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
+		
+		com.pepper.model.emap.map.Map oldMap = mapService.findById(entity.getId());
+		if(!entity.getCode().equals(oldMap.getCode())) {
+			if(mapService.findByCode(entity.getCode())!=null) {
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
+		
 		mapService.update(entity);
 		addMapImageUrl(entity.getId(),mapImageUrl);
 		return resultData;

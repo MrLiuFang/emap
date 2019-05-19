@@ -137,7 +137,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		String token = setLoginInfo(userReal, resourceList);
 		resultData.setData("token", token);
 		resultData.setData("role", role);
-		stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		if(map.containsKey("language")) {
+			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		}
 		return resultData;
 	}
 

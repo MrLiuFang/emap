@@ -21,8 +21,8 @@ public class ActionListServiceImpl extends BaseServiceImpl<ActionList> implement
 	}
 
 	@Override
-	public ActionList findByActionListId(String actionListId) {
-		return actionListDao.findByActionListId(actionListId);
+	public ActionList findByEventListId(String eventListId) {
+		return actionListDao.findByEventListId(eventListId);
 	}
 
 }

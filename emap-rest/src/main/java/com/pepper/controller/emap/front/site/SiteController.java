@@ -14,10 +14,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.site.SiteInfoService;
@@ -58,6 +60,13 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		SiteInfo siteInfo = new SiteInfo();
 		MapToBeanUtil.convert(siteInfo, map);
+		
+		if(siteInfoService.findByCode(siteInfo.getCode())!=null) {
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			return resultData;
+		}
+		
 		siteInfoService.save(siteInfo);
 		return resultData;
 	}
@@ -69,6 +78,15 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		SiteInfo siteInfo = new SiteInfo();
 		MapToBeanUtil.convert(siteInfo, map);
+		
+		SiteInfo oldSiteInfo = siteInfoService.findById(siteInfo.getId());
+		if(!siteInfo.getCode().equals(oldSiteInfo.getCode())) {
+			if(siteInfoService.findByCode(siteInfo.getCode())!=null) {
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
 		siteInfoService.update(siteInfo);
 		return resultData;
 	}

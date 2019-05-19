@@ -29,6 +29,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventRule;
@@ -40,6 +41,7 @@ import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
+import com.pepper.service.emap.event.ActionListService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.EventRuleService;
@@ -95,6 +97,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	
 	@Reference
 	private MessageService messageService;
+	
+	@Reference
+	private ActionListService actionListService;
 	
 	@RequestMapping(value = "/add")
 	@ResponseBody
@@ -235,8 +240,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(eventRule == null || !StringUtils.hasText(eventRule.getDepartmentId())) {
 			resultData.setStatus(300001);
 			resultData.setMessage("该设备未设备部门!");
+			return resultData;
 		}
 		resultData.setData("employee", adminUserService.findUserByDepartmentId(eventRule.getDepartmentId()));
+		
+		
+		
 		return resultData;
 	}
 	
@@ -250,6 +259,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
 		if(eventList==null) {
+			resultData.setCode(800001);
+			resultData.setMessage("事件无效");
+			return resultData;
+		}
+		if(!map.containsKey("employeeId")) {
+			resultData.setCode(800002);
+			resultData.setMessage("请选择工人/部门");
 			return resultData;
 		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
@@ -309,9 +325,15 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					eventListVo.setCurrentHandleUserVo(currentHandleUser);
 				}
 			}
+			ActionList actionList = this.actionListService.findByEventListId(eventList.getId());
+			if(actionList!=null) {
+				eventListVo.setImageUrl1(this.fileService.getUrl(actionList.getImage1()));
+				eventListVo.setImageUrl2(this.fileService.getUrl(actionList.getImage2()));
+				eventListVo.setImageUrl3(this.fileService.getUrl(actionList.getImage3()));
+				eventListVo.setVoiceUrl1(fileService.getUrl(actionList.getVoice1()));
+			}
 			returnList.add(eventListVo);
 		}
-		
 		resultData.setData("historyEvent", returnList);
 		return resultData;
 	}
@@ -406,6 +428,14 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				AdminUser currentHandleUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
 				eventListVo.setCurrentHandleUserVo(currentHandleUser);
 			}
+			ActionList actionList = this.actionListService.findByEventListId(eventList.getId());
+			if(actionList!=null) {
+				eventListVo.setImageUrl1(this.fileService.getUrl(actionList.getImage1()));
+				eventListVo.setImageUrl2(this.fileService.getUrl(actionList.getImage2()));
+				eventListVo.setImageUrl3(this.fileService.getUrl(actionList.getImage3()));
+				eventListVo.setVoiceUrl1(fileService.getUrl(actionList.getVoice1()));
+			}
+			
 //			eventListVo.setHistoryEventList(this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId()));
 			returnList.add(eventListVo);
 		}

@@ -8,5 +8,5 @@ public interface ActionListDao extends BaseDao<ActionList> {
 
 	public ActionList findByEventId(String eventId); 
 	
-	public ActionList findByActionListId(String actionListId); 
+	public ActionList findByEventListId(String eventListId); 
 }
