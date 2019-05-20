@@ -56,6 +56,9 @@ public class Staff extends BaseModel {
 	
 	@Column(name = "last_login_time")
 	private Date lastLoginTime;
+	
+	@Column(name = "id_card")
+	private String idCard;
 
 	public String getName() {
 		return name;
@@ -128,4 +131,14 @@ public class Staff extends BaseModel {
 	public void setLastLoginTime(Date lastLoginTime) {
 		this.lastLoginTime = lastLoginTime;
 	}
+
+	public String getIdCard() {
+		return idCard;
+	}
+
+	public void setIdCard(String idCard) {
+		this.idCard = idCard;
+	}
+	
+	
 }

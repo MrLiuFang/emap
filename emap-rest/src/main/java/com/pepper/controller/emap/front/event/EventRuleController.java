@@ -18,17 +18,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
+import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.vo.EventRuleVo;
 import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.node.NodeService;
+import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
@@ -41,6 +44,10 @@ public class EventRuleController {
 	
 	@Reference
 	private NodeService nodeService;
+	
+	
+	@Reference
+	private NodeTypeService nodeTypeService;
 	
 	@Reference
 	private DepartmentService departmentService;
@@ -74,6 +81,16 @@ public class EventRuleController {
 		ResultData resultData = new ResultData();
 		EventRule eventRule = new EventRule();
 		MapToBeanUtil.convert(eventRule, map);
+		
+		EventRule oldEventRule = this.eventRuleService.findByNodeId(eventRule.getNodeId());
+		if(oldEventRule!=null) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+			resultData.setCode(5000001);
+			return resultData;
+		}
+		
+		Node node = this.nodeService.findById(eventRule.getNodeId());
+		eventRule.setNodeTypeId(node.getNodeTypeId());
 		eventRuleService.save(eventRule);
 		return resultData;
 	}
@@ -85,6 +102,14 @@ public class EventRuleController {
 		ResultData resultData = new ResultData();
 		EventRule eventRule = new EventRule();
 		MapToBeanUtil.convert(eventRule, map);
+		
+		EventRule oldEventRule = this.eventRuleService.findByNodeId(eventRule.getNodeId());
+		if(!oldEventRule.getId().equals(eventRule.getId())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+			resultData.setCode(5000001);
+			return resultData;
+		}
+		
 		eventRuleService.update(eventRule);
 		return resultData;
 	}

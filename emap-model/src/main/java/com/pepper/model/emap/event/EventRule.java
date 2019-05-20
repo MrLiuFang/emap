@@ -21,6 +21,9 @@ public class EventRule extends BaseModel {
 	@Column(name = "node_id",unique = true)
 	private String nodeId;
 	
+	@Column(name = "node_type_id")
+	private String nodeTypeId;
+	
 	@Column(name = "warning_level")
 	private Integer warningLevel;
 	
@@ -170,6 +173,14 @@ public class EventRule extends BaseModel {
 
 	public void setDepartmentId(String departmentId) {
 		this.departmentId = departmentId;
+	}
+
+	public String getNodeTypeId() {
+		return nodeTypeId;
+	}
+
+	public void setNodeTypeId(String nodeTypeId) {
+		this.nodeTypeId = nodeTypeId;
 	}
 	
 	

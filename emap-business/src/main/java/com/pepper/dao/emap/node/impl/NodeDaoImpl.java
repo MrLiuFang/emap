@@ -69,6 +69,9 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 			jpql.append(" and m.floor like :floor");
 			searchParameter.put("floor", "%"+floor+"%");
 		}
+		
+		jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
+		
 		BaseDao<Node>  baseDao = this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(),searchParameter );
 	}

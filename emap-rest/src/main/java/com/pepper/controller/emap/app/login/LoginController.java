@@ -30,6 +30,7 @@ import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.parameter.ParameterService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
+import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.redis.string.serializer.SetOperationsService;
 import com.pepper.service.redis.string.serializer.StringRedisTemplateService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
@@ -72,6 +73,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 	
 	@Reference
 	private ValueOperationsService stringValueOperationsService;
+	
+	@Reference
+	private DepartmentService departmentService;
 
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -114,6 +118,14 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1000005);
 			return resultData;
 		}
+		
+		if(!role.getCode().equals("EMPLOYEE_ROLE")) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
+			resultData.setCode(1000008);
+			return resultData;
+		}
+		
+		
 		if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
 			resultData.setStatus(Status.LOGIN_FAIL.getKey());
@@ -131,12 +143,13 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		userReal.setLastLoginTime(new Date());
 
 		adminUserService.updateLoginTime(userReal.getId());
-
+		
 		// 获取用户所有资源，并让其处于登录状态。
 		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
 		String token = setLoginInfo(userReal, resourceList);
 		resultData.setData("token", token);
 		resultData.setData("role", role);
+		resultData.setData("department", departmentService.findById(userReal.getDepartmentId()));
 		if(map.containsKey("language")) {
 			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		}

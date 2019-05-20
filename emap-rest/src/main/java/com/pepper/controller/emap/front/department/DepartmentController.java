@@ -19,9 +19,9 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
-import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.service.authentication.aop.Authorize;
+import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.util.MapToBeanUtil;
 
@@ -31,6 +31,9 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 
 	@Reference
 	private DepartmentService departmentService;
+	
+	@Reference
+	private DepartmentGroupService departmentGroupService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -56,7 +59,8 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody String data) {
+		
 		ResultData resultData = new ResultData();
 		Department department = new Department();
 		MapToBeanUtil.convert(department, map);

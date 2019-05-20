@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
@@ -185,10 +186,24 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = adminUserService.findByAccountAndPassword(map.get("account"),map.get("password"));
 		if(adminUser==null) {
-			resultData.setCode(400001);
+			resultData.setCode(4000001);
 			resultData.setMessage("用户认证失败！");
 			return resultData;
 		}
+		
+		Role role = roleService.findByUserId(adminUser.getId());
+		if (role == null) {
+			resultData.setCode(4000001);
+			resultData.setMessage("用户认证失败！");
+			return resultData;
+		}
+		
+		if(role.getCode().equals("EMPLOYEE_ROLE")) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(4000002));
+			resultData.setCode(4000002);
+			return resultData;
+		}
+		
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		eventListService.handover(adminUser.getId(), currentUser.getId());
 		return resultData;
