@@ -17,10 +17,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -71,6 +73,12 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
+		
+		if(nodeTypeService.findByCode(nodeType.getCode())!=null) {
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			return resultData;
+		}
 		nodeTypeService.save(nodeType);
 		return resultData;
 	}
@@ -82,6 +90,16 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
+		
+		NodeType oldNodeType = nodeTypeService.findById(nodeType.getId());
+		if(nodeType.getCode()!=null&&!nodeType.getCode().equals(oldNodeType.getCode())) {
+			if(nodeTypeService.findByCode(nodeType.getCode())!=null) {
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
+		
 		nodeTypeService.update(nodeType);
 		return resultData;
 	}

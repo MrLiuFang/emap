@@ -12,5 +12,12 @@ public interface HelpListDao extends BaseDao<HelpList> {
 	 * @param id
 	 * @return
 	 */
-	public List<HelpList> findByNodeTypeId(String id) ;
+	public List<HelpList> findByNodeTypeId(String nodeTypeId) ;
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public List<HelpList> findByNodeTypeIdAndIdIn(String nodeTypeId, String... id) ;
 }

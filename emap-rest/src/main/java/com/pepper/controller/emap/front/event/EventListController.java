@@ -131,6 +131,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object automaticList(String id) {
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_status", "A");
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNULL+"_operator", null);
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
@@ -169,7 +170,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		for(int i = 0; i <arrayNode.size(); i++) {
 			EventList eventList = eventListService.findById(arrayNode.get(i).asText());
-			eventList.setStatus("N");
+			if(eventList.getStatus()==null || eventList.getStatus().equals("")) {
+				eventList.setStatus("N");
+			}
 			eventList.setOperator(currentUser.getId());
 			eventListService.update(eventList);
 		}
@@ -232,18 +235,18 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(eventList == null) {
 			return resultData;
 		}
-		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-		if(node==null) {
-			return resultData;
-		}
-		EventRule eventRule = eventRuleService.findByNodeId(node.getId());
-		if(eventRule == null || !StringUtils.hasText(eventRule.getDepartmentId())) {
-			resultData.setStatus(300001);
-			resultData.setMessage("该设备未设备部门!");
-			return resultData;
-		}
-		resultData.setData("employee", adminUserService.findUserByDepartmentId(eventRule.getDepartmentId()));
-		
+//		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+//		if(node==null) {
+//			return resultData;
+//		}
+//		EventRule eventRule = eventRuleService.findByNodeId(node.getId());
+//		if(eventRule == null || !StringUtils.hasText(eventRule.getDepartmentId())) {
+//			resultData.setStatus(300001);
+//			resultData.setMessage("该设备未设备部门!");
+//			return resultData;
+//		}
+//		resultData.setData("employee", adminUserService.findUserByDepartmentId(eventRule.getDepartmentId()));
+		resultData.setData("employee", adminUserService.findUserByDepartmentId(""));
 		
 		
 		return resultData;
@@ -271,10 +274,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventList.setStatus("W");
 		if(map.containsKey("helpId")) {
-			eventList.setHelpId(map.get("helpId").toString());
+			eventList.setHelpId(map.get("helpId")==null?"[]":map.get("helpId").toString());
 		}
 		if(map.containsKey("content")) {
-			eventList.setContent(map.get("content").toString());
+			eventList.setContent(map.get("content")==null?"":map.get("content").toString());
 		}
 		eventListService.update(eventList);
 		
@@ -325,7 +328,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					eventListVo.setCurrentHandleUserVo(currentHandleUser);
 				}
 			}
-			ActionList actionList = this.actionListService.findByEventListId(eventList.getId());
+			ActionList actionList = this.actionListService.findByEventListId(obj.getId());
 			if(actionList!=null) {
 				eventListVo.setImageUrl1(this.fileService.getUrl(actionList.getImage1()));
 				eventListVo.setImageUrl2(this.fileService.getUrl(actionList.getImage2()));

@@ -18,7 +18,12 @@ public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements He
 	private HelpListDao helpListDao;
 
 	@Override
-	public List<HelpList> findByNodeTypeId(String id) {
-		return helpListDao.findByNodeTypeId(id);
+	public List<HelpList> findByNodeTypeId(String nodeTypeId) {
+		return helpListDao.findByNodeTypeId(nodeTypeId);
+	}
+
+	@Override
+	public List<HelpList> findByNodeTypeIdAndIdIn(String nodeTypeId, String... id) {
+		return helpListDao.findByNodeTypeIdAndIdIn(nodeTypeId, id);
 	}
 }

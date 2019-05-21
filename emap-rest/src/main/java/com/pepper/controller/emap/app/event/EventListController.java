@@ -110,10 +110,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 		if(!isFinish) {
-			List<String> list = new ArrayList<String>();
-			list.add("W");
-			list.add("A");
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+ "_status",list);
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTEQUAL+ "_status","P");
 		}else {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","P");
 		}
@@ -179,11 +176,11 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("content", "");
 		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
+			ObjectMapper objectMapper = new ObjectMapper();
 			List<HelpList> list = helpListService.findByNodeTypeId(node.getNodeTypeId());
 			List<HelpListVo> returnList = new ArrayList<HelpListVo>();
 			List<String> helpIdList = new ArrayList<String>();
 			if(actionList!=null && StringUtils.hasText(actionList.getHelpId())) {
-				ObjectMapper objectMapper = new ObjectMapper();
 				JsonNode jsonNode = objectMapper.readTree(actionList.getHelpId());
 				if(jsonNode.isArray()) {
 					Iterator<JsonNode> array =jsonNode.iterator();
@@ -194,10 +191,29 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			}
 			
 			for(HelpList helpList : list) {
+//				String helpId = eventList.getHelpId();
+//				List<String> listHelpId = new ArrayList<String>();
+//				if(StringUtils.hasText(helpId)) {
+//					JsonNode jsonNode = objectMapper.readTree(helpId);
+//					if(jsonNode.isArray()) {
+//						Iterator<JsonNode> array =jsonNode.iterator();
+//						while (array.hasNext()) {
+//							listHelpId.add(array.next().asText());
+//						}
+//					}
+//				}
 				HelpListVo helpListVo = new HelpListVo();
 				BeanUtils.copyProperties(helpList, helpListVo);
 				helpListVo.setIsCheck(helpIdList.contains(helpList.getId()));
-				returnList.add(helpListVo);
+//				if(listHelpId.size()>0) {
+//					if(listHelpId.contains(helpList.getId())) {
+//						returnList.add(helpListVo);
+//					}
+//				}else {
+					returnList.add(helpListVo);
+//				}
+				
+				
 			}
 			resultData.setData("helpList", returnList);
 		}
@@ -272,6 +288,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
+		
+		
 		eventDispatchService.save(eventDispatch);
 		try {
 			String employeeId = map.get("employeeId").toString();

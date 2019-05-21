@@ -63,7 +63,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		
 		ResultData resultData = new ResultData();
 		Department department = new Department();
-		MapToBeanUtil.convert(department, map);
+//		MapToBeanUtil.convert(department, map);
 		if(departmentService.findByCode(department.getCode())!=null) {
 			resultData.setCode(2000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
@@ -82,7 +82,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		MapToBeanUtil.convert(department, map);
 		
 		Department oldDepartment = departmentService.findById(department.getId());
-		if(!department.getCode().equals(oldDepartment.getCode())) {
+		if(department.getCode()!=null&&!department.getCode().equals(oldDepartment.getCode())) {
 			if(departmentService.findByCode(department.getCode())!=null) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));

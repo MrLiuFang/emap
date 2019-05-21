@@ -7,21 +7,31 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.console.enums.UserType;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.site.SiteInfo;
@@ -34,6 +44,7 @@ import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.util.MapToBeanUtil;
+import com.pepper.util.Md5Util;
 
 @Controller()
 @RequestMapping(value = "/front/staff")
@@ -131,6 +142,8 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		}
 		return resultData;
 	}
+	
+	
 	
 	private StaffVo convertStaffVo(Staff staff) {
 		StaffVo staffVo = new StaffVo();

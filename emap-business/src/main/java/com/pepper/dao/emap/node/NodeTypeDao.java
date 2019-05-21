@@ -10,4 +10,5 @@ import com.pepper.model.emap.node.NodeType;
  */
 public interface NodeTypeDao extends BaseDao<NodeType> {
 
+	public NodeType findByCode(String code);
 }

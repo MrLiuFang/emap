@@ -101,7 +101,7 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		MapToBeanUtil.convert(buildingInfo, map);
 		
 		BuildingInfo oldBuildingInfo = buildingInfoService.findById(buildingInfo.getId());
-		if(!buildingInfo.getCode().equals(oldBuildingInfo.getCode())) {
+		if(buildingInfo.getCode()!=null&&!buildingInfo.getCode().equals(oldBuildingInfo.getCode())) {
 			if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
