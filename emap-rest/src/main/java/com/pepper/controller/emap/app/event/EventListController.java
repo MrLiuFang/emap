@@ -44,6 +44,7 @@ import com.pepper.service.emap.event.ActionListService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.HelpListService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.message.MessageService;
@@ -101,7 +102,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@Reference
 	private MessageService messageService;
 	
-
+	@Reference
+	private SystemLogService systemLogService;
+	
 	@RequestMapping("/list")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
@@ -120,6 +123,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		pager = eventListService.findNavigator(pager);
 		pager.setData("eventList",convertVo(pager.getResults()));
 		pager.setResults(null);
+		
+		systemLogService.log("App event list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -134,6 +139,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		pager = eventListService.transferList(pager, adminUser.getId());
 		pager.setData("eventList",convertVo(pager.getResults()));
 		pager.setResults(null);
+		
+		systemLogService.log("App event transfer list", this.request.getRequestURL().toString());
 		return pager;
 		
 	}
@@ -206,7 +213,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		resultData.setData("currentHelpId", eventList.getHelpId());
 		resultData.setData("isUrgent", eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
 		
-		
+		systemLogService.log("App event info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -245,6 +252,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			actionList.setHelpId(jsonNode.get("helpId").toString());
 		}
 		actionListService.save(actionList);
+		
+		systemLogService.log("App event finish", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -280,6 +289,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
+		
+		systemLogService.log("App event to employee", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

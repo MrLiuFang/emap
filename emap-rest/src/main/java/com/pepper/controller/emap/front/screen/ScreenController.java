@@ -33,6 +33,7 @@ import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.screen.ScreenMapService;
@@ -63,6 +64,9 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	@Reference
 	private ScreenMapService screenMapService;
 	
+	@Reference
+	private SystemLogService systemLogService;
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -83,6 +87,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		}
 		pager.setData("screen",returnList);
 		pager.setResults(null);
+		systemLogService.log("get screen list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -107,7 +112,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 			screenMap.setMapId(node.asText());
 			screenMapService.save(screenMap);
 		}
-		
+		systemLogService.log("screen add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -136,7 +141,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 				screenMapService.save(screenMap);
 			}
 		}
-		
+		systemLogService.log("screen update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -147,6 +152,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		ResultData resultData = new ResultData();
 		Screen screen = screenService.findById(id);
 		resultData.setData("screen",convertScreenVo(screen));
+		systemLogService.log("get screen info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -172,6 +178,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 			}catch (Exception e) {
 			}
 		}
+		systemLogService.log("screen delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

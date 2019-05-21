@@ -1,8 +1,5 @@
 package com.pepper.controller.emap.front.node;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -33,9 +30,7 @@ import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
-import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
-import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.site.SiteInfo;
@@ -45,6 +40,7 @@ import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.node.NodeService;
@@ -83,6 +79,9 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	@Reference
 	private MapImageUrlService mapImageUrlService;
 	
+	@Reference
+	private SystemLogService systemLogService;
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -96,6 +95,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		pager.setData("node",returnList);
 		pager.setResults(null);
+		systemLogService.log("get node list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -116,6 +116,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		
 		nodeService.save(node);
+		systemLogService.log("node add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -137,6 +138,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		
 		nodeService.update(node);
+		systemLogService.log("node update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -148,6 +150,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		Node node = nodeService.findById(map.get("id").toString());
 		node.setStatus(Status.valueOf(map.get("status").toString().toUpperCase()));
 		nodeService.update(node);
+		systemLogService.log("node update status", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -159,6 +162,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		ResultData resultData = new ResultData();
 		Node node = nodeService.findById(id);
 		resultData.setData("node",convertNodeVo(node));
+		systemLogService.log("get node info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -183,6 +187,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("node delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -196,6 +201,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			MultipartFile file = files.get(fileName);
 			importNode(file.getInputStream(),"camera");
 		}
+		systemLogService.log("node import camera", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -209,6 +215,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			MultipartFile file = files.get(fileName);
 			importNode(file.getInputStream(),"door");
 		}
+		systemLogService.log("node import door", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -276,6 +283,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			returnList.add(nodeVo);
 		}
 		resultData.setData("node", returnList);
+		systemLogService.log("get node for map list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

@@ -19,9 +19,9 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
-import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.service.authentication.aop.Authorize;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.util.MapToBeanUtil;
 
@@ -31,6 +31,9 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	
 	@Reference
 	private SiteInfoService siteInfoService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -50,6 +53,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		
 		pager.setData("site",pager.getResults());
 		pager.setResults(null);
+		systemLogService.log("get site list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -68,6 +72,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		}
 		
 		siteInfoService.save(siteInfo);
+		systemLogService.log("site add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -88,6 +93,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 			}
 		}
 		siteInfoService.update(siteInfo);
+		systemLogService.log("site update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -97,6 +103,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		resultData.setData("site",siteInfoService.findById(id));
+		systemLogService.log("get site info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -121,6 +128,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("site delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 }

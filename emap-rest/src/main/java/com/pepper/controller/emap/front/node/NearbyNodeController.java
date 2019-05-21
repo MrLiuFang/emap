@@ -28,6 +28,7 @@ import com.pepper.model.emap.vo.NearbyNodeVo;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.node.NearbyNodeService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
@@ -48,6 +49,9 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 	
 	@Reference
 	private FileService fileService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -100,6 +104,7 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 			nearbyNodeVo.setNearbyNode(listNodeVo);
 		}
 		resultData.setData(nearbyNodeVo);
+		systemLogService.log("get nearby node list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -134,6 +139,7 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 				nearbyNodeService.save(nearbyNode);
 			}
 		}
+		systemLogService.log("nearby node add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 }

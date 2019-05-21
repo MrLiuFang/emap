@@ -25,13 +25,13 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
-import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.map.MapImageUrl;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.site.SiteInfoService;
@@ -41,7 +41,6 @@ import com.pepper.util.MapToBeanUtil;
 @RequestMapping(value = "/front/map")
 public class MapController  extends BaseControllerImpl implements BaseController  {
 	
-//	{"id":"2c92b9ad69db5aca0169db5df8c70003","mapImageUrl":[{"id":"2c92b9ad6aa279ce016aa284e0fa0003","createDate":"2019-05-11 00:12:58","updateDate":null,"createUser":"402881e869a0341f0169a03f681d005e","updateUser":null,"mapId":"2c92b9ad69db5aca0169db5df8c70003","code":"build","url":"ImageDemo/big_building.bst","ratate":0,"offsetX":0,"offsetY":0,"imageWidth":"7216","imageHeigh":"5412","maxLevel":5},{"code":"elec","url":"ImageDemo/artificial.bst","imageWidth":"3072","imageHeigh":"2048","maxLevel":"5"}],"imageHeigh":"5412","imageWidth":"7216","maxLevel":5}
 	@Reference
 	private BuildingInfoService buildingInfoService;
 	
@@ -54,6 +53,8 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@Reference
 	private MapImageUrlService mapImageUrlService;
 	
+	@Reference
+	private SystemLogService systemLogService;
 
 	private void addMapImageUrl(String mapId, String data) throws IOException {
 		mapImageUrlService.deleteByMapId(mapId);
@@ -108,6 +109,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		}
 		pager.setData("map",returnList);
 		pager.setResults(null);
+		systemLogService.log("get map list", this.request.getRequestURL().toString());
 		return pager;
 	}
 
@@ -132,6 +134,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 			String mapImageUrl = jsonNode.get("mapImageUrl").toString();
 			addMapImageUrl(entity.getId(),mapImageUrl);
 		}
+		systemLogService.log("map add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -159,6 +162,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		
 		mapService.update(entity);
 		addMapImageUrl(entity.getId(),mapImageUrl);
+		systemLogService.log("map update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -169,6 +173,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		com.pepper.model.emap.map.Map  entity = mapService.findById(id);
 		resultData.setData("map",convertMapVo(entity));
+		systemLogService.log("get map info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -207,6 +212,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("map delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 }

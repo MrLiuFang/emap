@@ -1,9 +1,10 @@
 package com.pepper.controller.emap.front.department;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Iterator;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,10 +21,12 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.department.Department;
+import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.vo.DepartmentVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
-import com.pepper.util.MapToBeanUtil;
+import com.pepper.service.emap.log.SystemLogService;
 
 @Controller()
 @RequestMapping(value = "/front/department")
@@ -34,6 +37,9 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	
 	@Reference
 	private DepartmentGroupService departmentGroupService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -53,34 +59,59 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		pager = departmentService.findNavigator(pager);
 		pager.setData("department",pager.getResults());
 		pager.setResults(null);
+		systemLogService.log("get department list", this.request.getRequestURL().toString());
 		return pager;
 	}
 
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody String data) {
-		
+	public Object add(@RequestBody String data) throws IOException {
 		ResultData resultData = new ResultData();
 		Department department = new Department();
-		MapToBeanUtil.convert(department, map);
+//		MapToBeanUtil.convert(department, map);
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode jsonNode = objectMapper.readTree(data);
+		department.setCode(jsonNode.get("code").asText(""));
+		department.setName(jsonNode.get("name").asText(""));
+		department.setRemark(jsonNode.get("remark").asText(""));
 		if(departmentService.findByCode(department.getCode())!=null) {
 			resultData.setCode(2000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 			return resultData;
 		}
-		departmentService.save(department);
+		department = departmentService.save(department);
+		
+		if(jsonNode.has("group") && jsonNode.get("group").isArray()){
+			Iterator<JsonNode> group = jsonNode.get("group").iterator();
+			while(group.hasNext()){
+				JsonNode departmentGroupJsonNode = group.next();
+				DepartmentGroup departmentGroup = new DepartmentGroup();
+				departmentGroup.setDepartmentId(department.getId());
+				departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
+				departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
+				departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+				departmentGroupService.save(departmentGroup);
+			}
+		}
+		systemLogService.log("department add", this.request.getRequestURL().toString());
 		return resultData;
 	}
+	
+	
 	
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody String data) throws IOException {
 		ResultData resultData = new ResultData();
 		Department department = new Department();
-		MapToBeanUtil.convert(department, map);
-		
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode jsonNode = objectMapper.readTree(data);
+		department.setCode(jsonNode.get("code").asText(""));
+		department.setName(jsonNode.get("name").asText(""));
+		department.setRemark(jsonNode.get("remark").asText(""));
+		department.setId(jsonNode.get("id").asText(""));
 		Department oldDepartment = departmentService.findById(department.getId());
 		if(!department.getCode().equals(oldDepartment.getCode())) {
 			if(departmentService.findByCode(department.getCode())!=null) {
@@ -90,6 +121,20 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 			}
 		}
 		departmentService.update(department);
+		departmentGroupService.deleteByDepartmentId(department.getId());
+		if(jsonNode.has("group") && jsonNode.get("group").isArray()){
+			Iterator<JsonNode> group = jsonNode.get("group").iterator();
+			while(group.hasNext()){
+				JsonNode departmentGroupJsonNode = group.next();
+				DepartmentGroup departmentGroup = new DepartmentGroup();
+				departmentGroup.setDepartmentId(department.getId());
+				departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
+				departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
+				departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+				departmentGroupService.save(departmentGroup);
+			}
+		}
+		systemLogService.log("department update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -98,7 +143,12 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	@ResponseBody
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
-		resultData.setData("department",departmentService.findById(id));
+		Department department = departmentService.findById(id);
+		DepartmentVo departmentVo = new DepartmentVo();
+		BeanUtils.copyProperties(department, departmentVo);
+		departmentVo.setDepartmentGroup(departmentGroupService.findByDepartmentId(department.getId()));
+		resultData.setData("department",departmentVo);
+		systemLogService.log("get department info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -123,6 +173,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("department delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

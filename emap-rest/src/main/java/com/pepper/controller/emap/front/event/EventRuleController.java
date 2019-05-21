@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
+import com.pepper.core.base.BaseController;
+import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.event.EventRule;
@@ -30,6 +32,7 @@ import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.event.EventRuleService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.util.MapToBeanUtil;
@@ -37,7 +40,7 @@ import com.pepper.util.MapToBeanUtil;
 @Controller
 @RequestMapping(value = "/front/event/rule")
 @Validated
-public class EventRuleController {
+public class EventRuleController extends BaseControllerImpl implements BaseController {
 
 	@Reference
 	private EventRuleService eventRuleService;
@@ -51,6 +54,9 @@ public class EventRuleController {
 	
 	@Reference
 	private DepartmentService departmentService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -71,6 +77,7 @@ public class EventRuleController {
 		}
 		pager.setData("eventRule",returnList);
 		pager.setResults(null);
+		systemLogService.log("get event rule list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -92,6 +99,7 @@ public class EventRuleController {
 		Node node = this.nodeService.findById(eventRule.getNodeId());
 		eventRule.setNodeTypeId(node.getNodeTypeId());
 		eventRuleService.save(eventRule);
+		systemLogService.log("event rule add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -111,6 +119,7 @@ public class EventRuleController {
 		}
 		
 		eventRuleService.update(eventRule);
+		systemLogService.log("event rule update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -121,6 +130,7 @@ public class EventRuleController {
 		ResultData resultData = new ResultData();
 		EventRule eventRule = eventRuleService.findById(id);
 		resultData.setData("eventRule",convertEventRule(eventRule));
+		systemLogService.log("get event rule info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -145,6 +155,7 @@ public class EventRuleController {
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("event rule delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
+import com.pepper.core.base.BaseController;
+import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
@@ -26,13 +28,14 @@ import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.event.HelpListService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
 @RequestMapping(value = "/front/help")
 @Validated
-public class HelpListController {
+public class HelpListController extends BaseControllerImpl implements BaseController {
 
 	@Reference
 	private HelpListService helpListService;
@@ -40,6 +43,8 @@ public class HelpListController {
 	@Reference
 	private NodeTypeService nodeTypeService;
 	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -66,6 +71,7 @@ public class HelpListController {
 		}
 		pager.setData("help",returnList);
 		pager.setResults(null);
+		systemLogService.log("get help list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -78,6 +84,7 @@ public class HelpListController {
 		HelpList helpList = new HelpList();
 		MapToBeanUtil.convert(helpList, map);
 		helpListService.save(helpList);
+		systemLogService.log("help list add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -89,6 +96,7 @@ public class HelpListController {
 		HelpList helpList = new HelpList();
 		MapToBeanUtil.convert(helpList, map);
 		helpListService.update(helpList);
+		systemLogService.log("help list update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -101,6 +109,7 @@ public class HelpListController {
 		if(helpList!=null) {
 			resultData.setData("help",this.convertHelpList(helpList));
 		}
+		systemLogService.log("get help list info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -125,6 +134,7 @@ public class HelpListController {
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("help list delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

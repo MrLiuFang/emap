@@ -46,6 +46,7 @@ import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.message.MessageService;
@@ -101,6 +102,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Reference
 	private ActionListService actionListService;
 	
+	@Reference
+	private SystemLogService systemLogService;
+	
 	@RequestMapping(value = "/add")
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
@@ -122,6 +126,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
+		systemLogService.log("get event list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -138,6 +143,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
+		systemLogService.log("get event automatic list", this.request.getRequestURL().toString());
 		return pager;
 		
 	}
@@ -173,7 +179,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setOperator(currentUser.getId());
 			eventListService.update(eventList);
 		}
-		
+		systemLogService.log("event to me", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -181,6 +187,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object eventForMeHandle(Boolean isHandle,String id) {
+		systemLogService.log("event for me handle", this.request.getRequestURL().toString());
 		return eventForMeEx(true,id);
 	}
 	
@@ -188,6 +195,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object eventForMeNoHandle(Boolean isHandle,String id) {
+		systemLogService.log("event for me no handle", this.request.getRequestURL().toString());
 		return eventForMeEx(false,id);
 	}
 	
@@ -208,6 +216,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
+		
 		return pager;
 	}
 	
@@ -220,6 +229,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
 			resultData.setData("helpList", helpListService.findByNodeTypeId(node.getNodeTypeId()));
 		}
+		systemLogService.log("get event help", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -244,8 +254,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		resultData.setData("employee", adminUserService.findUserByDepartmentId(eventRule.getDepartmentId()));
 		
-		
-		
+		systemLogService.log("get employee", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -294,7 +303,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
-		
+		systemLogService.log("event to employee", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -335,6 +344,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			returnList.add(eventListVo);
 		}
 		resultData.setData("historyEvent", returnList);
+		systemLogService.log("event history list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -349,7 +359,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setFiledContent(map.get("filedContent"));
 			eventListService.update(eventList);
 		}
-		
+		systemLogService.log("event filed", this.request.getRequestURL().toString());
 		
 		return resultData;
 	}
@@ -369,6 +379,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventList.setIsOperatorTransfer(true);
 		eventList.setOperatorTransferRead(false);
 		eventListService.update(eventList);
+		systemLogService.log("event to operator", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -389,6 +400,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventListService.update(eventList);
 		}
 		resultData.setData("eventList", list);
+		systemLogService.log("event to operator round robin", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

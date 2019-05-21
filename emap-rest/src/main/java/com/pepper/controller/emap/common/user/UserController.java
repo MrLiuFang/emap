@@ -18,6 +18,7 @@ import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.Md5Util;
@@ -47,6 +48,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private ValueOperationsService stringValueOperationsService;
 	
+	@Reference
+	private SystemLogService systemLogService;
+	
 	@RequestMapping(value = "/headPortrait") 
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -62,6 +66,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUserService.update(adminUser);
 		
 		jdkValueOperationsService.set(adminUser.getId(), adminUser);
+		
+		systemLogService.log("user update head portrait", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -93,6 +99,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setCode(300001);
 			resultData.setMessage("密码不能为空！");
 		}
+		systemLogService.log("user update password", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -103,6 +110,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
 		stringValueOperationsService.set(adminUser.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		systemLogService.log("user set language", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

@@ -1,5 +1,7 @@
 package com.pepper.service.emap.department.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import org.apache.dubbo.config.annotation.Service;
 import com.pepper.core.base.impl.BaseServiceImpl;
@@ -12,5 +14,15 @@ public class DepartmentGroupServiceImpl extends BaseServiceImpl<DepartmentGroup>
 
 	@Resource
 	private DepartmentGroupDao departmentGroupDao;
+
+	@Override
+	public void deleteByDepartmentId(String departmentId) {
+		departmentGroupDao.deleteByDepartmentId(departmentId);
+	}
+
+	@Override
+	public List<DepartmentGroup> findByDepartmentId(String departmentId) {
+		return departmentGroupDao.findByDepartmentId(departmentId);
+	}
 
 }

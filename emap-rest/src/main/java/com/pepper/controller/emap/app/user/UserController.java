@@ -30,6 +30,7 @@ import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
@@ -55,6 +56,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private ValueOperationsService valueOperationsService;
 	
+	@Reference
+	private SystemLogService systemLogService;
+	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -72,6 +76,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
 		resultData.setData("user", adminUserVo);
+		
+		systemLogService.log("app get user info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -86,6 +92,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 			adminUser.setIsWork(Boolean.valueOf(map.get("work").toString()));
 			adminUserService.update(adminUser);
 		}
+		
+		systemLogService.log("app user work", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -108,6 +116,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 			returnList.add(adminUserVo);
 		}
 		resultData.setData("user", returnList);
+		
+		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -117,6 +127,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 	public Object bindDeviceId(@RequestBody Map<String,String> map) {
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		valueOperationsService.set("userDeviceId_"+currentUser.getId(), map.get("deviceId"));
+		
+		systemLogService.log("app bind device id", this.request.getRequestURL().toString());
 		return new ResultData();
 	} 
 	

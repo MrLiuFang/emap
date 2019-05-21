@@ -22,14 +22,11 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
-import com.pepper.model.emap.department.Department;
-import com.pepper.model.emap.node.NodeType;
-import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
-import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
@@ -50,6 +47,9 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	
 	@Reference
 	private SiteInfoService siteInfoService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -74,6 +74,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		
 		pager.setData("staff",returnList);
 		pager.setResults(null);
+		systemLogService.log("get staff list", this.request.getRequestURL().toString());
 		return pager;
 	}
 
@@ -86,6 +87,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		MapToBeanUtil.convert(staff, map);
 		staff.setAvailableTime(new Date());
 		staffService.save(staff);
+		systemLogService.log("staff add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -97,6 +99,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
 		staffService.update(staff);
+		systemLogService.log("staff update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -106,6 +109,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		resultData.setData("staff",convertStaffVo(staffService.findById(id)));
+		systemLogService.log("get staff info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -129,6 +133,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 			}catch (Exception e) {
 			}
 		}
+		systemLogService.log("staff delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

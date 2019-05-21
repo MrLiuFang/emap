@@ -24,6 +24,7 @@ import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.service.authentication.aop.Authorize;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.file.FileService;
 import com.pepper.util.MapToBeanUtil;
@@ -37,6 +38,9 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	
 	@Reference
 	private FileService fileService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -61,6 +65,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		
 		pager.setData("nodeType",returnList);
 		pager.setResults(null);
+		systemLogService.log("get node type list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -72,6 +77,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
 		nodeTypeService.save(nodeType);
+		systemLogService.log("node type add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -83,6 +89,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
 		nodeTypeService.update(nodeType);
+		systemLogService.log("node type update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -91,8 +98,8 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
-		
 		resultData.setData("nodeType",convertNodeTypeVo(nodeTypeService.findById(id)));
+		systemLogService.log("get node type info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -117,6 +124,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("node type delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

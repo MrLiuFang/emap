@@ -22,14 +22,12 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
-import com.pepper.model.console.admin.user.AdminUser;
-import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.site.SiteInfo;
-import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.util.MapToBeanUtil;
 
@@ -42,6 +40,9 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 	
 	@Reference
 	private SiteInfoService siteInfoService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
@@ -73,6 +74,8 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		}
 		pager.setData("build",returnList);
 		pager.setResults(null);
+		
+		systemLogService.log("get build list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -89,6 +92,7 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 			return resultData;
 		}
 		buildingInfoService.save(buildingInfo);
+		systemLogService.log("build add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -110,6 +114,8 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		}
 		
 		buildingInfoService.update(buildingInfo);
+		
+		systemLogService.log("build update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -123,6 +129,8 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
 		buildingInfoVo.setSite(this.siteInfoService.findById(buildingInfo.getSiteInfoId()));
 		resultData.setData("build",buildingInfoVo);
+		
+		systemLogService.log("get build info ", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -147,6 +155,7 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 				// TODO: handle exception
 			}
 		}
+		systemLogService.log("delete build ", this.request.getRequestURL().toString());
 		return resultData;
 	}
 }
