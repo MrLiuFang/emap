@@ -149,6 +149,57 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	}
 	
 	
+	@RequestMapping(value = "/import")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = new HSSFWorkbook(file.getInputStream());
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				Staff staff = new Staff();
+				staff.setName(getCellValue(row.getCell(0)).toString());
+				staff.setEmail(getCellValue(row.getCell(1)).toString());
+				staff.setIdCard(getCellValue(row.getCell(2)).toString());
+				staff.setPassword(getCellValue(row.getCell(3)).toString());
+				if(staffService.findByIdCard(staff.getIdCard())!=null) {
+					continue;
+				}
+				this.staffService.save(staff);
+	        }
+		}
+		return resultData;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = null;
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
+	
+	
 	
 	private StaffVo convertStaffVo(Staff staff) {
 		StaffVo staffVo = new StaffVo();

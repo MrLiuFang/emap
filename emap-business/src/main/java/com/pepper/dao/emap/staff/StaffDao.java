@@ -5,4 +5,5 @@ import com.pepper.model.emap.staff.Staff;
 
 public interface StaffDao extends BaseDao<Staff> {
 
+	public Staff findByIdCard(String idCard);
 }

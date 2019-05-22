@@ -73,9 +73,15 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(data);
-		department.setCode(jsonNode.get("code").asText(""));
-		department.setName(jsonNode.get("name").asText(""));
-		department.setRemark(jsonNode.get("remark").asText(""));
+		if(jsonNode.has("code")) {
+			department.setCode(jsonNode.get("code").asText(""));
+		}
+		if(jsonNode.has("name")) {
+			department.setName(jsonNode.get("name").asText(""));
+		}
+		if(jsonNode.has("remark")) {
+			department.setRemark(jsonNode.get("remark").asText(""));
+		}
 		if(departmentService.findByCode(department.getCode())!=null) {
 			resultData.setCode(2000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
@@ -89,9 +95,15 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 				JsonNode departmentGroupJsonNode = group.next();
 				DepartmentGroup departmentGroup = new DepartmentGroup();
 				departmentGroup.setDepartmentId(department.getId());
-				departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
-				departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
-				departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+				if(departmentGroupJsonNode.has("endTime")) {
+					departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
+				}
+				if(departmentGroupJsonNode.has("startTime")) {
+					departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
+				}
+				if(departmentGroupJsonNode.has("name")) {
+					departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+				}
 				departmentGroupService.save(departmentGroup);
 			}
 		}
@@ -109,9 +121,15 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		Department department = new Department();
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(data);
-		department.setCode(jsonNode.get("code").asText(""));
-		department.setName(jsonNode.get("name").asText(""));
-		department.setRemark(jsonNode.get("remark").asText(""));
+		if(jsonNode.has("code")) {
+			department.setCode(jsonNode.get("code").asText(""));
+		}
+		if(jsonNode.has("name")) {
+			department.setName(jsonNode.get("name").asText(""));
+		}
+		if(jsonNode.has("remark")) {
+			department.setRemark(jsonNode.get("remark").asText(""));
+		}
 		department.setId(jsonNode.get("id").asText(""));
 		Department oldDepartment = departmentService.findById(department.getId());
 		if(department.getCode()!=null&&!department.getCode().equals(oldDepartment.getCode())) {
@@ -129,9 +147,15 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 				JsonNode departmentGroupJsonNode = group.next();
 				DepartmentGroup departmentGroup = new DepartmentGroup();
 				departmentGroup.setDepartmentId(department.getId());
-				departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
-				departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
-				departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+				if(departmentGroupJsonNode.has("endTime")) {
+					departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
+				}
+				if(departmentGroupJsonNode.has("startTime")) {
+					departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
+				}
+				if(departmentGroupJsonNode.has("name")) {
+					departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+				}
 				departmentGroupService.save(departmentGroup);
 			}
 		}

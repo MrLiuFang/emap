@@ -57,7 +57,7 @@ public class Staff extends BaseModel {
 	@Column(name = "last_login_time")
 	private Date lastLoginTime;
 	
-	@Column(name = "id_card")
+	@Column(name = "id_card" ,unique= true)
 	private String idCard;
 
 	public String getName() {
