@@ -1,17 +1,25 @@
 package com.pepper.controller.emap.front.user;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
@@ -24,6 +32,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
@@ -113,7 +122,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 			BeanUtils.copyProperties(user, adminUserVo);
 			adminUserVo.setPassword("");
 			RoleUser roleUser = roleUserService.findByUserId(user.getId());
-			adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+			if(roleUser!=null) {
+				adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+			}
 			if(StringUtils.hasText(user.getDepartmentId())) {
 				adminUserVo.setDepartment(departmentService.findById(user.getDepartmentId()));
 			}
@@ -132,6 +143,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
+		AdminUser oldAdminUser = adminUserService.findByAccount(adminUser.getAccount());
+		if(oldAdminUser!=null) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(3000001));
+			resultData.setCode(3000001);
+			return resultData;
+		}
+				
 		adminUser.setStatus(Status.NORMAL);
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setCreateDate(new Date());
@@ -208,4 +226,68 @@ public class UserController extends BaseControllerImpl implements BaseController
 		eventListService.handover(adminUser.getId(), currentUser.getId());
 		return resultData;
 	}
+	
+	@RequestMapping(value = "/import")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importAdminUser(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = new HSSFWorkbook(file.getInputStream());
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				AdminUser adminUser = new AdminUser();
+				adminUser.setAccount(getCellValue(row.getCell(0)).toString());
+				adminUser.setName(getCellValue(row.getCell(1)).toString());
+				adminUser.setEmail(getCellValue(row.getCell(2)).toString());
+				adminUser.setMobile(getCellValue(row.getCell(3)).toString());
+				adminUser.setNickName(getCellValue(row.getCell(4)).toString());
+				adminUser.setPassword("96E79218965EB72C92A549DD5A330112");
+				AdminUser oldAdminUser = adminUserService.findByAccount(adminUser.getAccount());
+				if(oldAdminUser!=null) {
+					continue;
+				}
+						
+				adminUser.setStatus(Status.NORMAL);
+				adminUser.setUserType(UserType.EMPLOYEE);
+				adminUser.setCreateDate(new Date());
+				AdminUser user = (AdminUser) this.getCurrentUser();
+				adminUser.setCreateUser(user.getId());
+				adminUser.setPassword(Md5Util.encryptPassword(adminUser.getPassword().toUpperCase(),adminUser.getAccount()));
+				adminUser.setUserType(UserType.EMPLOYEE);
+				adminUser.setIsWork(false);
+				adminUserService.save(adminUser);
+				
+	        }
+		}
+		return resultData;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = null;
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
+	
 }

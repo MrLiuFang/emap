@@ -31,7 +31,7 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 	@Override
 	public Pager<Node> findNavigator(Pager<Node> pager, String code, String name, String source, String sourceCode,
 			String mapId, String nodeTypeId, String siteId, String buildId, String floor) {
-		StringBuffer jpql = new StringBuffer(" select n from Node n join Map m on n.mapId = m.id join BuildingInfo b on m.buildId = b.id join SiteInfo s on s.id = b.siteInfoId where 1=1 ");
+		StringBuffer jpql = new StringBuffer(" select n from Node n left join Map m on n.mapId = m.id left join BuildingInfo b on m.buildId = b.id left join SiteInfo s on s.id = b.siteInfoId where 1=1 ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		if(StringUtils.hasText(code)) {
 			jpql.append(" and n.code  like :code");
@@ -70,7 +70,7 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 			searchParameter.put("floor", "%"+floor+"%");
 		}
 		
-		jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
+//		jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
 		
 		BaseDao<Node>  baseDao = this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(),searchParameter );

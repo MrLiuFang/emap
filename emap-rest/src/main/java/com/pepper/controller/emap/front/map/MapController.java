@@ -152,7 +152,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		MapToBeanUtil.convert(entity, map);
 		
 		com.pepper.model.emap.map.Map oldMap = mapService.findById(entity.getId());
-		if(!entity.getCode().equals(oldMap.getCode())) {
+		if(entity.getCode()!=null&&!entity.getCode().equals(oldMap.getCode())) {
 			if(mapService.findByCode(entity.getCode())!=null) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
@@ -183,10 +183,13 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
 		BuildingInfo buildingInfo =  buildingInfoService.findById(map.getBuildId());
 		BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
-		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
-		mapVo.setBuild(buildingInfoVo);
-		SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
-		buildingInfoVo.setSite(siteInfo);
+		if(buildingInfo!=null) {
+			BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
+			mapVo.setBuild(buildingInfoVo);
+			SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
+			buildingInfoVo.setSite(siteInfo);
+		}
+		
 		
 		return mapVo;
 	}

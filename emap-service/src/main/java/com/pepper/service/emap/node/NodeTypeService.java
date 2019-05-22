@@ -10,4 +10,5 @@ import com.pepper.model.emap.node.NodeType;
  */
 public interface NodeTypeService extends BaseService<NodeType> {
 
+	public NodeType findByCode(String code);
 }

@@ -70,6 +70,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		ResultData resultData = new ResultData();
 		Department department = new Department();
 //		MapToBeanUtil.convert(department, map);
+
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(data);
 		department.setCode(jsonNode.get("code").asText(""));
@@ -113,7 +114,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		department.setRemark(jsonNode.get("remark").asText(""));
 		department.setId(jsonNode.get("id").asText(""));
 		Department oldDepartment = departmentService.findById(department.getId());
-		if(!department.getCode().equals(oldDepartment.getCode())) {
+		if(department.getCode()!=null&&!department.getCode().equals(oldDepartment.getCode())) {
 			if(departmentService.findByCode(department.getCode())!=null) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));

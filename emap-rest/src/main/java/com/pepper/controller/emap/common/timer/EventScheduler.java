@@ -68,10 +68,12 @@ public class EventScheduler {
 	private void eventRule(EventList eventList,EventRule eventRule) {		
 		try {
 			Calendar now = Calendar.getInstance();
-			Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""))/100;
-			Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""))/100;
-			Integer  time = now.get(Calendar.HOUR_OF_DAY);
-			if((time>=from&&time<=24)||(time<=to&&time>=1)) {
+			Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""));
+			Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""));
+//			Integer  time = now.get(Calendar.HOUR_OF_DAY);
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+			Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
+			if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
 				assignment(eventRule,eventList);
 			}else {
 				if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
@@ -119,12 +121,15 @@ public class EventScheduler {
 	}
 	
 	public static void main(String agrs[]) {
-		Calendar now = Calendar.getInstance();
-		String data1 = now.get(Calendar.YEAR) + "-" + (now.get(Calendar.MONTH) + 1) + "-" + now.get(Calendar.DAY_OF_MONTH) +" " + "18:00"+ ":00";
-		now.add(Calendar.DAY_OF_MONTH, 1); 
-		String data2 = now.get(Calendar.YEAR) + "-" + (now.get(Calendar.MONTH) + 1) + "-" + now.get(Calendar.DAY_OF_MONTH) +" " + "09:00"+ ":00";
-		System.out.println(data1);
-		System.out.println(data2);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+		String test = simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", "");
+		System.out.println(test);
+//		Calendar now = Calendar.getInstance();
+//		String data1 = now.get(Calendar.YEAR) + "-" + (now.get(Calendar.MONTH) + 1) + "-" + now.get(Calendar.DAY_OF_MONTH) +" " + "18:00"+ ":00";
+//		now.add(Calendar.DAY_OF_MONTH, 1); 
+//		String data2 = now.get(Calendar.YEAR) + "-" + (now.get(Calendar.MONTH) + 1) + "-" + now.get(Calendar.DAY_OF_MONTH) +" " + "09:00"+ ":00";
+//		System.out.println(data1);
+//		System.out.println(data2);
 	}
 	
 	private Node getNode(String sourceCode) {

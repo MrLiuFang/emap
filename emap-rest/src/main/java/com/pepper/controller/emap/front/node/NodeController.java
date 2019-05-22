@@ -115,6 +115,12 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			return resultData;
 		}
 		
+		if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			return resultData;
+		}
+		
 		nodeService.save(node);
 		systemLogService.log("node add", this.request.getRequestURL().toString());
 		return resultData;
@@ -129,8 +135,16 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		MapToBeanUtil.convert(node, map);
 		
 		Node oldNode = nodeService.findById(node.getId());
-		if(!node.getCode().equals(oldNode.getCode())) {
+		if(node.getCode()!=null&&!node.getCode().equals(oldNode.getCode())) {
 			if(nodeService.findByCode(node.getCode())!=null) {
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
+		
+		if(node.getSourceCode()!=null&&!node.getSourceCode().equals(oldNode.getSourceCode())) {
+			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
@@ -256,6 +270,14 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				node.setReaderId(getCellValue(row.getCell(11)).toString());
 				node.setReaderIo(getCellValue(row.getCell(12)).toString());
 			}
+			
+			if(nodeService.findByCode(node.getCode())!=null) {
+				continue ;
+			}
+			
+			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
+				continue ;
+			}
 			nodeService.save(node);
         }
 	}
@@ -331,13 +353,22 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		nodeVo.setNodeType(nodeTypeVo);
 		
 		com.pepper.model.emap.map.Map  entity = mapService.findById(node.getMapId());
+		if(entity==null) {
+			return nodeVo;
+		}
 		MapVo  mapVo = new MapVo();
 		BeanUtils.copyProperties(entity, mapVo);
 		mapVo.setMapImageUrl(mapImageUrlService.findByMapId(entity.getId()));
 		BuildingInfo buildingInfo =  buildingInfoService.findById(entity.getBuildId());
+		if(buildingInfo==null) {
+			return nodeVo;
+		}
 		BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
 		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
 		SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
+		if(siteInfo==null) {
+			return nodeVo;
+		}
 		buildingInfoVo.setSite(siteInfo);
 		mapVo.setBuild(buildingInfoVo);
 		nodeVo.setMap(mapVo);

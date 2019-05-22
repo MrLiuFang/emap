@@ -85,7 +85,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		MapToBeanUtil.convert(siteInfo, map);
 		
 		SiteInfo oldSiteInfo = siteInfoService.findById(siteInfo.getId());
-		if(!siteInfo.getCode().equals(oldSiteInfo.getCode())) {
+		if(siteInfo.getCode()!=null&&!siteInfo.getCode().equals(oldSiteInfo.getCode())) {
 			if(siteInfoService.findByCode(siteInfo.getCode())!=null) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
