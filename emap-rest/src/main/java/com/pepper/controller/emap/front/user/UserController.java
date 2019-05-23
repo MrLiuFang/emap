@@ -38,6 +38,7 @@ import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
+import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.file.FileService;
 import com.pepper.util.MapToBeanUtil;
@@ -58,6 +59,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private DepartmentService departmentService;
+	
+	@Reference
+	private DepartmentGroupService departmentGroupService;
 	
 	@Reference
 	private FileService fileService;
@@ -89,7 +93,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId) {
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
 		if(StringUtils.hasText(account)) {
@@ -106,6 +110,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		if(StringUtils.hasText(departmentId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_departmentId",departmentId );
+		}
+		if(StringUtils.hasText(departmentGroupId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_departmentGroupId",departmentGroupId );
 		}
 		pager = adminUserService.list(pager);
 		Role role = null;
@@ -127,6 +134,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 			}
 			if(StringUtils.hasText(user.getDepartmentId())) {
 				adminUserVo.setDepartment(departmentService.findById(user.getDepartmentId()));
+			}
+			if(StringUtils.hasText(user.getDepartmentGroupId())) {
+				adminUserVo.setDepartmentGroup(departmentGroupService.findById(user.getDepartmentGroupId()));
 			}
 			adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
 			returnList.add(adminUserVo);
@@ -193,6 +203,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setData("user",adminUser);
 			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
 			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
+			resultData.setData("departmentGroup",departmentGroupService.findById(adminUser.getDepartmentGroupId()));
 		}
 		return resultData;
 	}

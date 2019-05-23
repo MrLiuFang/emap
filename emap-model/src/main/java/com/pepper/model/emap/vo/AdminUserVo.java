@@ -21,6 +21,8 @@ public class AdminUserVo extends AdminUser {
 
 	
 	private Department department;
+	
+	private com.pepper.model.emap.department.DepartmentGroup departmentGroup;
 
 
 	public Department getDepartment() {
@@ -50,6 +52,16 @@ public class AdminUserVo extends AdminUser {
 
 	public void setRole(Role role) {
 		this.role = role;
+	}
+
+
+	public com.pepper.model.emap.department.DepartmentGroup getDepartmentGroup() {
+		return departmentGroup;
+	}
+
+
+	public void setDepartmentGroup(com.pepper.model.emap.department.DepartmentGroup departmentGroup) {
+		this.departmentGroup = departmentGroup;
 	}
 	
 	

@@ -91,6 +91,15 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<!-- <resources>
+			<resource>
+				<filtering>true</filtering>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>emap-run.properties</exclude>
+				</excludes>
+			</resource>
+		</resources> -->
 	</build>
 
 </project>

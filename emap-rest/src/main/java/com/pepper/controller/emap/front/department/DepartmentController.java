@@ -89,24 +89,24 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		}
 		department = departmentService.save(department);
 		
-		if(jsonNode.has("group") && jsonNode.get("group").isArray()){
-			Iterator<JsonNode> group = jsonNode.get("group").iterator();
-			while(group.hasNext()){
-				JsonNode departmentGroupJsonNode = group.next();
-				DepartmentGroup departmentGroup = new DepartmentGroup();
-				departmentGroup.setDepartmentId(department.getId());
-				if(departmentGroupJsonNode.has("endTime")) {
-					departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
-				}
-				if(departmentGroupJsonNode.has("startTime")) {
-					departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
-				}
-				if(departmentGroupJsonNode.has("name")) {
-					departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
-				}
-				departmentGroupService.save(departmentGroup);
-			}
-		}
+//		if(jsonNode.has("group") && jsonNode.get("group").isArray()){
+//			Iterator<JsonNode> group = jsonNode.get("group").iterator();
+//			while(group.hasNext()){
+//				JsonNode departmentGroupJsonNode = group.next();
+//				DepartmentGroup departmentGroup = new DepartmentGroup();
+//				departmentGroup.setDepartmentId(department.getId());
+//				if(departmentGroupJsonNode.has("endTime")) {
+//					departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
+//				}
+//				if(departmentGroupJsonNode.has("startTime")) {
+//					departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
+//				}
+//				if(departmentGroupJsonNode.has("name")) {
+//					departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+//				}
+//				departmentGroupService.save(departmentGroup);
+//			}
+//		}
 		systemLogService.log("department add", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -140,25 +140,25 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 			}
 		}
 		departmentService.update(department);
-		departmentGroupService.deleteByDepartmentId(department.getId());
-		if(jsonNode.has("group") && jsonNode.get("group").isArray()){
-			Iterator<JsonNode> group = jsonNode.get("group").iterator();
-			while(group.hasNext()){
-				JsonNode departmentGroupJsonNode = group.next();
-				DepartmentGroup departmentGroup = new DepartmentGroup();
-				departmentGroup.setDepartmentId(department.getId());
-				if(departmentGroupJsonNode.has("endTime")) {
-					departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
-				}
-				if(departmentGroupJsonNode.has("startTime")) {
-					departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
-				}
-				if(departmentGroupJsonNode.has("name")) {
-					departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
-				}
-				departmentGroupService.save(departmentGroup);
-			}
-		}
+//		departmentGroupService.deleteByDepartmentId(department.getId());
+//		if(jsonNode.has("group") && jsonNode.get("group").isArray()){
+//			Iterator<JsonNode> group = jsonNode.get("group").iterator();
+//			while(group.hasNext()){
+//				JsonNode departmentGroupJsonNode = group.next();
+//				DepartmentGroup departmentGroup = new DepartmentGroup();
+//				departmentGroup.setDepartmentId(department.getId());
+//				if(departmentGroupJsonNode.has("endTime")) {
+//					departmentGroup.setEndTime(departmentGroupJsonNode.get("endTime").asText(""));
+//				}
+//				if(departmentGroupJsonNode.has("startTime")) {
+//					departmentGroup.setStartTime(departmentGroupJsonNode.get("startTime").asText(""));
+//				}
+//				if(departmentGroupJsonNode.has("name")) {
+//					departmentGroup.setName(departmentGroupJsonNode.get("name").asText(""));
+//				}
+//				departmentGroupService.save(departmentGroup);
+//			}
+//		}
 		systemLogService.log("department update", this.request.getRequestURL().toString());
 		return resultData;
 	}
