@@ -11,4 +11,11 @@ public interface EventRuleDao extends BaseDao<EventRule> {
 	 * @return
 	 */
 	public EventRule findByNodeId(String nodeId);
+	
+	/**
+	 * 
+	 * @param nodeId
+	 * @return
+	 */
+	public EventRule findByNodeTypeId(String nodeTypeId);
 }

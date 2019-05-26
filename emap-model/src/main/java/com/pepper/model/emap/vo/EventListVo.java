@@ -21,6 +21,8 @@ public class EventListVo extends EventList {
 	
 	private NodeVo node;
 	
+	private String nodeName;
+	
 	private AdminUser operatorVo;
 	
 	private AdminUser currentHandleUserVo;
@@ -37,6 +39,15 @@ public class EventListVo extends EventList {
 	
 	private String imageUrl3;
 	
+	
+	public String getNodeName() {
+		return nodeName;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
 	private String voiceUrl1;
 
 	public NodeVo getNode() {

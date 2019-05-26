@@ -20,6 +20,7 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.vo.DepartmentVo;
@@ -131,14 +132,16 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 			department.setRemark(jsonNode.get("remark").asText(""));
 		}
 		department.setId(jsonNode.get("id").asText(""));
-		Department oldDepartment = departmentService.findById(department.getId());
-		if(department.getCode()!=null&&!department.getCode().equals(oldDepartment.getCode())) {
-			if(departmentService.findByCode(department.getCode())!=null) {
+		
+		Department oldDepartment = departmentService.findByCode(department.getCode());
+		if(oldDepartment!=null && oldDepartment.getCode()!=null&&department.getCode()!=null) {
+			if(!department.getId().equals(oldDepartment.getId())){
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
 			}
 		}
+		
 		departmentService.update(department);
 //		departmentGroupService.deleteByDepartmentId(department.getId());
 //		if(jsonNode.has("group") && jsonNode.get("group").isArray()){

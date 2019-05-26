@@ -250,7 +250,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			return resultData;
 		}
 		
-		eventList.setStatus("P");
+		eventList.setStatus("B");
 		eventListService.update(eventList);
 		
 		AdminUser user  = (AdminUser) this.getCurrentUser();
@@ -258,7 +258,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setOperator(user.getId());
 		actionList.setEventListId(eventList.getId());
 		actionList.setEventId(eventList.getEventId());
-		actionList.setStatus("P");
+		actionList.setStatus("B");
 		actionList.setImage1(image1);
 		actionList.setImage2(image2);
 		actionList.setImage3(image3);
@@ -351,6 +351,10 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		for(EventList eventList : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
+			Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+			if(node !=null) {
+				eventListVo.setNodeName(node.getName());
+			}
 			eventListVo.setIsUrgent(eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
 			EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 			if(eventDispatch!=null) {
@@ -362,7 +366,6 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 				}
 				eventListVo.setDispatchDate(eventDispatch.getCreateDate());
 			}
-			
 			returnList.add(eventListVo);
 		}
 		return returnList;

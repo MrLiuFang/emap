@@ -104,9 +104,9 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
 		
-		BuildingInfo oldBuildingInfo = buildingInfoService.findById(buildingInfo.getId());
-		if(buildingInfo.getCode()!=null&&!buildingInfo.getCode().equals(oldBuildingInfo.getCode())) {
-			if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
+		BuildingInfo oldBuildingInfo = buildingInfoService.findByCode(buildingInfo.getCode());
+		if(oldBuildingInfo!=null && oldBuildingInfo.getCode()!=null&&buildingInfo.getCode()!=null) {
+			if(!buildingInfo.getId().equals(oldBuildingInfo.getId())){
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
@@ -114,7 +114,6 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		}
 		
 		buildingInfoService.update(buildingInfo);
-		
 		systemLogService.log("build update", this.request.getRequestURL().toString());
 		return resultData;
 	}

@@ -20,4 +20,9 @@ public class EventRuleServiceImpl extends BaseServiceImpl<EventRule> implements 
 		return eventRuleDao.findByNodeId(nodeId);
 	}
 
+	@Override
+	public EventRule findByNodeTypeId(String nodeTypeId) {
+		return eventRuleDao.findByNodeTypeId(nodeTypeId);
+	}
+
 }

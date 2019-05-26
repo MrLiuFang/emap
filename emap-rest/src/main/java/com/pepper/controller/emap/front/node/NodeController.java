@@ -134,17 +134,18 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		Node node = new Node();
 		MapToBeanUtil.convert(node, map);
 		
-		Node oldNode = nodeService.findById(node.getId());
-		if(node.getCode()!=null&&!node.getCode().equals(oldNode.getCode())) {
-			if(nodeService.findByCode(node.getCode())!=null) {
+		Node oldNode = nodeService.findByCode(node.getCode());
+		if(oldNode!=null && oldNode.getCode()!=null&&node.getCode()!=null) {
+			if(!node.getId().equals(oldNode.getId())){
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
 			}
 		}
 		
-		if(node.getSourceCode()!=null&&!node.getSourceCode().equals(oldNode.getSourceCode())) {
-			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
+		Node oldNode1 = nodeService.findBySourceCode(node.getSourceCode());
+		if(oldNode1!=null && oldNode1.getSourceCode()!=null&&node.getSourceCode()!=null) {
+			if(!node.getId().equals(oldNode1.getId())){
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;

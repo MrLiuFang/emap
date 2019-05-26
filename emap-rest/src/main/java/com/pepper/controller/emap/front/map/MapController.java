@@ -25,6 +25,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.map.MapImageUrl;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
@@ -64,13 +65,13 @@ public class MapController  extends BaseControllerImpl implements BaseController
 			MapImageUrl mapImageUrl = new MapImageUrl();
 			mapImageUrl.setCode(node.get("code").asText());
 			mapImageUrl.setUrl(node.get("url").asText());
-			if(node.has("ratate")) {
+			if(node.hasNonNull("ratate")) {
 				mapImageUrl.setRatate(node.get("ratate").asDouble());
 			}
-			if(node.has("offsetX")) {
+			if(node.hasNonNull("offsetX")) {
 				mapImageUrl.setOffsetX(node.get("offsetX").asDouble());
 			}
-			if(node.has("offsetY")) {
+			if(node.hasNonNull("offsetY")) {
 				mapImageUrl.setOffsetY(node.get("offsetY").asDouble());
 			}
 			mapImageUrl.setMapId(mapId);
@@ -147,21 +148,25 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		JsonNode jsonNode = new ObjectMapper().readTree(data);
 		Map<String,Object> map = new ObjectMapper().readValue(data, Map.class);
-		String mapImageUrl = jsonNode.get("mapImageUrl").toString();
+		
 		com.pepper.model.emap.map.Map entity = new com.pepper.model.emap.map.Map();
 		MapToBeanUtil.convert(entity, map);
 		
-		com.pepper.model.emap.map.Map oldMap = mapService.findById(entity.getId());
-		if(entity.getCode()!=null&&!entity.getCode().equals(oldMap.getCode())) {
-			if(mapService.findByCode(entity.getCode())!=null) {
+		com.pepper.model.emap.map.Map oldMap = mapService.findByCode(entity.getCode());
+		if(oldMap!=null && oldMap.getCode()!=null&&entity.getCode()!=null) {
+			if(!entity.getId().equals(oldMap.getId())){
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
 			}
 		}
 		
+		
 		mapService.update(entity);
-		addMapImageUrl(entity.getId(),mapImageUrl);
+		if(jsonNode.hasNonNull("mapImageUrl")) {
+			String mapImageUrl = jsonNode.get("mapImageUrl").toString();
+			addMapImageUrl(entity.getId(),mapImageUrl);
+		}
 		systemLogService.log("map update", this.request.getRequestURL().toString());
 		return resultData;
 	}

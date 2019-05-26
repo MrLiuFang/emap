@@ -1,5 +1,7 @@
 package com.pepper.model.emap.event;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -23,6 +25,10 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "event_name")
 	private String eventName;
+	
+	
+	@Column(name = "event_date")
+	private String eventDate;
 	
 	@Column(name = "source")
 	private String source;
@@ -48,9 +54,6 @@ public class EventList extends BaseModel  {
 	@Column(name = "content")
 	private String content;
 	
-	@Column(name = "is_filed")
-	private Boolean isFiled;
-	
 	@Column(name = "filed_content")
 	private String filedContent;
 	
@@ -59,6 +62,26 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "operator_transfer_read")
 	private Boolean operatorTransferRead;
+	
+	@Column(name = "operator_transfer_date")
+	private Date operatorTransferDate;
+
+	
+	public String getEventDate() {
+		return eventDate;
+	}
+
+	public void setEventDate(String eventDate) {
+		this.eventDate = eventDate;
+	}
+
+	public Date getOperatorTransferDate() {
+		return operatorTransferDate;
+	}
+
+	public void setOperatorTransferDate(Date operatorTransferDate) {
+		this.operatorTransferDate = operatorTransferDate;
+	}
 
 	public String getEventId() {
 		return eventId;
@@ -138,14 +161,6 @@ public class EventList extends BaseModel  {
 
 	public void setContent(String content) {
 		this.content = content;
-	}
-
-	public Boolean getIsFiled() {
-		return isFiled;
-	}
-
-	public void setIsFiled(Boolean isFiled) {
-		this.isFiled = isFiled;
 	}
 
 	public String getFiledContent() {

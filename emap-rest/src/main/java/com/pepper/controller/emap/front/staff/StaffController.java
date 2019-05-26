@@ -167,8 +167,8 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				Staff staff = new Staff();
 				staff.setName(getCellValue(row.getCell(0)).toString());
 				staff.setEmail(getCellValue(row.getCell(1)).toString());
-				staff.setIdCard(getCellValue(row.getCell(2)).toString());
-				staff.setPassword(getCellValue(row.getCell(3)).toString());
+				staff.setPassword(getCellValue(row.getCell(2)).toString());
+				staff.setIdCard(getCellValue(row.getCell(3)).toString());
 				if(staffService.findByIdCard(staff.getIdCard())!=null) {
 					continue;
 				}

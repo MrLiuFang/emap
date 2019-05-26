@@ -97,9 +97,9 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
 		
-		NodeType oldNodeType = nodeTypeService.findById(nodeType.getId());
-		if(nodeType.getCode()!=null&&!nodeType.getCode().equals(oldNodeType.getCode())) {
-			if(nodeTypeService.findByCode(nodeType.getCode())!=null) {
+		NodeType oldNodeType = nodeTypeService.findByCode(nodeType.getCode());
+		if(oldNodeType!=null && oldNodeType.getCode()!=null&&nodeType.getCode()!=null) {
+			if(!nodeType.getId().equals(oldNodeType.getId())){
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;

@@ -96,8 +96,14 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 			return resultData;
 		}
 		
-		Node node = this.nodeService.findById(eventRule.getNodeId());
-		eventRule.setNodeTypeId(node.getNodeTypeId());
+		if(StringUtils.hasText(eventRule.getNodeTypeId()) ) {
+			if(eventRuleService.findByNodeTypeId(eventRule.getNodeTypeId())!=null) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+				resultData.setCode(5000001);
+				return resultData;
+			}
+		}
+		
 		eventRuleService.save(eventRule);
 		systemLogService.log("event rule add", this.request.getRequestURL().toString());
 		return resultData;
@@ -112,7 +118,13 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		MapToBeanUtil.convert(eventRule, map);
 		
 		EventRule oldEventRule = this.eventRuleService.findByNodeId(eventRule.getNodeId());
-		if(!oldEventRule.getId().equals(eventRule.getId())) {
+		if(oldEventRule!=null&&oldEventRule.getId()!=null&&eventRule.getId()!=null&&!oldEventRule.getId().equals(eventRule.getId())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+			resultData.setCode(5000001);
+			return resultData;
+		}
+		
+		if(oldEventRule!=null&&oldEventRule.getNodeTypeId()!=null&&eventRule.getNodeTypeId()!=null&&!oldEventRule.getNodeTypeId().equals(eventRule.getNodeTypeId())) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
 			resultData.setCode(5000001);
 			return resultData;

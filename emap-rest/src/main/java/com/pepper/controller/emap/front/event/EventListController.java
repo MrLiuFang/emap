@@ -2,6 +2,7 @@ package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,18 +30,24 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.department.Department;
+import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.vo.DepartmentGroupVo1;
+import com.pepper.model.emap.vo.DepartmentVo1;
 import com.pepper.model.emap.vo.EventListVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
+import com.pepper.service.emap.department.DepartmentGroupService;
+import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.event.ActionListService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
@@ -105,13 +112,18 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Reference
 	private SystemLogService systemLogService;
 	
+	@Reference
+	private DepartmentService departmentService;
+	
+	@Reference
+	private DepartmentGroupService departmentGroupService;
+	
 	@RequestMapping(value = "/add")
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
 		EventList eventList = new EventList();
 		MapToBeanUtil.convert(eventList, map);
-		eventList.setIsFiled(false);
 		eventList.setIsOperatorTransfer(false);
 		eventListService.save(eventList);
 		return resultData;
@@ -177,7 +189,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(int i = 0; i <arrayNode.size(); i++) {
 			EventList eventList = eventListService.findById(arrayNode.get(i).asText());
 			if(eventList.getStatus()==null || eventList.getStatus().equals("")) {
-				eventList.setStatus("N");
+				eventList.setStatus("W");
 			}
 			eventList.setOperator(currentUser.getId());
 			eventListService.update(eventList);
@@ -214,7 +226,6 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTEQUAL+"_isFiled", true);
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -241,23 +252,24 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	public Object  getEmployee(String id) {
 		ResultData resultData = new ResultData();
-		EventList eventList = eventListService.findById(id);
-		if(eventList == null) {
-			return resultData;
+		List<Department> list =  departmentService.findAll();
+		List<DepartmentVo1> returnList = new ArrayList<DepartmentVo1>();
+		for(Department department : list) {
+			DepartmentVo1 departmentVo1 = new DepartmentVo1();
+			BeanUtils.copyProperties(department, departmentVo1);
+			List<DepartmentGroup> listDepartmentGroup = departmentGroupService.findByDepartmentId(department.getId());
+			List<DepartmentGroupVo1> listDepartmentGroupV1 = new ArrayList<DepartmentGroupVo1>();
+			for(DepartmentGroup departmentGroup : listDepartmentGroup) {
+				DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+				BeanUtils.copyProperties(departmentGroup, departmentGroupV1);
+				departmentGroupV1.setUser(this.adminUserService.findByDepartmentGroupId(departmentGroup.getId()));
+				listDepartmentGroupV1.add(departmentGroupV1);
+			}
+			departmentVo1.setDepartmentGroup(listDepartmentGroupV1);
+			returnList.add(departmentVo1);
+			
 		}
-//		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-//		if(node==null) {
-//			return resultData;
-//		}
-//		EventRule eventRule = eventRuleService.findByNodeId(node.getId());
-//		if(eventRule == null || !StringUtils.hasText(eventRule.getDepartmentId())) {
-//			resultData.setStatus(300001);
-//			resultData.setMessage("该设备未设备部门!");
-//			return resultData;
-//		}
-//		resultData.setData("employee", adminUserService.findUserByDepartmentId(eventRule.getDepartmentId()));
-		resultData.setData("employee", adminUserService.findUserByDepartmentId(""));
-		
+		resultData.setData("department", returnList);
 		return resultData;
 	}
 	
@@ -277,11 +289,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		if(!map.containsKey("employeeId")) {
 			resultData.setCode(800002);
-			resultData.setMessage("请选择工人/部门");
+			resultData.setMessage("请选择工人");
 			return resultData;
 		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
-		eventList.setStatus("W");
+		eventList.setStatus("A");
 		if(map.containsKey("helpId")) {
 			eventList.setHelpId(map.get("helpId")==null?"[]":map.get("helpId").toString());
 		}
@@ -358,7 +370,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		if(map.containsKey("id")) {
 			EventList eventList = this.eventListService.findById(map.get("id"));
-			eventList.setIsFiled(true);
+			eventList.setStatus("P");
 			eventList.setFiledContent(map.get("filedContent"));
 			eventListService.update(eventList);
 		}
@@ -381,6 +393,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventList.setOperator(operatorId);
 		eventList.setIsOperatorTransfer(true);
 		eventList.setOperatorTransferRead(false);
+		eventList.setOperatorTransferDate(new Date());
 		eventListService.update(eventList);
 		systemLogService.log("event to operator", this.request.getRequestURL().toString());
 		return resultData;
