@@ -188,7 +188,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		for(int i = 0; i <arrayNode.size(); i++) {
 			EventList eventList = eventListService.findById(arrayNode.get(i).asText());
-			if(eventList.getStatus()==null || eventList.getStatus().equals("")) {
+			if(eventList.getStatus().equals("N")) {
 				eventList.setStatus("W");
 			}
 			eventList.setOperator(currentUser.getId());
