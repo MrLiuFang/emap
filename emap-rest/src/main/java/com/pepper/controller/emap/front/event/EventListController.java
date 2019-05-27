@@ -295,7 +295,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventList.setStatus("A");
 		if(map.containsKey("helpId")) {
-			eventList.setHelpId(map.get("helpId")==null?"[]":map.get("helpId").toString());
+			eventList.setHelpId(map.get("helpId")==null?"[]":objectMapper.writeValueAsString(map.get("helpId")));
 		}
 		if(map.containsKey("content")) {
 			eventList.setContent(map.get("content")==null?"":map.get("content").toString());
@@ -469,4 +469,5 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		return returnList;
 	}
+	
 }

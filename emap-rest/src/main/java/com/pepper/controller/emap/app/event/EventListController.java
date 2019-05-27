@@ -183,17 +183,22 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("content", "");
 		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
+			resultData.setData("nodeId",node.getId());
 			ObjectMapper objectMapper = new ObjectMapper();
 			List<HelpList> list = helpListService.findByNodeTypeId(node.getNodeTypeId());
 			List<HelpListVo> returnList = new ArrayList<HelpListVo>();
 			List<String> helpIdList = new ArrayList<String>();
 			if(actionList!=null && StringUtils.hasText(actionList.getHelpId())) {
-				JsonNode jsonNode = objectMapper.readTree(actionList.getHelpId());
-				if(jsonNode.isArray()) {
-					Iterator<JsonNode> array =jsonNode.iterator();
-					while (array.hasNext()) {
-						helpIdList.add(array.next().asText());
+				try{
+					JsonNode jsonNode = objectMapper.readTree(actionList.getHelpId());
+					if(jsonNode.isArray()) {
+						Iterator<JsonNode> array =jsonNode.iterator();
+						while (array.hasNext()) {
+							helpIdList.add(array.next().asText());
+						}
 					}
+				}catch (Exception e) {
+					
 				}
 			}
 			
@@ -219,13 +224,11 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //				}else {
 					returnList.add(helpListVo);
 //				}
-				
-				
 			}
 			resultData.setData("helpList", returnList);
 		}
 		resultData.setData("remark", eventList.getContent());
-		resultData.setData("nodeId",node.getId());
+		
 		resultData.setData("currentHelpId", eventList.getHelpId());
 		resultData.setData("isUrgent", eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
 		
