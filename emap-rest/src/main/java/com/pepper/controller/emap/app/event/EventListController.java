@@ -228,10 +228,18 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("helpList", returnList);
 		}
 		resultData.setData("remark", eventList.getContent());
-		
 		resultData.setData("currentHelpId", eventList.getHelpId());
 		resultData.setData("isUrgent", eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
-		
+		AdminUser user = (AdminUser) this.getCurrentUser();
+		if(StringUtils.hasText(eventList.getCurrentHandleUser())) {
+			if(eventList.getCurrentHandleUser().equals(user.getId())) {
+				resultData.setData("isMeHandle", true);
+			}else {
+				resultData.setData("isMeHandle", false);
+			}
+		}else {
+			resultData.setData("isMeHandle", false);
+		}
 		systemLogService.log("App event info", this.request.getRequestURL().toString());
 		return resultData;
 	}
