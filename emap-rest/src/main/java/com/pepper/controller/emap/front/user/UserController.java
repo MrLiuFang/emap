@@ -40,7 +40,9 @@ import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.file.FileService;
+import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.MapToBeanUtil;
 import com.pepper.util.Md5Util;
 
@@ -68,6 +70,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private com.pepper.service.emap.event.EventListService eventListService;
+	
+	@Reference
+	private com.pepper.service.redis.jdk.serializer.ValueOperationsService jdkValueOperationsService;
+	
+	@Reference
+	private ValueOperationsService stringValueOperationsService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
@@ -277,6 +288,24 @@ public class UserController extends BaseControllerImpl implements BaseController
 				
 	        }
 		}
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/headPortrait") 
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object headPortrait(@RequestBody java.util.Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+//		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		AdminUser adminUser = adminUserService.findById(map.get("id").toString());
+		if(map.containsKey("headPortrait")) {
+			adminUser.setHeadPortrait(map.get("headPortrait").toString());
+		}else {
+			adminUser.setHeadPortrait(null);
+		}
+		adminUserService.update(adminUser);
+		jdkValueOperationsService.set(adminUser.getId(), adminUser);
+		systemLogService.log("user update head portrait", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

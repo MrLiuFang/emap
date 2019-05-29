@@ -20,7 +20,7 @@ public class ActionList extends BaseModel {
 	 */
 	private static final long serialVersionUID = 1306017114585728921L;
 
-	@Column(name ="action_list_id")
+	@Column(name ="event_list_id")
 	private String eventListId;
 	
 	@Column(name ="task_id")
@@ -73,6 +73,12 @@ public class ActionList extends BaseModel {
 	
 	@Column(name ="help_id")
 	private String helpId;
+	
+	@Column(name ="operator_help_id")
+	private String operatorHelpId;
+	
+	@Column(name ="operatorcontent")
+	private String operatorContent;
 
 	
 	public String getEventListId() {
@@ -157,6 +163,24 @@ public class ActionList extends BaseModel {
 
 	public Date getReceiveDate() {
 		return receiveDate;
+	}
+	
+	
+
+	public String getOperatorHelpId() {
+		return operatorHelpId;
+	}
+
+	public void setOperatorHelpId(String operatorHelpId) {
+		this.operatorHelpId = operatorHelpId;
+	}
+
+	public String getOperatorContent() {
+		return operatorContent;
+	}
+
+	public void setOperatorContent(String operatorContent) {
+		this.operatorContent = operatorContent;
 	}
 
 	public void setReceiveDate(Date receiveDate) {

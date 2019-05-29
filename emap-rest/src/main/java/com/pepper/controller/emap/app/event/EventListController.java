@@ -33,6 +33,7 @@ import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.vo.ActionListVo;
 import com.pepper.model.emap.vo.EventListVo;
 import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.MapVo;
@@ -113,9 +114,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 		if(!isFinish) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTEQUAL+ "_status","P");
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
 		}else {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","P");
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+ "_status",new String[] {"P","B"});
 		}
 		pager = eventListService.findNavigator(pager);
 		pager.setData("eventList",convertVo(pager.getResults()));
@@ -168,64 +169,25 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		resultData.setData("warningLevel", eventList.getWarningLevel());
 		resultData.setData("status", eventList.getStatus());
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-		ActionList actionList = actionListService.findByEventListId(id);
-		if(actionList!=null) {
-			resultData.setData("image1", fileService.getUrl(actionList.getImage1()));
-			resultData.setData("image2", fileService.getUrl(actionList.getImage2()));
-			resultData.setData("image3", fileService.getUrl(actionList.getImage3()));
-			resultData.setData("voice1", fileService.getUrl(actionList.getVoice1()));
-			resultData.setData("content", actionList.getContent());
-		}else {
-			resultData.setData("image1", "");
-			resultData.setData("image2", "");
-			resultData.setData("image3", "");
-			resultData.setData("voice1", "");
-			resultData.setData("content", "");
+		List<ActionList> actionList = actionListService.findByEventListId(eventList.getId());
+		List<ActionListVo> actionListVo = new ArrayList<ActionListVo>();
+		for(ActionList obj1 : actionList) {
+			ActionListVo tmp = new ActionListVo();
+			BeanUtils.copyProperties(obj1, tmp);
+			actionListVo.add(tmp);
+			tmp.setImageUrl1(this.fileService.getUrl(tmp.getImage1()));
+			tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
+			tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
+			tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
+			if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
+				tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));
+			}
+			actionListVo.add(tmp);
 		}
+		resultData.setData("actionList", actionListVo);
+		
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("nodeId",node.getId());
-			ObjectMapper objectMapper = new ObjectMapper();
-			List<HelpList> list = helpListService.findByNodeTypeId(node.getNodeTypeId());
-			List<HelpListVo> returnList = new ArrayList<HelpListVo>();
-			List<String> helpIdList = new ArrayList<String>();
-			if(actionList!=null && StringUtils.hasText(actionList.getHelpId())) {
-				try{
-					JsonNode jsonNode = objectMapper.readTree(actionList.getHelpId());
-					if(jsonNode.isArray()) {
-						Iterator<JsonNode> array =jsonNode.iterator();
-						while (array.hasNext()) {
-							helpIdList.add(array.next().asText());
-						}
-					}
-				}catch (Exception e) {
-					
-				}
-			}
-			
-			for(HelpList helpList : list) {
-//				String helpId = eventList.getHelpId();
-//				List<String> listHelpId = new ArrayList<String>();
-//				if(StringUtils.hasText(helpId)) {
-//					JsonNode jsonNode = objectMapper.readTree(helpId);
-//					if(jsonNode.isArray()) {
-//						Iterator<JsonNode> array =jsonNode.iterator();
-//						while (array.hasNext()) {
-//							listHelpId.add(array.next().asText());
-//						}
-//					}
-//				}
-				HelpListVo helpListVo = new HelpListVo();
-				BeanUtils.copyProperties(helpList, helpListVo);
-				helpListVo.setIsCheck(helpIdList.contains(helpList.getId()));
-//				if(listHelpId.size()>0) {
-//					if(listHelpId.contains(helpList.getId())) {
-//						returnList.add(helpListVo);
-//					}
-//				}else {
-					returnList.add(helpListVo);
-//				}
-			}
-			resultData.setData("helpList", returnList);
+			resultData.setData("helpList", convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),null,eventList.getHelpId()));
 		}
 		resultData.setData("remark", eventList.getContent());
 		resultData.setData("currentHelpId", eventList.getHelpId());
@@ -244,6 +206,50 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		return resultData;
 	}
 	
+	
+	private List<HelpListVo> convertHelpList(List<HelpList> helpList,String helpId,String helpId1) throws IOException{
+		List<HelpListVo> helpListVo = new ArrayList<HelpListVo>();
+		List<String> helpIdList = new ArrayList<String>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		if(StringUtils.hasText(helpId)) {
+			try{
+				JsonNode jsonNode = objectMapper.readTree(helpId);
+				if(jsonNode.isArray()) {
+					Iterator<JsonNode> array =jsonNode.iterator();
+					while (array.hasNext()) {
+						helpIdList.add(array.next().asText());
+					}
+				}
+			}catch (Exception e) {
+				
+			}
+		}
+		
+		List<String> listHelpId = new ArrayList<String>();
+		if(StringUtils.hasText(helpId1)) {
+			JsonNode jsonNode = objectMapper.readTree(helpId1);
+			if(jsonNode.isArray()) {
+				Iterator<JsonNode> array =jsonNode.iterator();
+				while (array.hasNext()) {
+					listHelpId.add(array.next().asText());
+				}
+			}
+		}
+		
+		for(HelpList obj : helpList) {
+			HelpListVo obj1 = new HelpListVo();
+			BeanUtils.copyProperties(helpList, obj1);
+			obj1.setIsCheck(helpIdList.contains(obj.getId()));
+			if(listHelpId.size()>0) {
+				if(listHelpId.contains(obj.getId())) {
+					helpListVo.add(obj1);
+				}
+			}else {
+				helpListVo.add(obj1);
+			}
+		}
+		return helpListVo;
+	}
 	@RequestMapping("/finish")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
@@ -270,6 +276,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setEventListId(eventList.getId());
 		actionList.setEventId(eventList.getEventId());
 		actionList.setStatus("B");
+		actionList.setOperatorHelpId(eventList.getHelpId());
+		actionList.setOperatorContent(eventList.getContent());
 		actionList.setImage1(image1);
 		actionList.setImage2(image2);
 		actionList.setImage3(image3);

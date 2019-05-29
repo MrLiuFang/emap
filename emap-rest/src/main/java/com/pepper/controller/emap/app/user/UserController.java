@@ -24,11 +24,16 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.emap.department.Department;
+import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.vo.AdminUserVo;
+import com.pepper.model.emap.vo.DepartmentGroupVo1;
+import com.pepper.model.emap.vo.DepartmentVo1;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
+import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.file.FileService;
@@ -58,6 +63,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private SystemLogService systemLogService;
+	
+	@Reference
+	private DepartmentGroupService departmentGroupService;
 	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
@@ -100,24 +108,47 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/department/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object getUserByBepartmentId() {
-		ResultData resultData = new ResultData();
+	public Object departmentList() {
+//		ResultData resultData = new ResultData();
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
-		currentUser = adminUserService.findById(currentUser.getId());
-		List<AdminUser> list = adminUserService.findByDepartmentId(currentUser.getDepartmentId(),currentUser.getId());
-		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
-		for(AdminUser user : list) {
-			AdminUserVo adminUserVo = new AdminUserVo();
-			BeanUtils.copyProperties(user, adminUserVo);
-			if(StringUtils.hasText(user.getHeadPortrait())) {
-				adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
-			}
-			adminUserVo.setPassword("");
-			returnList.add(adminUserVo);
-		}
-		resultData.setData("user", returnList);
+//		currentUser = adminUserService.findById(currentUser.getId());
+//		List<AdminUser> list = adminUserService.findByDepartmentId(currentUser.getDepartmentId(),currentUser.getId());
+//		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
+//		for(AdminUser user : list) {
+//			AdminUserVo adminUserVo = new AdminUserVo();
+//			BeanUtils.copyProperties(user, adminUserVo);
+//			if(StringUtils.hasText(user.getHeadPortrait())) {
+//				adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
+//			}
+//			adminUserVo.setPassword("");
+//			returnList.add(adminUserVo);
+//		}
+//		resultData.setData("user", returnList);
+//		
+//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+//		return resultData;
 		
-		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+		ResultData resultData = new ResultData();
+		if(!StringUtils.hasText(currentUser.getDepartmentId())) {
+			return resultData;
+		}
+		Department department =  departmentService.findById(currentUser.getDepartmentId());
+		if(department==null) {
+			return resultData;
+		}
+		DepartmentVo1 departmentVo1 = new DepartmentVo1();
+		BeanUtils.copyProperties(department, departmentVo1);
+		List<DepartmentGroup> listDepartmentGroup = departmentGroupService.findByDepartmentId(department.getId());
+		List<DepartmentGroupVo1> listDepartmentGroupV1 = new ArrayList<DepartmentGroupVo1>();
+		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
+			DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+			BeanUtils.copyProperties(departmentGroup, departmentGroupV1);
+			departmentGroupV1.setUser(this.adminUserService.findByDepartmentGroupId(departmentGroup.getId()));
+			listDepartmentGroupV1.add(departmentGroupV1);
+		}
+		departmentVo1.setDepartmentGroup(listDepartmentGroupV1);
+			
+		resultData.setData("user", departmentVo1);
 		return resultData;
 	}
 	

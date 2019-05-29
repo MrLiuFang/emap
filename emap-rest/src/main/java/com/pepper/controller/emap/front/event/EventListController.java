@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,11 +37,14 @@ import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventRule;
+import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.vo.ActionListVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
 import com.pepper.model.emap.vo.DepartmentVo1;
 import com.pepper.model.emap.vo.EventListVo;
+import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
@@ -273,10 +277,28 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return resultData;
 	}
 	
+//	
+	
+	@RequestMapping("/workbench/retransmission")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object retransmission(@RequestBody String str) throws JsonParseException, JsonMappingException, IOException {
+		
+		systemLogService.log("event  retransmission", this.request.getRequestURL().toString());
+		return toEmployeeEx(str);
+	}
+
+	
 	@RequestMapping("/workbench/toEmployee")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object toEmployee(@RequestBody String str) throws JsonParseException, JsonMappingException, IOException {
+		
+		systemLogService.log("event to employee", this.request.getRequestURL().toString());
+		return toEmployeeEx(str);
+	}
+	
+	private ResultData toEmployeeEx(String str) throws JsonParseException, JsonMappingException, IOException  {
 		ObjectMapper objectMapper = new ObjectMapper();
 		Map<String,Object> map = objectMapper.readValue(str, Map.class);
 //		String eventId,String employeeId,String helpId,String content 
@@ -318,14 +340,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
-		systemLogService.log("event to employee", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
 	@RequestMapping("/workbench/historyEvent")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object historyEvent(String id) {
+	public Object historyEvent(String id) throws IOException {
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);
 		if(eventList==null) {
@@ -349,18 +370,72 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					eventListVo.setCurrentHandleUserVo(currentHandleUser);
 				}
 			}
-			ActionList actionList = this.actionListService.findByEventListId(obj.getId());
-			if(actionList!=null) {
-				eventListVo.setImageUrl1(this.fileService.getUrl(actionList.getImage1()));
-				eventListVo.setImageUrl2(this.fileService.getUrl(actionList.getImage2()));
-				eventListVo.setImageUrl3(this.fileService.getUrl(actionList.getImage3()));
-				eventListVo.setVoiceUrl1(fileService.getUrl(actionList.getVoice1()));
+			List<ActionList> actionList = actionListService.findByEventListId(eventList.getId());
+			List<ActionListVo> actionListVo = new ArrayList<ActionListVo>();
+			for(ActionList obj1 : actionList) {
+				ActionListVo tmp = new ActionListVo();
+				BeanUtils.copyProperties(obj1, tmp);
+				actionListVo.add(tmp);
+				tmp.setImageUrl1(this.fileService.getUrl(tmp.getImage1()));
+				tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
+				tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
+				tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
+				Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+				if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
+					tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));
+				}
+				actionListVo.add(tmp);
 			}
+			eventListVo.setActionList(actionListVo);
 			returnList.add(eventListVo);
 		}
 		resultData.setData("historyEvent", returnList);
 		systemLogService.log("event history list", this.request.getRequestURL().toString());
 		return resultData;
+	}
+	
+	private List<HelpListVo> convertHelpList(List<HelpList> helpList,String helpId,String helpId1) throws IOException{
+		List<HelpListVo> helpListVo = new ArrayList<HelpListVo>();
+		List<String> helpIdList = new ArrayList<String>();
+		ObjectMapper objectMapper = new ObjectMapper();
+		if(StringUtils.hasText(helpId)) {
+			try{
+				JsonNode jsonNode = objectMapper.readTree(helpId);
+				if(jsonNode.isArray()) {
+					Iterator<JsonNode> array =jsonNode.iterator();
+					while (array.hasNext()) {
+						helpIdList.add(array.next().asText());
+					}
+				}
+			}catch (Exception e) {
+				
+			}
+		}
+		
+		List<String> listHelpId = new ArrayList<String>();
+		if(StringUtils.hasText(helpId1)) {
+			JsonNode jsonNode = objectMapper.readTree(helpId1);
+			if(jsonNode.isArray()) {
+				Iterator<JsonNode> array =jsonNode.iterator();
+				while (array.hasNext()) {
+					listHelpId.add(array.next().asText());
+				}
+			}
+		}
+		
+		for(HelpList obj : helpList) {
+			HelpListVo obj1 = new HelpListVo();
+			BeanUtils.copyProperties(helpList, obj1);
+			obj1.setIsCheck(helpIdList.contains(obj.getId()));
+			if(listHelpId.size()>0) {
+				if(listHelpId.contains(obj.getId())) {
+					helpListVo.add(obj1);
+				}
+			}else {
+				helpListVo.add(obj1);
+			}
+		}
+		return helpListVo;
 	}
 	
 	@RequestMapping("/workbench/filed")
@@ -456,15 +531,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				AdminUser currentHandleUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
 				eventListVo.setCurrentHandleUserVo(currentHandleUser);
 			}
-			ActionList actionList = this.actionListService.findByEventListId(eventList.getId());
-			if(actionList!=null) {
-				eventListVo.setImageUrl1(this.fileService.getUrl(actionList.getImage1()));
-				eventListVo.setImageUrl2(this.fileService.getUrl(actionList.getImage2()));
-				eventListVo.setImageUrl3(this.fileService.getUrl(actionList.getImage3()));
-				eventListVo.setVoiceUrl1(fileService.getUrl(actionList.getVoice1()));
-			}
 			
-//			eventListVo.setHistoryEventList(this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId()));
 			returnList.add(eventListVo);
 		}
 		return returnList;

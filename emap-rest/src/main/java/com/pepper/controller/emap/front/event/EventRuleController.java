@@ -89,11 +89,12 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		EventRule eventRule = new EventRule();
 		MapToBeanUtil.convert(eventRule, map);
 		
-		EventRule oldEventRule = this.eventRuleService.findByNodeId(eventRule.getNodeId());
-		if(oldEventRule!=null) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
-			resultData.setCode(5000001);
-			return resultData;
+		if(StringUtils.hasText(eventRule.getNodeId()) ) {
+			if(this.eventRuleService.findByNodeId(eventRule.getNodeId())!=null) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+				resultData.setCode(5000001);
+				return resultData;
+			}
 		}
 		
 		if(StringUtils.hasText(eventRule.getNodeTypeId()) ) {
@@ -117,17 +118,26 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		EventRule eventRule = new EventRule();
 		MapToBeanUtil.convert(eventRule, map);
 		
-		EventRule oldEventRule = this.eventRuleService.findByNodeId(eventRule.getNodeId());
-		if(oldEventRule!=null&&oldEventRule.getId()!=null&&eventRule.getId()!=null&&!oldEventRule.getId().equals(eventRule.getId())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
-			resultData.setCode(5000001);
-			return resultData;
+		if(StringUtils.hasText(eventRule.getNodeId())) {
+			EventRule oldEventRule = this.eventRuleService.findByNodeId(eventRule.getNodeId());
+			if(oldEventRule!=null&&oldEventRule.getId()!=null&&eventRule.getId()!=null&&!oldEventRule.getId().equals(eventRule.getId())) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+				resultData.setCode(5000001);
+				return resultData;
+			}
+		}else {
+			eventRule.setNodeId("");
 		}
 		
-		if(oldEventRule!=null&&oldEventRule.getNodeTypeId()!=null&&eventRule.getNodeTypeId()!=null&&!oldEventRule.getNodeTypeId().equals(eventRule.getNodeTypeId())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
-			resultData.setCode(5000001);
-			return resultData;
+		if(StringUtils.hasText(eventRule.getNodeTypeId())) {
+			EventRule oldEventRule1 = this.eventRuleService.findByNodeId(eventRule.getNodeTypeId());
+			if(oldEventRule1!=null&&oldEventRule1.getId()!=null&&eventRule.getId()!=null&&!oldEventRule1.getId().equals(eventRule.getId())) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
+				resultData.setCode(5000001);
+				return resultData;
+			}
+		}else {
+			eventRule.setNodeTypeId("");
 		}
 		
 		eventRuleService.update(eventRule);
@@ -175,10 +185,15 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		EventRuleVo  eventRuleVo = new EventRuleVo();
 		if(eventRule!=null) {
 			BeanUtils.copyProperties(eventRule, eventRuleVo);
-			eventRuleVo.setNode(nodeService.findById(eventRule.getNodeId()));
+			if(StringUtils.hasText(eventRule.getNodeId())) {
+				eventRuleVo.setNode(nodeService.findById(eventRule.getNodeId()));
+			}
 			if(StringUtils.hasText(eventRuleVo.getDepartmentId())) {
 				Department department = departmentService.findById(eventRuleVo.getDepartmentId());
 				eventRuleVo.setDepartment(department);
+			}
+			if(StringUtils.hasText(eventRule.getNodeTypeId())) {
+				eventRuleVo.setNodeType(nodeTypeService.findById(eventRule.getNodeTypeId()));
 			}
 		}
 		return eventRuleVo;

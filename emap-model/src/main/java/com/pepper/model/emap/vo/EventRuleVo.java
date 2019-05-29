@@ -3,6 +3,7 @@ package com.pepper.model.emap.vo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.node.Node;
+import com.pepper.model.emap.node.NodeType;
 
 /**
  * 
@@ -20,6 +21,8 @@ public class EventRuleVo extends EventRule {
 	
 	private Department department;
 	
+	private NodeType nodeType;
+	
 	public Node getNode() {
 		return node;
 	}
@@ -32,5 +35,13 @@ public class EventRuleVo extends EventRule {
 	public void setDepartment(Department department) {
 		this.department = department;
 	}
+	public NodeType getNodeType() {
+		return nodeType;
+	}
+	public void setNodeType(NodeType nodeType) {
+		this.nodeType = nodeType;
+	}
+	
+	
 
 }

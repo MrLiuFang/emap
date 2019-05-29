@@ -1,5 +1,7 @@
 package com.pepper.service.emap.event.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -21,7 +23,7 @@ public class ActionListServiceImpl extends BaseServiceImpl<ActionList> implement
 	}
 
 	@Override
-	public ActionList findByEventListId(String eventListId) {
+	public List<ActionList> findByEventListId(String eventListId) {
 		return actionListDao.findByEventListId(eventListId);
 	}
 

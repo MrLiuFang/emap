@@ -30,6 +30,7 @@ import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.parameter.ParameterService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
+import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.redis.string.serializer.SetOperationsService;
 import com.pepper.service.redis.string.serializer.StringRedisTemplateService;
@@ -76,6 +77,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 	
 	@Reference
 	private DepartmentService departmentService;
+	
+	@Reference
+	private DepartmentGroupService departmentGroupService;
 
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -150,6 +154,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		resultData.setData("token", token);
 		resultData.setData("role", role);
 		resultData.setData("department", departmentService.findById(userReal.getDepartmentId()));
+		resultData.setData("departmentGroup", departmentGroupService.findById(userReal.getDepartmentGroupId()));
 		if(map.containsKey("language")) {
 			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		}
