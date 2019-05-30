@@ -387,7 +387,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return resultData;
 	}
 	
-	@RequestMapping("/workbench/acctionList")
+	@RequestMapping("/workbench/actionList")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object acctionList(String eventId) throws IOException {

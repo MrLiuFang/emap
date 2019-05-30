@@ -118,25 +118,29 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 		if(!isFinish) {
+			pager.getJpqlParameter().getSearchParameter().clear();
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
 			pager = eventListService.findNavigator(pager);
 			pager.setData("eventList",convertVo(pager.getResults()));
 		}else {
 			Pager<ActionList> pager1 = new Pager<ActionList>();
+			pager1.getJpqlParameter().getSearchParameter().clear();
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_operator",adminUser.getId());
+			pager1 = actionListService.findNavigator(pager1);
 			List<ActionList> list = pager1.getResults();
-			List<ActionListVo> listActionListVo = new ArrayList<ActionListVo>();
 			List<EventListVo> listEventList = new ArrayList<EventListVo>();
 			for(ActionList actionList : list) {
 				EventList eventList = this.eventListService.findById(actionList.getEventListId());
 //				ActionListVo actionListVo = new ActionListVo();
 //				BeanUtils.copyProperties(actionList, actionListVo);
 //				actionListVo.setEventList(this.convertVo(eventList));
-				EventListVo eventListVo = this.convertVo(eventList);
-				eventListVo.setActionListId(actionList.getId());
-				listEventList.add(eventListVo);
+				if(eventList!=null) {
+					EventListVo eventListVo = this.convertVo(eventList);
+					eventListVo.setActionListId(actionList.getId());
+					listEventList.add(eventListVo);
+				}
 			}
-			pager.setData("eventList",listActionListVo);
+			pager.setData("eventList",listEventList);
 		}
 		pager.setResults(null);
 		return pager;
