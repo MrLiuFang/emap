@@ -43,6 +43,9 @@ public class EventDispatch extends BaseModel{
 	
 	@Column(name ="content")
 	private String content;
+	
+	@Column(name ="assign_date")
+	private Date assignDate;
 
 	public String getTaskId() {
 		return taskId;
@@ -106,8 +109,14 @@ public class EventDispatch extends BaseModel{
 
 	public void setEventListId(String eventListId) {
 		this.eventListId = eventListId;
+	}
+
+	public Date getAssignDate() {
+		return assignDate;
+	}
+
+	public void setAssignDate(Date assignDate) {
+		this.assignDate = assignDate;
 	} 
-	
-	
 	
 }

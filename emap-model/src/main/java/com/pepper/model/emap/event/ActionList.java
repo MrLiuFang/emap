@@ -50,6 +50,12 @@ public class ActionList extends BaseModel {
 	@Column(name ="success")
 	private Boolean success;
 	
+	@Column(name ="assign_date")
+	private Date assignDate;
+	
+	@Column(name ="finish_date")
+	private Date finishDate;
+	
 	@Column(name ="receive_date")
 	private Date receiveDate;
 	
@@ -241,6 +247,22 @@ public class ActionList extends BaseModel {
 
 	public void setHelpId(String helpId) {
 		this.helpId = helpId;
+	}
+
+	public Date getAssignDate() {
+		return assignDate;
+	}
+
+	public void setAssignDate(Date assignDate) {
+		this.assignDate = assignDate;
+	}
+
+	public Date getFinishDate() {
+		return finishDate;
+	}
+
+	public void setFinishDate(Date finishDate) {
+		this.finishDate = finishDate;
 	}
 	
 	

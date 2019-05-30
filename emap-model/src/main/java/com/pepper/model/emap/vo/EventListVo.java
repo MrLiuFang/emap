@@ -24,9 +24,9 @@ public class EventListVo extends EventList {
 	
 	private String nodeName;
 	
-	private AdminUser operatorVo;
+	private AdminUserVo operatorVo;
 	
-	private AdminUser currentHandleUserVo;
+	private AdminUserVo currentHandleUserVo;
 	
 	private Boolean isUrgent;
 	
@@ -36,6 +36,7 @@ public class EventListVo extends EventList {
 	
 	private List<ActionListVo> actionList;
 	
+	private String actionListId;
 	
 	public String getNodeName() {
 		return nodeName;
@@ -54,19 +55,19 @@ public class EventListVo extends EventList {
 		this.node = node;
 	}
 
-	public AdminUser getOperatorVo() {
+	public AdminUserVo getOperatorVo() {
 		return operatorVo;
 	}
 
-	public void setOperatorVo(AdminUser operatorVo) {
+	public void setOperatorVo(AdminUserVo operatorVo) {
 		this.operatorVo = operatorVo;
 	}
 
-	public AdminUser getCurrentHandleUserVo() {
+	public AdminUserVo getCurrentHandleUserVo() {
 		return currentHandleUserVo;
 	}
 
-	public void setCurrentHandleUserVo(AdminUser currentHandleUserVo) {
+	public void setCurrentHandleUserVo(AdminUserVo currentHandleUserVo) {
 		this.currentHandleUserVo = currentHandleUserVo;
 	}
 
@@ -100,6 +101,14 @@ public class EventListVo extends EventList {
 
 	public void setActionList(List<ActionListVo> actionList) {
 		this.actionList = actionList;
+	}
+
+	public String getActionListId() {
+		return actionListId;
+	}
+
+	public void setActionListId(String actionListId) {
+		this.actionListId = actionListId;
 	}
 
 	

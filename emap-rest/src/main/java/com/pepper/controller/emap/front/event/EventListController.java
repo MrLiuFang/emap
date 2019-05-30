@@ -41,6 +41,7 @@ import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.ActionListVo;
+import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
 import com.pepper.model.emap.vo.DepartmentVo1;
 import com.pepper.model.emap.vo.EventListVo;
@@ -322,6 +323,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(map.containsKey("content")) {
 			eventList.setContent(map.get("content")==null?"":map.get("content").toString());
 		}
+		eventList.setAssignDate(new Date());
 		eventListService.update(eventList);
 		
 		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
@@ -331,6 +333,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
+		eventDispatch.setAssignDate(new Date());
 		eventDispatchService.save(eventDispatch);
 		
 		try {
@@ -361,36 +364,61 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			if(StringUtils.hasText(obj.getOperator())) {
 				AdminUser operatorUser = this.adminUserService.findById(obj.getOperator());
 				if(operatorUser!=null) {
-					eventListVo.setOperatorVo(operatorUser);
+					AdminUserVo adminUserVo = new AdminUserVo();
+					BeanUtils.copyProperties(operatorUser, adminUserVo);
+					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
+					eventListVo.setOperatorVo(adminUserVo);
 				}
 			}
 			if(StringUtils.hasText(obj.getCurrentHandleUser())) {
 				AdminUser currentHandleUser = this.adminUserService.findById(obj.getCurrentHandleUser());
 				if(currentHandleUser!=null) {
-					eventListVo.setCurrentHandleUserVo(currentHandleUser);
+					AdminUserVo adminUserVo = new AdminUserVo();
+					BeanUtils.copyProperties(currentHandleUser, adminUserVo);
+					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(currentHandleUser.getHeadPortrait()));
+					eventListVo.setCurrentHandleUserVo(adminUserVo);
 				}
 			}
-			List<ActionList> actionList = actionListService.findByEventListId(eventList.getId());
-			List<ActionListVo> actionListVo = new ArrayList<ActionListVo>();
-			for(ActionList obj1 : actionList) {
-				ActionListVo tmp = new ActionListVo();
-				BeanUtils.copyProperties(obj1, tmp);
-				actionListVo.add(tmp);
-				tmp.setImageUrl1(this.fileService.getUrl(tmp.getImage1()));
-				tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
-				tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
-				tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
-				Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-				if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-					tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));
-				}
-				actionListVo.add(tmp);
-			}
-			eventListVo.setActionList(actionListVo);
+
 			returnList.add(eventListVo);
 		}
 		resultData.setData("historyEvent", returnList);
 		systemLogService.log("event history list", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	@RequestMapping("/workbench/acctionList")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object acctionList(String eventId) throws IOException {
+		ResultData resultData = new ResultData();
+		EventList eventList = this.eventListService.findById(eventId);
+		List<ActionList> actionList = actionListService.findByEventListId(eventId);
+		List<ActionListVo> actionListVo = new ArrayList<ActionListVo>();
+		for(ActionList obj1 : actionList) {
+			ActionListVo tmp = new ActionListVo();
+			BeanUtils.copyProperties(obj1, tmp);
+			tmp.setImageUrl1(this.fileService.getUrl(tmp.getImage1()));
+			tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
+			tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
+			tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
+			Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+			if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
+				tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));
+			}
+			if(StringUtils.hasText(obj1.getOperator())) {
+				AdminUser operatorUser = this.adminUserService.findById(obj1.getOperator());
+				if(operatorUser!=null) {
+					AdminUserVo adminUserVo = new AdminUserVo();
+					BeanUtils.copyProperties(operatorUser, adminUserVo);
+					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
+					adminUserVo.setPassword("");
+					tmp.setEmployee(adminUserVo);
+				}
+			}
+			actionListVo.add(tmp);
+		}
+		resultData.setData("actionList", actionListVo);
 		return resultData;
 	}
 	
@@ -425,7 +453,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		for(HelpList obj : helpList) {
 			HelpListVo obj1 = new HelpListVo();
-			BeanUtils.copyProperties(helpList, obj1);
+			BeanUtils.copyProperties(obj,obj1);
 			obj1.setIsCheck(helpIdList.contains(obj.getId()));
 			if(listHelpId.size()>0) {
 				if(listHelpId.contains(obj.getId())) {
@@ -529,7 +557,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			}
 			if(StringUtils.hasText(eventList.getCurrentHandleUser()) ) {
 				AdminUser currentHandleUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
-				eventListVo.setCurrentHandleUserVo(currentHandleUser);
+				if(currentHandleUser!=null) {
+					AdminUserVo adminUserVo = new AdminUserVo();
+					BeanUtils.copyProperties(currentHandleUser, adminUserVo);
+					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(currentHandleUser.getHeadPortrait()));
+					eventListVo.setCurrentHandleUserVo(adminUserVo);
+				}
 			}
 			
 			returnList.add(eventListVo);

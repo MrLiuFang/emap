@@ -66,6 +66,8 @@ public class EventList extends BaseModel  {
 	@Column(name = "operator_transfer_date")
 	private Date operatorTransferDate;
 
+	@Column(name ="assign_date")
+	private Date assignDate;
 	
 	public String getEventDate() {
 		return eventDate;
@@ -185,6 +187,14 @@ public class EventList extends BaseModel  {
 
 	public void setOperatorTransferRead(Boolean operatorTransferRead) {
 		this.operatorTransferRead = operatorTransferRead;
+	}
+
+	public Date getAssignDate() {
+		return assignDate;
+	}
+
+	public void setAssignDate(Date assignDate) {
+		this.assignDate = assignDate;
 	}
 	
 	

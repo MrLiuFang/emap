@@ -3,6 +3,7 @@ package com.pepper.model.emap.vo;
 import java.util.List;
 
 import com.pepper.model.emap.event.ActionList;
+import com.pepper.model.emap.event.EventList;
 
 public class ActionListVo extends ActionList {
 
@@ -20,7 +21,10 @@ public class ActionListVo extends ActionList {
 	private String voiceUrl1;
 	
 	private List<HelpListVo> helpList;
+	
+	private AdminUserVo employee;
 
+	private EventListVo eventList;
 
 	public String getImageUrl1() {
 		return imageUrl1;
@@ -70,6 +74,25 @@ public class ActionListVo extends ActionList {
 	public void setHelpList(List<HelpListVo> helpList) {
 		this.helpList = helpList;
 	}
-	
-	
+
+
+	public AdminUserVo getEmployee() {
+		return employee;
+	}
+
+
+	public void setEmployee(AdminUserVo employee) {
+		this.employee = employee;
+	}
+
+
+	public EventListVo getEventList() {
+		return eventList;
+	}
+
+
+	public void setEventList(EventListVo eventList) {
+		this.eventList = eventList;
+	}
+
 }

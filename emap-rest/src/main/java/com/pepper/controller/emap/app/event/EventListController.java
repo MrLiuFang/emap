@@ -2,6 +2,8 @@ package com.pepper.controller.emap.app.event;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.ActionListVo;
+import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.EventListVo;
 import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.MapVo;
@@ -110,23 +113,66 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object list(Boolean isFinish) {
+		systemLogService.log("App event list", this.request.getRequestURL().toString());
 		Pager<EventList> pager = new Pager<EventList>();
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 		if(!isFinish) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
+			pager = eventListService.findNavigator(pager);
+			pager.setData("eventList",convertVo(pager.getResults()));
 		}else {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+ "_status",new String[] {"P","B"});
+			Pager<ActionList> pager1 = new Pager<ActionList>();
+			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_operator",adminUser.getId());
+			List<ActionList> list = pager1.getResults();
+			List<ActionListVo> listActionListVo = new ArrayList<ActionListVo>();
+			List<EventListVo> listEventList = new ArrayList<EventListVo>();
+			for(ActionList actionList : list) {
+				EventList eventList = this.eventListService.findById(actionList.getEventListId());
+//				ActionListVo actionListVo = new ActionListVo();
+//				BeanUtils.copyProperties(actionList, actionListVo);
+//				actionListVo.setEventList(this.convertVo(eventList));
+				EventListVo eventListVo = this.convertVo(eventList);
+				eventListVo.setActionListId(actionList.getId());
+				listEventList.add(eventListVo);
+			}
+			pager.setData("eventList",listActionListVo);
 		}
-		pager = eventListService.findNavigator(pager);
-		pager.setData("eventList",convertVo(pager.getResults()));
 		pager.setResults(null);
-		
-		systemLogService.log("App event list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
-	
+	@RequestMapping("/actionList")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object actionList(String id) throws IOException {
+		systemLogService.log("App action list", this.request.getRequestURL().toString());
+		ResultData resultData = new ResultData();
+		ActionList actionList = actionListService.findById(id);
+		ActionListVo actionListVo = new ActionListVo();
+		BeanUtils.copyProperties(actionList, actionListVo);
+		actionListVo.setImageUrl1(this.fileService.getUrl(actionList.getImage1()));
+		actionListVo.setImageUrl2(this.fileService.getUrl(actionList.getImage2()));
+		actionListVo.setImageUrl3(this.fileService.getUrl(actionList.getImage3()));
+		actionListVo.setVoiceUrl1(this.fileService.getUrl(actionList.getVoice1()));
+		EventList eventList = this.eventListService.findById(actionList.getEventListId());
+		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
+			actionListVo.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),actionList.getHelpId(),actionList.getOperatorHelpId()));
+		}
+		if(StringUtils.hasText(actionList.getOperator())) {
+			AdminUser operatorUser = this.adminUserService.findById(actionList.getOperator());
+			if(operatorUser!=null) {
+				AdminUserVo adminUserVo = new AdminUserVo();
+				BeanUtils.copyProperties(operatorUser, adminUserVo);
+				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
+				adminUserVo.setPassword("");
+				actionListVo.setEmployee(adminUserVo);
+			}
+		}
+		resultData.setData("actionList", actionListVo);
+		return resultData;
+	}
 	
 	@RequestMapping("/transferList")
 	@ResponseBody
@@ -164,7 +210,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("dispatchDate", eventDispatch.getCreateDate());
 			
 		}else{
-			
+			resultData.setData("dispatchFromName", "");
+			resultData.setData("dispatchDate", null);
 		}
 		resultData.setData("warningLevel", eventList.getWarningLevel());
 		resultData.setData("status", eventList.getStatus());
@@ -174,13 +221,22 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		for(ActionList obj1 : actionList) {
 			ActionListVo tmp = new ActionListVo();
 			BeanUtils.copyProperties(obj1, tmp);
-			actionListVo.add(tmp);
 			tmp.setImageUrl1(this.fileService.getUrl(tmp.getImage1()));
 			tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
 			tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
 			tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
 			if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
 				tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));
+			}
+			if(StringUtils.hasText(obj1.getOperator())) {
+				AdminUser operatorUser = this.adminUserService.findById(obj1.getOperator());
+				if(operatorUser!=null) {
+					AdminUserVo adminUserVo = new AdminUserVo();
+					BeanUtils.copyProperties(operatorUser, adminUserVo);
+					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
+					adminUserVo.setPassword("");
+					tmp.setEmployee(adminUserVo);
+				}
 			}
 			actionListVo.add(tmp);
 		}
@@ -238,10 +294,10 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		
 		for(HelpList obj : helpList) {
 			HelpListVo obj1 = new HelpListVo();
-			BeanUtils.copyProperties(helpList, obj1);
-			obj1.setIsCheck(helpIdList.contains(obj.getId()));
+			BeanUtils.copyProperties(obj, obj1);
+			obj1.setIsCheck(helpIdList.contains(obj1.getId()));
 			if(listHelpId.size()>0) {
-				if(listHelpId.contains(obj.getId())) {
+				if(listHelpId.contains(obj1.getId())) {
 					helpListVo.add(obj1);
 				}
 			}else {
@@ -280,6 +336,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setOperatorContent(eventList.getContent());
 		actionList.setImage1(image1);
 		actionList.setImage2(image2);
+		actionList.setFinishDate(new Date());
+		actionList.setAssignDate(eventList.getAssignDate());
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
@@ -306,6 +364,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setMessage("要转移的事件不存在！");
 			return resultData;
 		}
+		eventList.setAssignDate(new Date());
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventListService.update(eventList);
 		
@@ -316,7 +375,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
-		
+		eventDispatch.setAssignDate(new Date());
 		
 		eventDispatchService.save(eventDispatch);
 		try {
@@ -364,28 +423,32 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		return resultData;
 	} 
 	
+	private EventListVo convertVo(EventList eventList){
+		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
+		EventListVo eventListVo = new EventListVo();
+		BeanUtils.copyProperties(eventList, eventListVo);
+		Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+		if(node !=null) {
+			eventListVo.setNodeName(node.getName());
+		}
+		eventListVo.setIsUrgent(eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
+		EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
+		if(eventDispatch!=null) {
+			AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
+			if(dispatchFrom!=null) {
+				eventListVo.setAssignHeadPortrait(this.fileService.getUrl(dispatchFrom.getHeadPortrait()));
+			}else {
+				eventListVo.setAssignHeadPortrait("");
+			}
+			eventListVo.setDispatchDate(eventDispatch.getCreateDate());
+		}
+		return eventListVo;
+	}
+	
 	private List<EventListVo> convertVo(List<EventList> list){
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
-		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		for(EventList eventList : list) {
-			EventListVo eventListVo = new EventListVo();
-			BeanUtils.copyProperties(eventList, eventListVo);
-			Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
-			if(node !=null) {
-				eventListVo.setNodeName(node.getName());
-			}
-			eventListVo.setIsUrgent(eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
-			EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
-			if(eventDispatch!=null) {
-				AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
-				if(dispatchFrom!=null) {
-					eventListVo.setAssignHeadPortrait(this.fileService.getUrl(dispatchFrom.getHeadPortrait()));
-				}else {
-					eventListVo.setAssignHeadPortrait("");
-				}
-				eventListVo.setDispatchDate(eventDispatch.getCreateDate());
-			}
-			returnList.add(eventListVo);
+			returnList.add(convertVo(eventList));
 		}
 		return returnList;
 	}
