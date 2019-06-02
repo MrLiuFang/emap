@@ -135,6 +135,7 @@ public class EventScheduler {
 		messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
 		eventList.setCurrentHandleUser(user.getId());
 		eventList.setStatus("A");
+		eventList.setAssignDate(new Date());
 		eventList.setContent("系統自動派單");
 		if(!StringUtils.hasText(eventList.getCurrentHandleUser())) {
 			return false;

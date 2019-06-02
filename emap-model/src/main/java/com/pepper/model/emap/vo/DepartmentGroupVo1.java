@@ -12,14 +12,16 @@ public class DepartmentGroupVo1 extends DepartmentGroup  {
 	 */
 	private static final long serialVersionUID = 7104140665103233478L;
 	
-	private List<AdminUser> user;
+	private List<AdminUserVo> user;
 
-	public List<AdminUser> getUser() {
+	public List<AdminUserVo> getUser() {
 		return user;
 	}
 
-	public void setUser(List<AdminUser> user) {
+	public void setUser(List<AdminUserVo> user) {
 		this.user = user;
 	}
+
+	
 	
 }

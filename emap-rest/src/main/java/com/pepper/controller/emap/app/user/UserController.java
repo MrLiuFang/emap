@@ -143,7 +143,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
 			DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
 			BeanUtils.copyProperties(departmentGroup, departmentGroupV1);
-			departmentGroupV1.setUser(this.adminUserService.findByDepartmentGroupId(departmentGroup.getId()));
+			List<AdminUser> listAdminUser = this.adminUserService.findByDepartmentGroupId(departmentGroup.getId());
+			List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+			for(AdminUser adminUser : listAdminUser) {
+				AdminUserVo adminUserVo = new AdminUserVo();
+				BeanUtils.copyProperties(adminUser, adminUserVo);
+				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+				listAdminUserVo.add(adminUserVo);
+			}
+			departmentGroupV1.setUser(listAdminUserVo);
 			listDepartmentGroupV1.add(departmentGroupV1);
 		}
 		departmentVo1.setDepartmentGroup(listDepartmentGroupV1);

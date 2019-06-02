@@ -242,11 +242,16 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/eventHelp")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object eventHelp(String id) {
+	public Object eventHelp(String id,String eventId) {
 		ResultData resultData = new ResultData();
 		Node node = nodeService.findById(id);
+		EventList eventList = this.eventListService.findById(eventId);
+		int warningLevel = 0;
+		if(eventList!=null) {
+			warningLevel=eventList.getWarningLevel();
+		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("helpList", helpListService.findByNodeTypeId(node.getNodeTypeId()));
+			resultData.setData("helpList", helpListService.findByNodeTypeIdAndWarningLevelGreaterThanEqual(node.getNodeTypeId(),warningLevel));
 		}
 		systemLogService.log("get event help", this.request.getRequestURL().toString());
 		return resultData;
@@ -267,7 +272,14 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			for(DepartmentGroup departmentGroup : listDepartmentGroup) {
 				DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
 				BeanUtils.copyProperties(departmentGroup, departmentGroupV1);
-				departmentGroupV1.setUser(this.adminUserService.findByDepartmentGroupId(departmentGroup.getId()));
+				List<AdminUser> listAdminUser = this.adminUserService.findByDepartmentGroupId(departmentGroup.getId());
+				List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+				for(AdminUser adminUser : listAdminUser) {
+					AdminUserVo adminUserVo = new AdminUserVo();
+					BeanUtils.copyProperties(adminUser, adminUserVo);
+					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+					listAdminUserVo.add(adminUserVo);
+				}
 				listDepartmentGroupV1.add(departmentGroupV1);
 			}
 			departmentVo1.setDepartmentGroup(listDepartmentGroupV1);

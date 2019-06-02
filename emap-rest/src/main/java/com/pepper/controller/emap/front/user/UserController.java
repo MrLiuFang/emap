@@ -104,28 +104,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId) {
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_userType", UserType.EMPLOYEE);
-		if(StringUtils.hasText(account)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_account",account );
-		}
-		if(StringUtils.hasText(mobile)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_mobile",mobile );
-		}
-		if(StringUtils.hasText(email)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_email",email );
-		}
-		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
-		}
-		if(StringUtils.hasText(departmentId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_departmentId",departmentId );
-		}
-		if(StringUtils.hasText(departmentGroupId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_departmentGroupId",departmentGroupId );
-		}
-		pager = adminUserService.list(pager);
+		
+		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId);
 		Role role = null;
 		for (AdminUser u : pager.getResults()) {
 			role = roleService.findByUserId(u.getId());

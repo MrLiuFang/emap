@@ -116,9 +116,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		systemLogService.log("App event list", this.request.getRequestURL().toString());
 		Pager<EventList> pager = new Pager<EventList>();
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 		if(!isFinish) {
-			pager.getJpqlParameter().getSearchParameter().clear();
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
 			pager = eventListService.findNavigator(pager);
 			pager.setData("eventList",convertVo(pager.getResults()));
@@ -196,7 +195,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@RequestMapping("/info")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object info(String id) throws IOException {
+	public Object info(String id,String actionId) throws IOException {
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);
 		if(eventList == null) {
@@ -219,36 +218,38 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		resultData.setData("warningLevel", eventList.getWarningLevel());
 		resultData.setData("status", eventList.getStatus());
+		
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
-		List<ActionList> actionList = actionListService.findByEventListId(eventList.getId());
-		List<ActionListVo> actionListVo = new ArrayList<ActionListVo>();
-		for(ActionList obj1 : actionList) {
-			ActionListVo tmp = new ActionListVo();
-			BeanUtils.copyProperties(obj1, tmp);
-			tmp.setImageUrl1(this.fileService.getUrl(tmp.getImage1()));
-			tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
-			tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
-			tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
-			if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-				tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));
+		if(node!=null) {
+			resultData.setData("nodeId",node.getId());
+			resultData.setData("helpList", convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),null,eventList.getHelpId()));
+		}
+		
+		if(StringUtils.hasText(actionId)) {
+			ActionList actionList = actionListService.findById(actionId);
+			ActionListVo actionListVo = new ActionListVo();
+			BeanUtils.copyProperties(actionList, actionListVo);
+			actionListVo.setImageUrl1(this.fileService.getUrl(actionListVo.getImage1()));
+			actionListVo.setImageUrl2(this.fileService.getUrl(actionListVo.getImage2()));
+			actionListVo.setImageUrl3(this.fileService.getUrl(actionListVo.getImage3()));
+			actionListVo.setVoiceUrl1(this.fileService.getUrl(actionListVo.getVoice1()));
+			if(node!=null&&StringUtils.hasText(node.getNodeTypeId())) {
+				actionListVo.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),actionList.getHelpId(),actionList.getOperatorHelpId()));
+				
 			}
-			if(StringUtils.hasText(obj1.getOperator())) {
-				AdminUser operatorUser = this.adminUserService.findById(obj1.getOperator());
+			if(StringUtils.hasText(actionList.getOperator())) {
+				AdminUser operatorUser = this.adminUserService.findById(actionList.getOperator());
 				if(operatorUser!=null) {
 					AdminUserVo adminUserVo = new AdminUserVo();
 					BeanUtils.copyProperties(operatorUser, adminUserVo);
 					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
 					adminUserVo.setPassword("");
-					tmp.setEmployee(adminUserVo);
+					actionListVo.setEmployee(adminUserVo);
 				}
 			}
-			actionListVo.add(tmp);
+			resultData.setData("actionList", actionListVo);
 		}
-		resultData.setData("actionList", actionListVo);
 		
-		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("helpList", convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),null,eventList.getHelpId()));
-		}
 		resultData.setData("remark", eventList.getContent());
 		resultData.setData("currentHelpId", eventList.getHelpId());
 		resultData.setData("isUrgent", eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
