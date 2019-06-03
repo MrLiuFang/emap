@@ -1,5 +1,7 @@
 package com.pepper.service.emap.site;
 
+import java.util.List;
+
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.site.SiteInfo;
 
@@ -16,4 +18,6 @@ public interface SiteInfoService extends BaseService<SiteInfo> {
 	 * @return
 	 */
 	public SiteInfo findByCode(String code);
+	
+	public List<SiteInfo> findByName(String name);
 }

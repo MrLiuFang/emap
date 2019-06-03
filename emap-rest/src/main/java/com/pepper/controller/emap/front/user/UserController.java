@@ -3,8 +3,11 @@ package com.pepper.controller.emap.front.user;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -231,20 +234,28 @@ public class UserController extends BaseControllerImpl implements BaseController
 		return resultData;
 	}
 	
+	@SuppressWarnings("resource")
 	@RequestMapping(value = "/import")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object importAdminUser(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
 		ResultData resultData = new ResultData();
 		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<Map<String,AdminUser>> list = new ArrayList<Map<String,AdminUser>>();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
 			Workbook wookbook = new HSSFWorkbook(file.getInputStream());
 	        Sheet sheet = wookbook.getSheetAt(0);
 	        Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();
-			for(int i = 1 ; i <= totalRowNum ; i++)
-	        {
+			if(!check(sheet.getRow(0))) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！（非用户结构数据）");
+				return resultData;
+			}
+			
+			
+			for(int i = 1 ; i <= totalRowNum ; i++){
 				Row row = sheet.getRow(i);
 				AdminUser adminUser = new AdminUser();
 				adminUser.setAccount(getCellValue(row.getCell(0)).toString());
@@ -252,12 +263,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 				adminUser.setEmail(getCellValue(row.getCell(2)).toString());
 				adminUser.setMobile(getCellValue(row.getCell(3)).toString());
 				adminUser.setNickName(getCellValue(row.getCell(4)).toString());
-				adminUser.setPassword("96E79218965EB72C92A549DD5A330112");
-				AdminUser oldAdminUser = adminUserService.findByAccount(adminUser.getAccount());
-				if(oldAdminUser!=null) {
-					continue;
-				}
-						
+				adminUser.setPassword("E10ADC3949BA59ABBE56E057F20F883E");						
 				adminUser.setStatus(Status.NORMAL);
 				adminUser.setUserType(UserType.EMPLOYEE);
 				adminUser.setCreateDate(new Date());
@@ -266,11 +272,89 @@ public class UserController extends BaseControllerImpl implements BaseController
 				adminUser.setPassword(Md5Util.encryptPassword(adminUser.getPassword().toUpperCase(),adminUser.getAccount()));
 				adminUser.setUserType(UserType.EMPLOYEE);
 				adminUser.setIsWork(false);
-				adminUserService.save(adminUser);
 				
+				if(!StringUtils.hasText(adminUser.getAccount())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，account不能为空");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(adminUser.getName())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，name不能为空");
+					return resultData;
+				}
+				if(!StringUtils.hasText(adminUser.getEmail())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
+					return resultData;
+				}
+				if(!StringUtils.hasText(adminUser.getMobile())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，mobile不能为空");
+					return resultData;
+				}
+				if(!StringUtils.hasText(adminUser.getNickName())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，nickName不能为空");
+					return resultData;
+				}
+				if(!StringUtils.hasText(getCellValue(row.getCell(5)).toString())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，role不能为空");
+					return resultData;
+				}
+				
+				if(this.adminUserService.findByAccount(adminUser.getAccount())!=null) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，"+adminUser.getAccount()+"已存在！");
+					return resultData;
+				}
+				
+				
+				String roleName = getCellValue(row.getCell(5)).toString();
+				Role role = this.roleService.findByName(roleName);
+				if(role==null) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，role角色错误！");
+					return resultData;
+				}
+				String roleId = role.getId();
+				Map<String,AdminUser> map = new HashMap<String, AdminUser>();
+				map.put(roleId, adminUser);
+				list.add(map);
 	        }
+			for(Map<String,AdminUser> map : list) {
+				for (String key : map.keySet()) {
+					adminUserService.saveUser(map.get(key), key);
+				}
+				
+			}
+			
 		}
 		return resultData;
+	}
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("account")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("email")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("mobile")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(4)).toString().equals("nickName")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("role")) {
+			return false;
+		}
+		return true;
 	}
 	
 	@RequestMapping(value = "/headPortrait") 

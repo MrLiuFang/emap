@@ -32,6 +32,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -149,18 +150,25 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	}
 	
 	
+	@SuppressWarnings("resource")
 	@RequestMapping(value = "/import")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
 		ResultData resultData = new ResultData();
 		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<Staff> list = new ArrayList<Staff>();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
 			Workbook wookbook = new HSSFWorkbook(file.getInputStream());
 	        Sheet sheet = wookbook.getSheetAt(0);
 	        Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！（非staff结构数据）");
+				return resultData;
+			}
 			for(int i = 1 ; i <= totalRowNum ; i++)
 	        {
 				Row row = sheet.getRow(i);
@@ -170,12 +178,105 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				staff.setPassword(getCellValue(row.getCell(2)).toString());
 				staff.setIdCard(getCellValue(row.getCell(3)).toString());
 				if(staffService.findByIdCard(staff.getIdCard())!=null) {
-					continue;
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，"+staff.getIdCard()+"已存在");
+					return resultData;
 				}
-				this.staffService.save(staff);
+				String needChangePassword = getCellValue(row.getCell(4)).toString().toLowerCase();
+				if(StringUtils.hasText(needChangePassword)&&(needChangePassword.equals("true")||needChangePassword.equals("false"))) {
+					staff.setNeedChangePassword(Boolean.valueOf(needChangePassword));
+				}else {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，needChangePassword数据错误");
+					return resultData;
+				}
+				
+				String passwordNeverExpire = getCellValue(row.getCell(5)).toString().toLowerCase();
+				if(StringUtils.hasText(passwordNeverExpire)&&(passwordNeverExpire.equals("true")||needChangePassword.equals("false"))) {
+					staff.setNeedChangePassword(Boolean.valueOf(passwordNeverExpire));
+				}else {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
+					return resultData;
+				}
+				
+				String isAvailable = getCellValue(row.getCell(6)).toString().toLowerCase();
+				if(StringUtils.hasText(isAvailable)&&(isAvailable.equals("true")||isAvailable.equals("false"))) {
+					staff.setNeedChangePassword(Boolean.valueOf(isAvailable));
+				}else {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
+					return resultData;
+				}
+				
+				String site = getCellValue(row.getCell(7)).toString().toLowerCase();
+				List<SiteInfo> listSiteInfo = this.siteInfoService.findByName(site);
+				if(listSiteInfo.size()!=1) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，site数据错误(空值/找到多个site)");
+					return resultData;
+				}
+				
+				staff.setSiteId(listSiteInfo.get(0).getId());
+				
+				if(!StringUtils.hasText(staff.getName())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，name不能为空");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(staff.getEmail())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(staff.getPassword())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，password不能为空");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(staff.getIdCard())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，idCard不能为空");
+					return resultData;
+				}
+				
+				list.add(staff);
 	        }
+			
+			this.staffService.saveAll(list);
 		}
 		return resultData;
+	}
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("email")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("password")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("idCard")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(4)).toString().equals("needChangePassword")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("passwordNeverExpire")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("isAvailable")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(7)).toString().equals("site")) {
+			return false;
+		}
+		return true;
 	}
 	
 	private Object getCellValue(Cell cell) {

@@ -1,5 +1,7 @@
 package com.pepper.service.emap.node;
 
+import java.util.List;
+
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.node.NodeType;
 
@@ -11,4 +13,6 @@ import com.pepper.model.emap.node.NodeType;
 public interface NodeTypeService extends BaseService<NodeType> {
 
 	public NodeType findByCode(String code);
+	
+	public List<NodeType> findByName(String name);
 }

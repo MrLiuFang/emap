@@ -1,5 +1,7 @@
 package com.pepper.service.emap.site.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -18,6 +20,11 @@ public class SiteInfoServiceImpl extends BaseServiceImpl<SiteInfo> implements Si
 	@Override
 	public SiteInfo findByCode(String code) {
 		return siteInfoDao.findByCode(code);
+	}
+
+	@Override
+	public List<SiteInfo> findByName(String name) {
+		return siteInfoDao.findByName(name);
 	}
 
 }

@@ -206,42 +206,63 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		return resultData;
 	}
 	
-	@RequestMapping(value = "/importCamera")
+//	@RequestMapping(value = "/importCamera")
+//	@Authorize(authorizeResources = false)
+//	@ResponseBody
+//	public Object importCamera(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+//		ResultData resultData = new ResultData();
+//		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+//		for (String fileName : files.keySet()) {
+//			MultipartFile file = files.get(fileName);
+//			importNode(file.getInputStream(),"camera");
+//		}
+//		systemLogService.log("node import camera", this.request.getRequestURL().toString());
+//		return resultData;
+//	}
+//	
+//	@RequestMapping(value = "/importDoor")
+//	@Authorize(authorizeResources = false)
+//	@ResponseBody
+//	public Object importDoor(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+//		ResultData resultData = new ResultData();
+//		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+//		for (String fileName : files.keySet()) {
+//			MultipartFile file = files.get(fileName);
+//			importNode(file.getInputStream(),"door");
+//		}
+//		systemLogService.log("node import door", this.request.getRequestURL().toString());
+//		return resultData;
+//	}
+	
+	@RequestMapping(value = "/import")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object importCamera(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+	public Object importExcel(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
 		ResultData resultData = new ResultData();
 		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
-			importNode(file.getInputStream(),"camera");
+			return importNode(file.getInputStream());
 		}
 		systemLogService.log("node import camera", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
-	@RequestMapping(value = "/importDoor")
-	@Authorize(authorizeResources = false)
-	@ResponseBody
-	public Object importDoor(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+	private ResultData importNode(InputStream inputStream) throws IOException {
 		ResultData resultData = new ResultData();
-		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
-		for (String fileName : files.keySet()) {
-			MultipartFile file = files.get(fileName);
-			importNode(file.getInputStream(),"door");
-		}
-		systemLogService.log("node import door", this.request.getRequestURL().toString());
-		return resultData;
-	}
-	
-	private void importNode(InputStream inputStream, String nodeType) throws IOException {
 		if (inputStream == null) {
-			return;
+			return resultData;
 		}
 		Workbook wookbook = new HSSFWorkbook(inputStream);
         Sheet sheet = wookbook.getSheetAt(0);
         Row rowHead = sheet.getRow(0);
 		int totalRowNum = sheet.getLastRowNum();
+		List<Node> list = new ArrayList<Node>();
+		if(!check(sheet.getRow(0))) {
+			resultData.setCode(4000003);
+			resultData.setMessage("数据错误！（非设备结构数据）");
+			return resultData;
+		}
 		for(int i = 1 ; i <= totalRowNum ; i++)
         {
 			Node node = new Node();
@@ -251,38 +272,243 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			node.setName(getCellValue(row.getCell(1)).toString());
 			node.setSource(getCellValue(row.getCell(2)).toString());
 			node.setSourceCode(getCellValue(row.getCell(3)).toString());
-			node.setMapId(getCellValue(row.getCell(4)).toString());
+			
+			List<com.pepper.model.emap.map.Map> listMap = this.mapService.findByName(getCellValue(row.getCell(4)).toString());
+			
+			if(listMap.size()!=1) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+i+"行，map数据错误");
+				return resultData;
+			}else {
+				node.setMapId(listMap.get(0).getId());
+			}
+			
 			node.setNodeTypeId(getCellValue(row.getCell(5)).toString());
-			node.setParentNode(getCellValue(row.getCell(6)).toString());
-			node.setX(getCellValue(row.getCell(7)).toString());
-			node.setY(getCellValue(row.getCell(8)).toString());
-			if(nodeType.equals("camera")) {
-				node.setIp(getCellValue(row.getCell(9)).toString());
-				node.setHasPtz(row.getCell(10)==null?false:Boolean.valueOf(getCellValue(row.getCell(10)).toString()));
-				node.setUserName(getCellValue(row.getCell(11)).toString());
-				node.setPassword(getCellValue(row.getCell(12)).toString());
-				node.setSystemID(getCellValue(row.getCell(13)).toString());
-				node.setWindowsUser(getCellValue(row.getCell(14)).toString());
-				node.setWindowsPass(getCellValue(row.getCell(15)).toString());
-				node.setDomainName(getCellValue(row.getCell(16)).toString());
-			}else if(nodeType.equals("door")) {
-				node.setPaneId(getCellValue(row.getCell(9)).toString());
-				node.setPaneIp(getCellValue(row.getCell(10)).toString());
-				node.setReaderId(getCellValue(row.getCell(11)).toString());
-				node.setReaderIo(getCellValue(row.getCell(12)).toString());
+			node.setX(getCellValue(row.getCell(6)).toString());
+			node.setY(getCellValue(row.getCell(7)).toString());
+			node.setWarningLevel(Integer.valueOf(getCellValue(row.getCell(10)).toString()));
+			if(!StringUtils.hasText(node.getCode())) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+i+"行，code数据错误");
+				return resultData;
+			}
+			
+			if(!StringUtils.hasText(node.getName())) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+i+"行，name数据错误");
+				return resultData;
+			}
+			
+			if(!StringUtils.hasText(node.getSource())) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+i+"行，source数据错误");
+				return resultData;
+			}
+			
+			if(!StringUtils.hasText(node.getSourceCode())) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+i+"行,sourceCode数据错误");
+				return resultData;
+			}
+			
+			if(!StringUtils.hasText(node.getMapId())) {
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+i+"行,map数据错误");
+				return resultData;
+			}
+			
+			if(node.getNodeTypeId().equals("camera")) {
+				node.setIp(getCellValue(row.getCell(8)).toString());
+				node.setExternalLink(getCellValue(row.getCell(9)).toString());
+				String hasPtz = getCellValue(row.getCell(11)).toString().toLowerCase();
+				if(StringUtils.hasText(hasPtz)&&(hasPtz.equals("true")||hasPtz.equals("false"))) {
+					node.setHasPtz(Boolean.valueOf(hasPtz));
+				}else {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，hasPtz数据错误");
+					return resultData;
+				}
+				node.setUserName(getCellValue(row.getCell(12)).toString());
+				node.setPassword(getCellValue(row.getCell(13)).toString());
+				node.setSystemID(getCellValue(row.getCell(14)).toString());
+				node.setWindowsUser(getCellValue(row.getCell(15)).toString());
+				node.setWindowsPass(getCellValue(row.getCell(16)).toString());
+				node.setDomainName(getCellValue(row.getCell(17)).toString());
+				
+				if(!StringUtils.hasText(node.getIp())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行,map数据错误");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(node.getExternalLink())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行,externalLink数据错误");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(node.getUserName())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行userName数据错误");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(node.getPassword())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行password数据错误");
+					return resultData;
+				}
+				
+				if(!StringUtils.hasText(node.getSystemID())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行systemID数据错误");
+					return resultData;
+				}
+				if(!StringUtils.hasText(node.getWindowsPass())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行windowsPass数据错误");
+					return resultData;
+				}
+				if(!StringUtils.hasText(node.getWindowsPass())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行windowsPass数据错误");
+					return resultData;
+				}
+				if(!StringUtils.hasText(node.getDomainName())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行domainName数据错误");
+					return resultData;
+				}
+			}else if(node.getNodeTypeId().equals("door")) {
+				node.setPaneId(getCellValue(row.getCell(18)).toString());
+				node.setPaneIp(getCellValue(row.getCell(19)).toString());
+				node.setReaderId(getCellValue(row.getCell(20)).toString());
+				node.setReaderIo(getCellValue(row.getCell(21)).toString());
+				
+				if(!StringUtils.hasText(node.getPaneId())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行paneId数据错误");
+					return resultData;
+				}
+				if(!StringUtils.hasText(node.getPaneIp())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行paneIp数据错误");
+					return resultData;
+				}
+				if(!StringUtils.hasText(node.getReaderId())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行readerId数据错误");
+					return resultData;
+				}
+				if(!StringUtils.hasText(node.getReaderIo())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行readerIo数据错误");
+					return resultData;
+				}
+			}else {
+				List<NodeType> listNodeType = this.nodeTypeService.findByName(node.getNodeTypeId());
+				if(listNodeType.size()!=1) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行，nodeType数据错误");
+					return resultData;
+				}else {
+					node.setNodeTypeId(listNodeType.get(0).getId());
+				}
+				
+				if(!StringUtils.hasText(node.getNodeTypeId())) {
+					resultData.setCode(4000003);
+					resultData.setMessage("数据错误！第"+i+"行nodeType数据错误");
+					return resultData;
+				}
 			}
 			
 			if(nodeService.findByCode(node.getCode())!=null) {
-				continue ;
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+node.getCode()+"已存在");
+				return resultData;
 			}
 			
 			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
-				continue ;
+				resultData.setCode(4000003);
+				resultData.setMessage("数据错误！第"+node.getSourceCode()+"已存在");
+				return resultData;
 			}
-			nodeService.save(node);
+			list.add(node);
+			
         }
+		this.nodeService.saveAll(list);
+		return resultData;
 	}
 	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("source")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("sourceCode")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(4)).toString().equals("map")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("nodeType")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("x")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(7)).toString().equals("y")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(8)).toString().equals("ip")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(9)).toString().equals("externalLink")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(10)).toString().equals("warningLevel")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(11)).toString().equals("hasPtz")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(12)).toString().equals("userName")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(13)).toString().equals("password")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(14)).toString().equals("systemId")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(15)).toString().equals("windowsUser")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(16)).toString().equals("windowsPass")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(17)).toString().equals("domainName")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(18)).toString().equals("paneId")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(19)).toString().equals("paneIp")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(20)).toString().equals("readerId")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(21)).toString().equals("readerIo")) {
+			return false;
+		}
+		return true;
+	}
 	
 	@RequestMapping(value = "/forMap")
 	@Authorize(authorizeResources = false)

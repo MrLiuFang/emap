@@ -1,5 +1,7 @@
 package com.pepper.service.emap.node.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -22,6 +24,11 @@ public class NodeTypeServiceImpl extends BaseServiceImpl<NodeType> implements No
 	@Override
 	public NodeType findByCode(String code) {
 		return nodeTypeDao.findByCode(code);
+	}
+
+	@Override
+	public List<NodeType> findByName(String name) {
+		return nodeTypeDao.findByName(name);
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.pepper.service.emap.map.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -18,6 +20,11 @@ public class MapServiceImpl extends BaseServiceImpl<Map> implements MapService {
 	@Override
 	public Map findByCode(String code) {
 		return mapDao.findByCode(code);
+	}
+
+	@Override
+	public List<Map> findByName(String name) {
+		return mapDao.findByName(name);
 	}
 	
 }
