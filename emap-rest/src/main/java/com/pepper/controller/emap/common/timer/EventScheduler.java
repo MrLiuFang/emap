@@ -82,6 +82,25 @@ public class EventScheduler {
 	
 	private void eventRule(EventList eventList,EventRule eventRule) {		
 		try {
+			
+			if(eventList.getWarningLevel()==0) {
+				Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+				if(node!=null && node.getNodeTypeId().equals("door")) {
+					eventList.setStatus("P");
+					eventList.setContent("自动归档");
+					eventList.setOperator("000000000000");
+					this.eventListService.update(eventList);
+					return ;
+				}
+			}
+			
+			if(eventRule.getSpecialWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0&&eventRule.getSpecialWarningLevel()>eventRule.getWarningLevel()) {
+				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
+					assignment(eventRule.getSpecialDepartmentId(),eventList);
+					return ;
+				}
+			}
+			
 			if(!StringUtils.hasText(eventRule.getFromDateTime())||!StringUtils.hasText(eventRule.getToDateTime())) {
 				return;
 			}
@@ -90,14 +109,14 @@ public class EventScheduler {
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
 			Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 			if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-				assignment(eventRule,eventList);
+				assignment(eventRule.getDepartmentId(),eventList);
 			}else {
 				if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
-					assignment(eventRule,eventList);
+					assignment(eventRule.getDepartmentId(),eventList);
 					return ;
 				}else {
 					if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-						assignment(eventRule,eventList);
+						assignment(eventRule.getDepartmentId(),eventList);
 						return ;
 					}
 				}
@@ -106,8 +125,8 @@ public class EventScheduler {
 		}
 	}
 	
-	private Boolean assignment(EventRule eventRule,EventList eventList) {
-		List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentId(eventRule.getDepartmentId());
+	private Boolean assignment(String departmentId,EventList eventList) {
+		List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentId(departmentId);
 		AdminUser user = null;
 		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
 			if(StringUtils.hasText(departmentGroup.getStartTime())&&StringUtils.hasText(departmentGroup.getEndTime())) {

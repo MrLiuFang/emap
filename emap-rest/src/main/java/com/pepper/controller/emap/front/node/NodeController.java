@@ -85,9 +85,9 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor) {
+	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY) {
 		Pager<Node> pager = new Pager<Node>();	
-		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor);
+		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY);
 		List<Node> list = pager.getResults();
 		List<NodeVo> returnList = new ArrayList<NodeVo>();
 		for(Node node : list) {
@@ -424,13 +424,13 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			
 			if(nodeService.findByCode(node.getCode())!=null) {
 				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+node.getCode()+"已存在");
+				resultData.setMessage("数据错误！第"+i+"行，"+node.getCode()+"已存在");
 				return resultData;
 			}
 			
 			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
 				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+node.getSourceCode()+"已存在");
+				resultData.setMessage("数据错误！第"+i+"行，"+node.getSourceCode()+"已存在");
 				return resultData;
 			}
 			list.add(node);
