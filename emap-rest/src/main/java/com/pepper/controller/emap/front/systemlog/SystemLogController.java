@@ -39,6 +39,7 @@ public class SystemLogController extends BaseControllerImpl implements BaseContr
 		if(endDate!=null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
 		}
+		pager.getJpqlParameter().setSortParameter("createDate", "DESC");
 		pager = systemLogService.findNavigator(pager);
 		pager.setData("systemlog",pager.getResults());
 		pager.setResults(null);

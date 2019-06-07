@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -253,7 +253,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		if (inputStream == null) {
 			return resultData;
 		}
-		Workbook wookbook = new HSSFWorkbook(inputStream);
+		Workbook wookbook = new XSSFWorkbook(inputStream);
         Sheet sheet = wookbook.getSheetAt(0);
         Row rowHead = sheet.getRow(0);
 		int totalRowNum = sheet.getLastRowNum();

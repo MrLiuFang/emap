@@ -21,6 +21,8 @@ public class EventRuleVo extends EventRule {
 	
 	private Department department;
 	
+	private Department specialDepartment;
+	
 	private NodeType nodeType;
 	
 	public Node getNode() {
@@ -40,6 +42,12 @@ public class EventRuleVo extends EventRule {
 	}
 	public void setNodeType(NodeType nodeType) {
 		this.nodeType = nodeType;
+	}
+	public Department getSpecialDepartment() {
+		return specialDepartment;
+	}
+	public void setSpecialDepartment(Department specialDepartment) {
+		this.specialDepartment = specialDepartment;
 	}
 	
 	

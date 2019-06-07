@@ -105,6 +105,20 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 			}
 		}
 		
+		if(eventRule.getWarningLevel()!=null && eventRule.getSpecialWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0) {
+			if(eventRule.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(6000001));
+				resultData.setCode(6000001);
+				return resultData;
+			}else {
+				if(eventRule.getSpecialWarningLevel()>0&&!StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
+					resultData.setMessage(Internationalization.getMessageInternationalization(6000002));
+					resultData.setCode(6000002);
+					return resultData;
+				}
+			}
+		}
+		
 		eventRuleService.save(eventRule);
 		systemLogService.log("event rule add", this.request.getRequestURL().toString());
 		return resultData;
@@ -138,6 +152,20 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 			}
 		}else {
 			eventRule.setNodeTypeId("");
+		}
+		
+		if(eventRule.getWarningLevel()!=null && eventRule.getSpecialWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0) {
+			if(eventRule.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(6000001));
+				resultData.setCode(6000001);
+				return resultData;
+			}else {
+				if(eventRule.getSpecialWarningLevel()>0&&!StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
+					resultData.setMessage(Internationalization.getMessageInternationalization(6000002));
+					resultData.setCode(6000002);
+					return resultData;
+				}
+			}
 		}
 		
 		eventRuleService.update(eventRule);
@@ -191,6 +219,10 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 			if(StringUtils.hasText(eventRuleVo.getDepartmentId())) {
 				Department department = departmentService.findById(eventRuleVo.getDepartmentId());
 				eventRuleVo.setDepartment(department);
+			}
+			if(StringUtils.hasText(eventRuleVo.getSpecialDepartmentId())) {
+				Department specialDepartment = departmentService.findById(eventRuleVo.getSpecialDepartmentId());
+				eventRuleVo.setSpecialDepartment(specialDepartment);
 			}
 			if(StringUtils.hasText(eventRule.getNodeTypeId())) {
 				eventRuleVo.setNodeType(nodeTypeService.findById(eventRule.getNodeTypeId()));

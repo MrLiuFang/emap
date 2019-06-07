@@ -6,15 +6,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.dubbo.config.annotation.Reference;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -30,12 +28,10 @@ import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
-import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
-import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
@@ -244,7 +240,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		List<Map<String,AdminUser>> list = new ArrayList<Map<String,AdminUser>>();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
-			Workbook wookbook = new HSSFWorkbook(file.getInputStream());
+			Workbook wookbook = new XSSFWorkbook(file.getInputStream());
 	        Sheet sheet = wookbook.getSheetAt(0);
 	        Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();

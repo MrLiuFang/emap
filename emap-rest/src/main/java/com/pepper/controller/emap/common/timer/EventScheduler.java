@@ -84,43 +84,44 @@ public class EventScheduler {
 		try {
 			
 			if(eventList.getWarningLevel()==0) {
-				Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
-				if(node!=null && node.getNodeTypeId().equals("door")) {
+//				Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+//				if(node!=null && node.getNodeTypeId().equals("door")) {
 					eventList.setStatus("P");
 					eventList.setContent("自动归档");
 					eventList.setOperator("000000000000");
 					this.eventListService.update(eventList);
 					return ;
-				}
+//				}
 			}
 			
-			if(eventRule.getSpecialWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0&&eventRule.getSpecialWarningLevel()>eventRule.getWarningLevel()) {
+			if(eventRule.getSpecialWarningLevel()!=null&&eventRule.getWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0&&eventRule.getSpecialWarningLevel()>eventRule.getWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
 					assignment(eventRule.getSpecialDepartmentId(),eventList);
 					return ;
 				}
 			}
 			
-			if(!StringUtils.hasText(eventRule.getFromDateTime())||!StringUtils.hasText(eventRule.getToDateTime())) {
-				return;
+			if(StringUtils.hasText(eventRule.getFromDateTime())&&StringUtils.hasText(eventRule.getToDateTime())) {
+				Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""));
+				Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""));
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
+				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
+				if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
+					assignment(eventRule.getDepartmentId(),eventList);
+				}
+				return ;
 			}
-			Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""));
-			Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""));
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
-			Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
-			if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
+			
+			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
 				assignment(eventRule.getDepartmentId(),eventList);
+				return ;
 			}else {
-				if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
+				if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
 					assignment(eventRule.getDepartmentId(),eventList);
 					return ;
-				}else {
-					if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-						assignment(eventRule.getDepartmentId(),eventList);
-						return ;
-					}
 				}
 			}
+			
 		}catch (Exception e) {
 		}
 	}
