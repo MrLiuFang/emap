@@ -244,6 +244,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 			
 			this.staffService.saveAll(list);
 		}
+		systemLogService.log("staff import", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

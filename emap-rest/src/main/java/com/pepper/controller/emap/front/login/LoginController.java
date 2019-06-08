@@ -32,6 +32,7 @@ import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.parameter.ParameterService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
+import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.redis.string.serializer.SetOperationsService;
 import com.pepper.service.redis.string.serializer.StringRedisTemplateService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
@@ -74,6 +75,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 	
 	@Reference
 	private ValueOperationsService stringValueOperationsService;
+	
+	@Reference
+	private SystemLogService systemLogService;
 	
 	@RequestMapping(value = "/login")
 	@ResponseBody
@@ -143,6 +147,8 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		if(map.containsKey("language")) {
 			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		}
+		
+		systemLogService.log("user login", this.request.getRequestURI(),userReal);
 		return resultData;
 	}
 
@@ -194,6 +200,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		frontAuthorize.deleteAuthorizeInfo(token);
 		frontAuthorize.deleteUserResources(userId);
 		frontAuthorize.deleteResourceCode(userId);
+		if(StringUtils.hasText(userId)) {
+			this.systemLogService.log("login out", this.request.getRequestURI(), this.adminUserService.findById(userId));
+		}
 		return resultData;
 	}
 }

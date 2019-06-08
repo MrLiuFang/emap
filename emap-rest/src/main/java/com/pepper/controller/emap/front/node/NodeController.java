@@ -437,6 +437,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			
         }
 		this.nodeService.saveAll(list);
+		systemLogService.log("node import", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

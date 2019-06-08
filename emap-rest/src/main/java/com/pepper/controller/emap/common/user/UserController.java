@@ -60,12 +60,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser = adminUserService.findById(adminUser.getId());
 		if(map.containsKey("headPortrait")) {
 			adminUser.setHeadPortrait(map.get("headPortrait").toString());
+			resultData.setData("headPortraitUrl", this.fileService.getUrl(adminUser.getHeadPortrait()));
 		}else {
 			adminUser.setHeadPortrait(null);
 		}
 		adminUserService.update(adminUser);
 		
 		jdkValueOperationsService.set(adminUser.getId(), adminUser);
+		
 		
 		systemLogService.log("user update head portrait", this.request.getRequestURL().toString());
 		return resultData;

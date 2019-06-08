@@ -96,7 +96,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
 		resultData.setData("user", adminUserVo);
-		
+		systemLogService.log("get user info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -135,6 +135,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		pager.setData("user",returnList);
 		pager.setResults(null);
+		systemLogService.log("get user list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -162,6 +163,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setIsWork(false);
 		adminUserService.saveUser(adminUser, map.get("roleId").toString());
+		systemLogService.log("get user add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -180,6 +182,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setPassword(old.getPassword());
 		adminUser.setAccount(old.getAccount());
 		adminUserService.updateUser(adminUser, map.get("roleId").toString());
+		systemLogService.log("get user update", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -197,6 +200,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
 			resultData.setData("departmentGroup",departmentGroupService.findById(adminUser.getDepartmentGroupId()));
 		}
+		systemLogService.log("get user to edit", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -227,6 +231,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		eventListService.handover(adminUser.getId(), currentUser.getId());
+		systemLogService.log("work handover", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -328,6 +333,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			}
 			
 		}
+		systemLogService.log("user import", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

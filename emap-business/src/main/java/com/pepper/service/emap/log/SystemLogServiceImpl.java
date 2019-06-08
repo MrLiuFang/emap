@@ -29,5 +29,14 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 		this.save(systemLog);
 	}
 	
+	public void log(String actionName,String url,AdminUser adminUser){
+		SystemLog systemLog = new SystemLog();
+		systemLog.setUserId(adminUser.getId());
+		systemLog.setUserName(adminUser.getName());
+		systemLog.setLogContent(actionName);
+		systemLog.setUrl(url);
+		this.save(systemLog);
+	}
+	
 	
 }

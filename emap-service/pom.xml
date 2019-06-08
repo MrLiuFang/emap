@@ -12,6 +12,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.pepper</groupId>
+			<artifactId>console-model</artifactId>
+			<version>${console.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.pepper</groupId>
 			<artifactId>emap-model</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
