@@ -99,8 +99,8 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		
 		if(StringUtils.hasText(eventRule.getNodeTypeId()) ) {
 			if(eventRuleService.findByNodeTypeId(eventRule.getNodeTypeId())!=null) {
-				resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
-				resultData.setCode(5000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(5000002));
+				resultData.setCode(5000002);
 				return resultData;
 			}
 		}
@@ -146,8 +146,8 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(eventRule.getNodeTypeId())) {
 			EventRule oldEventRule1 = this.eventRuleService.findByNodeTypeId(eventRule.getNodeTypeId());
 			if(oldEventRule1!=null&&oldEventRule1.getId()!=null&&eventRule.getId()!=null&&!oldEventRule1.getId().equals(eventRule.getId())) {
-				resultData.setMessage(Internationalization.getMessageInternationalization(5000001));
-				resultData.setCode(5000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(5000002));
+				resultData.setCode(5000002);
 				return resultData;
 			}
 		}else {

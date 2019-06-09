@@ -252,7 +252,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			warningLevel=eventList.getWarningLevel();
 		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("helpList", helpListService.findByNodeTypeIdAndWarningLevelGreaterThanEqual(node.getNodeTypeId(),warningLevel));
+			resultData.setData("helpList", helpListService.findByNodeTypeIdAndWarningLevel(node.getNodeTypeId(),warningLevel));
 		}
 		systemLogService.log("get event help", this.request.getRequestURL().toString());
 		return resultData;
@@ -281,6 +281,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
 					listAdminUserVo.add(adminUserVo);
 				}
+				departmentGroupV1.setUser(listAdminUserVo);
 				listDepartmentGroupV1.add(departmentGroupV1);
 			}
 			departmentVo1.setDepartmentGroup(listDepartmentGroupV1);

@@ -21,6 +21,7 @@ public interface HelpListService extends BaseService<HelpList> {
 	
 	List<HelpList> findByNodeTypeIdAndWarningLevelGreaterThanEqual(String nodeTypeId,int warningLevel);
 	
+	public List<HelpList> findByNodeTypeIdAndWarningLevel(String nodeTypeId,int warningLevel) ;
 	/**
 	 * 
 	 * @param id

@@ -16,6 +16,8 @@ public interface HelpListDao extends BaseDao<HelpList> {
 	
 	public List<HelpList> findByNodeTypeIdAndWarningLevelGreaterThanEqual(String nodeTypeId,int warningLevel) ;
 	
+	public List<HelpList> findByNodeTypeIdAndWarningLevel(String nodeTypeId,int warningLevel) ;
+	
 	/**
 	 * 
 	 * @param id
