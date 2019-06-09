@@ -1,5 +1,7 @@
 package com.pepper.dao.emap.department;
 
+import java.util.List;
+
 import com.pepper.core.base.BaseDao;
 import com.pepper.model.emap.department.Department;
 
@@ -16,4 +18,6 @@ public interface DepartmentDao extends BaseDao<Department> {
 	 * @return
 	 */
 	public Department findByCode(String code);
+	
+	public List<Department> findByName(String name);
 }

@@ -14,4 +14,5 @@ public interface DepartmentGroupService extends BaseService<DepartmentGroup> {
 	
 	public List<DepartmentGroup> findByDepartmentId(String departmentId);
 
+	public List<DepartmentGroup> findByDepartmentIdAndName(String departmentId,String name);
 }

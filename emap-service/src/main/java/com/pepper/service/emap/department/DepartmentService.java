@@ -1,5 +1,7 @@
 package com.pepper.service.emap.department;
 
+import java.util.List;
+
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.department.Department;
 
@@ -15,5 +17,7 @@ public interface DepartmentService extends BaseService<Department> {
 	 * @return
 	 */
 	public Department findByCode(String code);
+	
+	public List<Department> findByName(String name);
 
 }

@@ -25,4 +25,9 @@ public class DepartmentGroupServiceImpl extends BaseServiceImpl<DepartmentGroup>
 		return departmentGroupDao.findByDepartmentId(departmentId);
 	}
 
+	@Override
+	public List<DepartmentGroup> findByDepartmentIdAndName(String departmentId, String name) {
+		return departmentGroupDao.findByDepartmentIdAndName(departmentId, name);
+	}
+
 }

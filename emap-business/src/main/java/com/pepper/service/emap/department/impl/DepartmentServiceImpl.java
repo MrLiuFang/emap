@@ -1,5 +1,7 @@
 package com.pepper.service.emap.department.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -17,5 +19,10 @@ public class DepartmentServiceImpl extends BaseServiceImpl<Department> implement
 	@Override
 	public Department findByCode(String code) {
 		return departmentDao.findByCode(code);
+	}
+
+	@Override
+	public List<Department> findByName(String name) {
+		return departmentDao.findByName(name);
 	}
 }

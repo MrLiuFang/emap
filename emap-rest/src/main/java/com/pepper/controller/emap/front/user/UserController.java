@@ -32,6 +32,8 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.emap.department.Department;
+import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
@@ -274,6 +276,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 				adminUser.setUserType(UserType.EMPLOYEE);
 				adminUser.setIsWork(false);
 				
+				
 				if(!StringUtils.hasText(adminUser.getAccount())) {
 					resultData.setCode(4000003);
 					resultData.setMessage("数据错误！第"+i+"行，account不能为空");
@@ -323,6 +326,42 @@ public class UserController extends BaseControllerImpl implements BaseController
 					resultData.setMessage("数据错误！第"+i+"行，role角色错误！");
 					return resultData;
 				}
+				
+				if(role.getCode().equals("EMPLOYEE_ROLE")) {
+					String departmentName= getCellValue(row.getCell(6)).toString();
+					String departmentGroupName= getCellValue(row.getCell(7)).toString();
+					String isManager= getCellValue(row.getCell(8)).toString();
+					if(StringUtils.hasText(isManager)&&(!isManager.toLowerCase().equals("true")||!isManager.toLowerCase().equals("false"))) {
+						resultData.setCode(4000006);
+						resultData.setMessage("数据错误！第"+i+"行，isManager数据错误！");
+						return resultData;
+					}
+					if(!StringUtils.hasText(departmentName)) {
+						resultData.setCode(4000004);
+						resultData.setMessage("数据错误！第"+i+"行，department不能为空！");
+						return resultData;
+					}else {
+						List<Department> listDepartment = this.departmentService.findByName(departmentName);
+						if(listDepartment.size()!=1) {
+							resultData.setCode(4000005);
+							resultData.setMessage("数据错误！第"+i+"行，department错误（找到多个/没有找到部门）！");
+							return resultData;
+						}else {
+							Department department = listDepartment.get(0);
+							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndName(department.getId(), departmentGroupName);
+							if(listDepartmentGroup.size()!=1) {
+								resultData.setCode(4000005);
+								resultData.setMessage("数据错误！第"+i+"行，DepartmentGroup错误（找到多个/没有找到部门组）！");
+								return resultData;
+							}else {
+								adminUser.setDepartmentId(department.getId());
+								adminUser.setDepartmentGroupId(listDepartmentGroup.get(0).getId());
+								adminUser.setIsManager(Boolean.valueOf(StringUtils.hasText(isManager)?isManager.toLowerCase():"false"));
+							}
+						}
+					}
+				}
+				
 				String roleId = role.getId();
 				Map<String,AdminUser> map = new HashMap<String, AdminUser>();
 				map.put(roleId, adminUser);
@@ -357,6 +396,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return false;
 		}
 		if(!getCellValue(row.getCell(5)).toString().equals("role")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("department")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(7)).toString().equals("departmentGroup")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(8)).toString().equals("isManager")) {
 			return false;
 		}
 		return true;

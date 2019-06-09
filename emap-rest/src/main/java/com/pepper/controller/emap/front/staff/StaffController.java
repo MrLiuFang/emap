@@ -178,42 +178,43 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 					resultData.setMessage("数据错误！第"+i+"行，"+staff.getIdCard()+"已存在");
 					return resultData;
 				}
-				String needChangePassword = getCellValue(row.getCell(4)).toString().toLowerCase();
-				if(StringUtils.hasText(needChangePassword)&&(needChangePassword.equals("true")||needChangePassword.equals("false"))) {
-					staff.setNeedChangePassword(Boolean.valueOf(needChangePassword));
-				}else {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，needChangePassword数据错误");
-					return resultData;
-				}
+//				String needChangePassword = getCellValue(row.getCell(4)).toString().toLowerCase();
+//				if(StringUtils.hasText(needChangePassword)&&(needChangePassword.equals("true")||needChangePassword.equals("false"))) {
+//					staff.setNeedChangePassword(Boolean.valueOf(needChangePassword));
+//				}else {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，needChangePassword数据错误");
+//					return resultData;
+//				}
+//				
+//				String passwordNeverExpire = getCellValue(row.getCell(5)).toString().toLowerCase();
+//				if(StringUtils.hasText(passwordNeverExpire)&&(passwordNeverExpire.equals("true")||needChangePassword.equals("false"))) {
+//					staff.setNeedChangePassword(Boolean.valueOf(passwordNeverExpire));
+//				}else {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
+//					return resultData;
+//				}
+//				
+//				String isAvailable = getCellValue(row.getCell(6)).toString().toLowerCase();
+//				if(StringUtils.hasText(isAvailable)&&(isAvailable.equals("true")||isAvailable.equals("false"))) {
+//					staff.setNeedChangePassword(Boolean.valueOf(isAvailable));
+//				}else {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
+//					return resultData;
+//				}
 				
-				String passwordNeverExpire = getCellValue(row.getCell(5)).toString().toLowerCase();
-				if(StringUtils.hasText(passwordNeverExpire)&&(passwordNeverExpire.equals("true")||needChangePassword.equals("false"))) {
-					staff.setNeedChangePassword(Boolean.valueOf(passwordNeverExpire));
-				}else {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
-					return resultData;
+				String site = getCellValue(row.getCell(4)).toString().toLowerCase();
+				if(StringUtils.hasText(site)) {
+					List<SiteInfo> listSiteInfo = this.siteInfoService.findByName(site);
+					if(listSiteInfo.size()!=1) {
+						resultData.setCode(4000003);
+						resultData.setMessage("数据错误！第"+i+"行，site数据错误(空值/找到多个site)");
+						return resultData;
+					}
+					staff.setSiteId(listSiteInfo.get(0).getId());
 				}
-				
-				String isAvailable = getCellValue(row.getCell(6)).toString().toLowerCase();
-				if(StringUtils.hasText(isAvailable)&&(isAvailable.equals("true")||isAvailable.equals("false"))) {
-					staff.setNeedChangePassword(Boolean.valueOf(isAvailable));
-				}else {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
-					return resultData;
-				}
-				
-				String site = getCellValue(row.getCell(7)).toString().toLowerCase();
-				List<SiteInfo> listSiteInfo = this.siteInfoService.findByName(site);
-				if(listSiteInfo.size()!=1) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，site数据错误(空值/找到多个site)");
-					return resultData;
-				}
-				
-				staff.setSiteId(listSiteInfo.get(0).getId());
 				
 				if(!StringUtils.hasText(staff.getName())) {
 					resultData.setCode(4000003);
@@ -233,11 +234,11 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 					return resultData;
 				}
 				
-				if(!StringUtils.hasText(staff.getIdCard())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，idCard不能为空");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(staff.getIdCard())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，idCard不能为空");
+//					return resultData;
+//				}
 				
 				list.add(staff);
 	        }
@@ -261,16 +262,16 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		if(!getCellValue(row.getCell(3)).toString().equals("idCard")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(4)).toString().equals("needChangePassword")) {
-			return false;
-		}
-		if(!getCellValue(row.getCell(5)).toString().equals("passwordNeverExpire")) {
-			return false;
-		}
-		if(!getCellValue(row.getCell(6)).toString().equals("isAvailable")) {
-			return false;
-		}
-		if(!getCellValue(row.getCell(7)).toString().equals("site")) {
+//		if(!getCellValue(row.getCell(4)).toString().equals("needChangePassword")) {
+//			return false;
+//		}
+//		if(!getCellValue(row.getCell(5)).toString().equals("passwordNeverExpire")) {
+//			return false;
+//		}
+//		if(!getCellValue(row.getCell(6)).toString().equals("isAvailable")) {
+//			return false;
+//		}
+		if(!getCellValue(row.getCell(4)).toString().equals("site")) {
 			return false;
 		}
 		return true;

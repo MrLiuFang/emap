@@ -11,4 +11,6 @@ public interface DepartmentGroupDao extends BaseDao<DepartmentGroup>{
 	public void deleteByDepartmentId(String departmentId);
 	
 	public List<DepartmentGroup> findByDepartmentId(String departmentId);
+	
+	public List<DepartmentGroup> findByDepartmentIdAndName(String departmentId,String name);
 }
