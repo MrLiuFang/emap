@@ -290,16 +290,19 @@ public class UserController extends BaseControllerImpl implements BaseController
 					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
 					return resultData;
 				}
-				if(!StringUtils.hasText(adminUser.getMobile())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，mobile不能为空");
-					return resultData;
-				}
-				if(!StringUtils.hasText(adminUser.getNickName())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，nickName不能为空");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(adminUser.getMobile())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，mobile不能为空");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(adminUser.getNickName())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，nickName不能为空");
+//					return resultData;
+//				}
+				
+				
+				
 				if(!StringUtils.hasText(getCellValue(row.getCell(5)).toString())) {
 					resultData.setCode(4000003);
 					resultData.setMessage("数据错误！第"+i+"行，role不能为空");
@@ -381,7 +384,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		if(cell == null) {
 			return "";
 		}
-		Object object = null;
+		Object object = "";
 		switch (cell.getCellType()) {
 		case STRING :
 			object = cell.getStringCellValue();

@@ -29,6 +29,7 @@ public class SystemLogController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String userName,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date endDate) {
+		systemLogService.log("get system log list", this.request.getRequestURI());
 		Pager<SystemLog> pager = new Pager<SystemLog>();
 		if(StringUtils.hasText(userName)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_userName", userName);

@@ -280,7 +280,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		if(cell == null) {
 			return "";
 		}
-		Object object = null;
+		Object object = "";
 		switch (cell.getCellType()) {
 		case STRING :
 			object = cell.getStringCellValue();

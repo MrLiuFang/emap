@@ -223,10 +223,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_operator", currentUser.getId());
+		//处理中
 		if(isHandle) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNOTNULL+"_currentHandleUser",null );
-		}else {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNULL+"_currentHandleUser", null);
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_status", new String[] {"A","B"});
+		}else {//未处理中
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_status", "W");
 		}
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
