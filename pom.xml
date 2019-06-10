@@ -52,7 +52,7 @@
 				<artifactId>discreteness-file-business</artifactId>
 				<version>${pepper.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>com.pepper</groupId>
 				<artifactId>discreteness-file-service</artifactId>
@@ -101,6 +101,11 @@
 		<dependency>
 			<groupId>com.pepper</groupId>
 			<artifactId>pepper-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.dadiyang</groupId>
+			<artifactId>jave</artifactId>
+			<version>1.0.6</version>
 		</dependency>
 	</dependencies>
 

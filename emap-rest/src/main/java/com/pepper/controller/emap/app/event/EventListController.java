@@ -1,5 +1,7 @@
 package com.pepper.controller.emap.app.event;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
@@ -18,6 +21,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -56,6 +61,9 @@ import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
+import com.pepper.util.FileUtil;
+
+import it.sauronsoftware.jave.AudioUtils;
 
 @Controller(value="appEventListController")
 @RequestMapping("/app/event")
@@ -119,12 +127,14 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(!isFinish) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
+			pager.getJpqlParameter().setSortParameter("assignDate", "DESC");
 			pager = eventListService.findNavigator(pager);
 			pager.setData("eventList",convertVo(pager.getResults()));
 		}else {
 			Pager<ActionList> pager1 = new Pager<ActionList>();
 			pager1.getJpqlParameter().getSearchParameter().clear();
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_operator",adminUser.getId());
+			pager1.getJpqlParameter().setSortParameter("assignDate", "DESC");
 			pager1 = actionListService.findNavigator(pager1);
 			List<ActionList> list = pager1.getResults();
 			List<EventListVo> listEventList = new ArrayList<EventListVo>();
@@ -456,5 +466,30 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			returnList.add(convertVo(eventList));
 		}
 		return returnList;
+	}
+	
+	@RequestMapping("/toMp3")
+	@ResponseBody
+	public Object toMp3(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName); 
+			File source = new File("\\","3.amr");
+			FileUtils.copyInputStreamToFile(file.getInputStream(), source);
+			File target = new File("\\","‪3.mp3");
+			AudioUtils.amrToMp3(source, target);
+			FileInputStream io = new FileInputStream(target);
+			byte b[] = new byte[(int) target.length()];
+			io.read(b);
+			String fileId = fileService.addFile(b, "1.mp3");
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("id", fileId);
+			map.put("url", fileService.getUrl(fileId));
+			io.close();
+			resultData.setData(map);
+			return resultData;
+		}
+		return resultData;
 	}
 }
