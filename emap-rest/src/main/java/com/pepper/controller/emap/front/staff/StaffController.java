@@ -173,7 +173,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				staff.setEmail(getCellValue(row.getCell(1)).toString());
 				staff.setPassword(getCellValue(row.getCell(2)).toString());
 				staff.setIdCard(getCellValue(row.getCell(3)).toString());
-				if(staffService.findByIdCard(staff.getIdCard())!=null) {
+				if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
 					resultData.setCode(4000003);
 					resultData.setMessage("数据错误！第"+i+"行，"+staff.getIdCard()+"已存在");
 					return resultData;
@@ -222,11 +222,11 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 					return resultData;
 				}
 				
-				if(!StringUtils.hasText(staff.getEmail())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(staff.getEmail())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
+//					return resultData;
+//				}
 				
 				if(!StringUtils.hasText(staff.getPassword())) {
 					resultData.setCode(4000003);

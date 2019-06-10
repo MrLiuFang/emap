@@ -68,12 +68,14 @@ public class Internationalization {
 		if (!StringUtils.hasText(language) && request.getHeader("language") != null) {
 			language = request.getHeader("language").toString();
 		}
-//		if (!StringUtils.hasText(language)){
-//			RedisTemplate<String, String> redisTemplate = (RedisTemplate<String, String>) SpringContextUtil.getBean("redisTemplate");
-//			ICurrentUser iCurrentUser = (ICurrentUser) SpringContextUtil.getBean("currentUserUtil");
-//			AdminUser adminUser =  (AdminUser)iCurrentUser.getCurrentUser();
-//			language = redisTemplate.opsForValue().get(adminUser.getId()+"_language");
-//		}
+		if (!StringUtils.hasText(language)){
+			RedisTemplate<String, String> redisTemplate = (RedisTemplate<String, String>) SpringContextUtil.getBean("redisTemplate");
+			ICurrentUser iCurrentUser = (ICurrentUser) SpringContextUtil.getBean("currentUserUtil");
+			AdminUser adminUser =  (AdminUser)iCurrentUser.getCurrentUser();
+			if(adminUser!=null) {
+				language = redisTemplate.opsForValue().get(adminUser.getId()+"_language");
+			}
+		}
 		if (!StringUtils.hasText(language)){
 			language = "zh";
 		}

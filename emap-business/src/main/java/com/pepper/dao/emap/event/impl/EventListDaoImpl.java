@@ -23,7 +23,7 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent,String id) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
-		jpql.append(" from  EventList where (status = '' or status is null or status = 'N')  ");
+		jpql.append(" from  EventList where status = 'N'   ");
 		
 		if(StringUtils.hasText(id)) {
 			jpql.append(" and id = :id ");

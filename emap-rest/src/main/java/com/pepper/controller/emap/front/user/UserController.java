@@ -288,11 +288,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 					resultData.setMessage("数据错误！第"+i+"行，name不能为空");
 					return resultData;
 				}
-				if(!StringUtils.hasText(adminUser.getEmail())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(adminUser.getEmail())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
+//					return resultData;
+//				}
 //				if(!StringUtils.hasText(adminUser.getMobile())) {
 //					resultData.setCode(4000003);
 //					resultData.setMessage("数据错误！第"+i+"行，mobile不能为空");
@@ -331,7 +331,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 					String departmentName= getCellValue(row.getCell(6)).toString();
 					String departmentGroupName= getCellValue(row.getCell(7)).toString();
 					String isManager= getCellValue(row.getCell(8)).toString();
-					if(StringUtils.hasText(isManager)&&(!isManager.toLowerCase().equals("true")||!isManager.toLowerCase().equals("false"))) {
+					if(StringUtils.hasText(isManager)&&!(isManager.toLowerCase().equals("true")||isManager.toLowerCase().equals("false"))) {
 						resultData.setCode(4000006);
 						resultData.setMessage("数据错误！第"+i+"行，isManager数据错误！");
 						return resultData;
@@ -349,13 +349,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 						}else {
 							Department department = listDepartment.get(0);
 							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndName(department.getId(), departmentGroupName);
-							if(listDepartmentGroup.size()!=1) {
+							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
 								resultData.setCode(4000005);
 								resultData.setMessage("数据错误！第"+i+"行，DepartmentGroup错误（找到多个/没有找到部门组）！");
 								return resultData;
 							}else {
 								adminUser.setDepartmentId(department.getId());
-								adminUser.setDepartmentGroupId(listDepartmentGroup.get(0).getId());
+								adminUser.setDepartmentGroupId(listDepartmentGroup.size()==1?listDepartmentGroup.get(0).getId():null);
 								adminUser.setIsManager(Boolean.valueOf(StringUtils.hasText(isManager)?isManager.toLowerCase():"false"));
 							}
 						}

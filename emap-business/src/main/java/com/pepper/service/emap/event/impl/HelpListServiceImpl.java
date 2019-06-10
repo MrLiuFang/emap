@@ -36,4 +36,9 @@ public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements He
 	public List<HelpList> findByNodeTypeIdAndWarningLevel(String nodeTypeId, int warningLevel) {
 		return helpListDao.findByNodeTypeIdAndWarningLevel(nodeTypeId, warningLevel);
 	}
+
+	@Override
+	public List<HelpList> findByNodeTypeIdAndWarningLevelLessThanEqual(String nodeTypeId, int warningLevel) {
+		return helpListDao.findByNodeTypeIdAndWarningLevelLessThanEqual(nodeTypeId, warningLevel);
+	}
 }

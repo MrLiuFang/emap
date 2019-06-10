@@ -1,5 +1,7 @@
 package com.pepper.service.emap.staff;
 
+import java.util.List;
+
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.staff.Staff;
 
@@ -10,5 +12,5 @@ import com.pepper.model.emap.staff.Staff;
  */
 public interface StaffService extends BaseService<Staff> {
 
-	public Staff findByIdCard(String idCard);
+	public List<Staff> findByIdCard(String idCard);
 }

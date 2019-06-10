@@ -286,7 +286,9 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			node.setNodeTypeId(getCellValue(row.getCell(5)).toString());
 			node.setX(getCellValue(row.getCell(6)).toString());
 			node.setY(getCellValue(row.getCell(7)).toString());
-			node.setWarningLevel(Integer.valueOf(getCellValue(row.getCell(10)).toString()));
+			if(StringUtils.hasText(getCellValue(row.getCell(10)).toString())) {
+				node.setWarningLevel(Integer.valueOf(getCellValue(row.getCell(10)).toString()));
+			}
 			if(!StringUtils.hasText(node.getCode())) {
 				resultData.setCode(4000003);
 				resultData.setMessage("数据错误！第"+i+"行，code数据错误");
@@ -323,11 +325,12 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				String hasPtz = getCellValue(row.getCell(11)).toString().toLowerCase();
 				if(StringUtils.hasText(hasPtz)&&(hasPtz.equals("true")||hasPtz.equals("false"))) {
 					node.setHasPtz(Boolean.valueOf(hasPtz));
-				}else {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，hasPtz数据错误");
-					return resultData;
 				}
+//				else {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行，hasPtz数据错误");
+//					return resultData;
+//				}
 				node.setUserName(getCellValue(row.getCell(12)).toString());
 				node.setPassword(getCellValue(row.getCell(13)).toString());
 				node.setSystemID(getCellValue(row.getCell(14)).toString());
@@ -335,76 +338,77 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				node.setWindowsPass(getCellValue(row.getCell(16)).toString());
 				node.setDomainName(getCellValue(row.getCell(17)).toString());
 				
-				if(!StringUtils.hasText(node.getIp())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行,map数据错误");
-					return resultData;
-				}
-				
-				if(!StringUtils.hasText(node.getExternalLink())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行,externalLink数据错误");
-					return resultData;
-				}
-				
-				if(!StringUtils.hasText(node.getUserName())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行userName数据错误");
-					return resultData;
-				}
-				
-				if(!StringUtils.hasText(node.getPassword())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行password数据错误");
-					return resultData;
-				}
-				
-				if(!StringUtils.hasText(node.getSystemID())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行systemID数据错误");
-					return resultData;
-				}
-				if(!StringUtils.hasText(node.getWindowsPass())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行windowsPass数据错误");
-					return resultData;
-				}
-				if(!StringUtils.hasText(node.getWindowsPass())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行windowsPass数据错误");
-					return resultData;
-				}
-				if(!StringUtils.hasText(node.getDomainName())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行domainName数据错误");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(node.getIp())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行,ip不能为空");
+//					return resultData;
+//				}
+//				
+//				if(!StringUtils.hasText(node.getExternalLink())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行,externalLink数据错误");
+//					return resultData;
+//				}
+//				
+//				if(!StringUtils.hasText(node.getUserName())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行userName数据错误");
+//					return resultData;
+//				}
+//				
+//				if(!StringUtils.hasText(node.getPassword())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行password数据错误");
+//					return resultData;
+//				}
+//				
+//				if(!StringUtils.hasText(node.getSystemID())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行systemID数据错误");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(node.getWindowsPass())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行windowsPass数据错误");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(node.getWindowsPass())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行windowsPass数据错误");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(node.getDomainName())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行domainName数据错误");
+//					return resultData;
+//				}
 			}else if(node.getNodeTypeId().equals("door")) {
+				
 				node.setPaneId(getCellValue(row.getCell(18)).toString());
 				node.setPaneIp(getCellValue(row.getCell(19)).toString());
 				node.setReaderId(getCellValue(row.getCell(20)).toString());
 				node.setReaderIo(getCellValue(row.getCell(21)).toString());
 				
-				if(!StringUtils.hasText(node.getPaneId())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行paneId数据错误");
-					return resultData;
-				}
-				if(!StringUtils.hasText(node.getPaneIp())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行paneIp数据错误");
-					return resultData;
-				}
-				if(!StringUtils.hasText(node.getReaderId())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行readerId数据错误");
-					return resultData;
-				}
-				if(!StringUtils.hasText(node.getReaderIo())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行readerIo数据错误");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(node.getPaneId())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行paneId数据错误");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(node.getPaneIp())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行paneIp数据错误");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(node.getReaderId())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行readerId数据错误");
+//					return resultData;
+//				}
+//				if(!StringUtils.hasText(node.getReaderIo())) {
+//					resultData.setCode(4000003);
+//					resultData.setMessage("数据错误！第"+i+"行readerIo数据错误");
+//					return resultData;
+//				}
 			}else {
 				List<NodeType> listNodeType = this.nodeTypeService.findByName(node.getNodeTypeId());
 				if(listNodeType.size()!=1) {

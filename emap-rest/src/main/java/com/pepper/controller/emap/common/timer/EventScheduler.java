@@ -94,9 +94,9 @@ public class EventScheduler {
 //				}
 			}
 			
-			if(eventRule.getSpecialWarningLevel()!=null&&eventRule.getWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0&&eventRule.getSpecialWarningLevel()>eventRule.getWarningLevel()) {
+			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
-					assignment(eventRule.getSpecialDepartmentId(),eventList);
+					assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getResult());
 					return ;
 				}
 			}
@@ -107,26 +107,27 @@ public class EventScheduler {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 				if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-					assignment(eventRule.getDepartmentId(),eventList);
+					assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+					return ;
 				}
-				return ;
+				
 			}
 			
 			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
-				assignment(eventRule.getDepartmentId(),eventList);
+				assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
 				return ;
-			}else {
-				if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-					assignment(eventRule.getDepartmentId(),eventList);
-					return ;
-				}
+			}
+			
+			if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
+				assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+				return ;
 			}
 			
 		}catch (Exception e) {
 		}
 	}
 	
-	private Boolean assignment(String departmentId,EventList eventList) {
+	private Boolean assignment(String departmentId,EventList eventList,String pushTitle) {
 		List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentId(departmentId);
 		AdminUser user = null;
 		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
@@ -152,7 +153,7 @@ public class EventScheduler {
 			return false;
 		}	
 		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-		messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
+		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工单",eventList.getEventName(),eventList.getId());
 		eventList.setCurrentHandleUser(user.getId());
 		eventList.setStatus("A");
 		eventList.setAssignDate(new Date());

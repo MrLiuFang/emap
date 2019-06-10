@@ -1,5 +1,7 @@
 package com.pepper.service.emap.staff.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -16,7 +18,7 @@ public class StaffServiceImpl extends BaseServiceImpl<Staff> implements StaffSer
 	private StaffDao staffDao;
 
 	@Override
-	public Staff findByIdCard(String idCard) {
+	public List<Staff> findByIdCard(String idCard) {
 		return staffDao.findByIdCard(idCard);
 	}
 }

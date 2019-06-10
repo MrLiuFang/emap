@@ -252,7 +252,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			warningLevel=eventList.getWarningLevel();
 		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("helpList", helpListService.findByNodeTypeIdAndWarningLevel(node.getNodeTypeId(),warningLevel));
+			resultData.setData("helpList", helpListService.findByNodeTypeIdAndWarningLevelLessThanEqual(node.getNodeTypeId(),warningLevel));
 		}
 		systemLogService.log("get event help", this.request.getRequestURL().toString());
 		return resultData;
