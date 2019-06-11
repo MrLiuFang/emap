@@ -152,7 +152,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	public Object automaticList(String id) {
 		Pager<EventList> pager = new Pager<EventList>();
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_status", "A");
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_status", new String[] {"A","B"});
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNULL+"_operator", null);
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
@@ -244,7 +244,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object eventHelp(String id,String eventId) {
-		ResultData resultData = new ResultData();
+		
+		Pager<HelpList> pager = new Pager<HelpList>();
 		Node node = nodeService.findById(id);
 		EventList eventList = this.eventListService.findById(eventId);
 		int warningLevel = 0;
@@ -252,10 +253,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			warningLevel=eventList.getWarningLevel();
 		}
 		if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
-			resultData.setData("helpList", helpListService.findByNodeTypeIdAndWarningLevelLessThanEqual(node.getNodeTypeId(),warningLevel));
+			
+			pager = helpListService.findByNodeTypeIdAndWarningLevelLessThanEqual(node.getNodeTypeId(),warningLevel,pager);
+			pager.setData("helpList", pager.getResults());
+			pager.setResults(null);
 		}
 		systemLogService.log("get event help", this.request.getRequestURL().toString());
-		return resultData;
+		return pager;
 	}
 	
 	@RequestMapping("/workbench/getEmployee")
@@ -364,12 +368,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object historyEvent(String id) throws IOException {
-		ResultData resultData = new ResultData();
+		Pager<EventList> pager = new Pager<EventList>();
 		EventList eventList = this.eventListService.findById(id);
 		if(eventList==null) {
-			return resultData;
+			return pager;
 		}
-		List<EventList> list= this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId());
+		pager = this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId(),pager);
+		List<EventList> list= pager.getResults();
 		
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
 		for(EventList obj : list) {
@@ -396,9 +401,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 			returnList.add(eventListVo);
 		}
-		resultData.setData("historyEvent", returnList);
+		pager.setData("historyEvent", returnList);
+		pager.setResults(null);
 		systemLogService.log("event history list", this.request.getRequestURL().toString());
-		return resultData;
+		return pager;
 	}
 	
 	@RequestMapping("/workbench/actionList")

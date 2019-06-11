@@ -33,7 +33,7 @@ public interface EventListService extends BaseService<EventList> {
 	 * @param id
 	 * @return
 	 */
-	public List<EventList> findBySourceCodeAndIdNot(String sourceCode,String id);
+	public Pager<EventList> findBySourceCodeAndIdNot(String sourceCode, String id,Pager<EventList> pager) ;
 	
 	
 	/**

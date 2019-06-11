@@ -3,8 +3,12 @@ package com.pepper.service.emap.event.impl;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.print.attribute.standard.PageRanges;
 
 import org.apache.dubbo.config.annotation.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
@@ -29,8 +33,12 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
-	public java.util.List<EventList> findBySourceCodeAndIdNot(String sourceCode, String id) {
-		return eventListDao.findBySourceCodeAndIdNot(sourceCode, id);
+	public Pager<EventList> findBySourceCodeAndIdNot(String sourceCode, String id,Pager<EventList> pager) {
+		Pageable pageable =PageRequest.of(pager.getPageNo()-1, pager.getPageSize());
+		Page<EventList> page = eventListDao.findBySourceCodeAndIdNot(sourceCode, id,pageable);
+		pager.setResults(page.getContent());
+		pager.setTotalRow(Long.valueOf(page.getTotalElements()));
+		return pager;
 	}
 
 	@Override

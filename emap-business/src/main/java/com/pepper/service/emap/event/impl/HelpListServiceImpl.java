@@ -5,7 +5,11 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.HelpListDao;
 import com.pepper.model.emap.event.HelpList;
@@ -38,7 +42,11 @@ public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements He
 	}
 
 	@Override
-	public List<HelpList> findByNodeTypeIdAndWarningLevelLessThanEqual(String nodeTypeId, int warningLevel) {
-		return helpListDao.findByNodeTypeIdAndWarningLevelLessThanEqual(nodeTypeId, warningLevel);
+	public Pager<HelpList> findByNodeTypeIdAndWarningLevelLessThanEqual(String nodeTypeId, int warningLevel,Pager<HelpList> pager) {
+		Pageable pageable = PageRequest.of(pager.getPageNo()-1, pager.getPageSize());
+		Page<HelpList> page = helpListDao.findByNodeTypeIdAndWarningLevelLessThanEqual(nodeTypeId, warningLevel,pageable);
+		pager.setResults(page.getContent());
+		pager.setTotalRow(Long.valueOf(page.getTotalElements()));
+		return pager;
 	}
 }

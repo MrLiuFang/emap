@@ -122,17 +122,20 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@Authorize(authorizeResources = false)
 	public Object list(Boolean isFinish) {
 		systemLogService.log("App event list", this.request.getRequestURL().toString());
-		Pager<EventList> pager = new Pager<EventList>();
+		
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		if(!isFinish) {
+			Pager<EventList> pager = new Pager<EventList>();
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
 			pager.getJpqlParameter().setSortParameter("assignDate", "DESC");
 			pager = eventListService.findNavigator(pager);
 			pager.setData("eventList",convertVo(pager.getResults()));
+			pager.setResults(null);
+			return pager;
 		}else {
 			Pager<ActionList> pager1 = new Pager<ActionList>();
-			pager1.getJpqlParameter().getSearchParameter().clear();
+			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","B");
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_operator",adminUser.getId());
 			pager1.getJpqlParameter().setSortParameter("assignDate", "DESC");
 			pager1 = actionListService.findNavigator(pager1);
@@ -149,10 +152,12 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 					listEventList.add(eventListVo);
 				}
 			}
-			pager.setData("eventList",listEventList);
+			pager1.setData("eventList",listEventList);
+			pager1.setResults(null);
+			return pager1;
 		}
-		pager.setResults(null);
-		return pager;
+		
+		
 	}
 	
 	@RequestMapping("/actionList")

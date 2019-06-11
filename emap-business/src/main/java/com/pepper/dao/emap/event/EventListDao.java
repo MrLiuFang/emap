@@ -2,6 +2,8 @@ package com.pepper.dao.emap.event;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
@@ -24,7 +26,7 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	 * @param id
 	 * @return
 	 */
-	public List<EventList> findBySourceCodeAndIdNot(String sourceCode,String id);
+	public Page<EventList> findBySourceCodeAndIdNot(String sourceCode,String id,Pageable pageable);
 	
 	/**
 	 * 交接工作

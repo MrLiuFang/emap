@@ -2,6 +2,7 @@ package com.pepper.service.emap.event;
 
 import java.util.List;
 
+import com.pepper.core.Pager;
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.event.HelpList;
 
@@ -23,7 +24,7 @@ public interface HelpListService extends BaseService<HelpList> {
 	
 	public List<HelpList> findByNodeTypeIdAndWarningLevel(String nodeTypeId,int warningLevel) ;
 	
-	public List<HelpList> findByNodeTypeIdAndWarningLevelLessThanEqual(String nodeTypeId,int warningLevel);
+	public Pager<HelpList> findByNodeTypeIdAndWarningLevelLessThanEqual(String nodeTypeId, int warningLevel,Pager<HelpList> pager);
 	/**
 	 * 
 	 * @param id
