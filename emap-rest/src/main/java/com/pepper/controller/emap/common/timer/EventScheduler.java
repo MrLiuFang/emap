@@ -64,6 +64,13 @@ public class EventScheduler {
 				eventList.setStatus("N");
 				eventListService.update(eventList);
 			}
+			if(eventList.getWarningLevel()==0) {
+				eventList.setStatus("P");
+				eventList.setContent("自动归档");
+				eventList.setOperator("000000000000");
+				this.eventListService.update(eventList);
+				continue ;
+			}
 			if(StringUtils.hasText(sourceCode)) {
 				Node node = getNode(sourceCode);
 				if(node != null) {
@@ -83,17 +90,6 @@ public class EventScheduler {
 	
 	private void eventRule(EventList eventList,EventRule eventRule) {		
 		try {
-			
-			if(eventList.getWarningLevel()==0) {
-//				Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
-//				if(node!=null && node.getNodeTypeId().equals("door")) {
-					eventList.setStatus("P");
-					eventList.setContent("自动归档");
-					eventList.setOperator("000000000000");
-					this.eventListService.update(eventList);
-					return ;
-//				}
-			}
 			
 			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
