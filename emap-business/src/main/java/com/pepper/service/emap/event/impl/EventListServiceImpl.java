@@ -35,7 +35,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public Pager<EventList> findBySourceCodeAndIdNot(String sourceCode, String id,Pager<EventList> pager) {
 		Pageable pageable =PageRequest.of(pager.getPageNo()-1, pager.getPageSize());
-		Page<EventList> page = eventListDao.findBySourceCodeAndIdNot(sourceCode, id,pageable);
+		Page<EventList> page = eventListDao.findBySourceCodeAndIdNotAndWarningLevelNot(sourceCode, id,0,pageable);
 		pager.setResults(page.getContent());
 		pager.setTotalRow(Long.valueOf(page.getTotalElements()));
 		return pager;

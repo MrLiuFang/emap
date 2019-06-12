@@ -26,6 +26,8 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	 * @param id
 	 * @return
 	 */
+	public Page<EventList> findBySourceCodeAndIdNotAndWarningLevelNot(String sourceCode,String id,Integer warningLevel ,Pageable pageable);
+	
 	public Page<EventList> findBySourceCodeAndIdNot(String sourceCode,String id,Pageable pageable);
 	
 	/**
