@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
@@ -221,7 +222,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(eventDispatch != null) {
 			AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
 			if(dispatchFrom==null) {
-				resultData.setData("dispatchFromName", "系统自动派单");
+				resultData.setData("dispatchFromName", Internationalization.getMessageInternationalization(7000002));
 			}else {
 				resultData.setData("dispatchFromName", dispatchFrom.getName());
 			}
@@ -380,8 +381,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
 		if(eventList==null) {
-			resultData.setCode(500001);
-			resultData.setMessage("要转移的事件不存在！");
+			resultData.setCode(8000002);
+			resultData.setMessage(Internationalization.getMessageInternationalization(8000002));
 			return resultData;
 		}
 		eventList.setAssignDate(new Date());
@@ -401,7 +402,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		try {
 			String employeeId = map.get("employeeId").toString();
 			String deviceId = valueOperationsService.get("userDeviceId_"+employeeId);
-			messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
+			messageService.send(deviceId, Internationalization.getMessageInternationalization(7000001),eventList.getEventName(),eventList.getId());
 		}catch (Exception e) {
 			// TODO: handle exception
 		}

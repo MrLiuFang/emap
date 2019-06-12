@@ -214,14 +214,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUser adminUser = adminUserService.findByAccountAndPassword(map.get("account"),map.get("password"));
 		if(adminUser==null) {
 			resultData.setCode(4000001);
-			resultData.setMessage("用户认证失败！");
+			resultData.setMessage(Internationalization.getMessageInternationalization(4000001));
 			return resultData;
 		}
 		
 		Role role = roleService.findByUserId(adminUser.getId());
 		if (role == null) {
 			resultData.setCode(4000001);
-			resultData.setMessage("用户认证失败！");
+			resultData.setMessage(Internationalization.getMessageInternationalization(4000001));
 			return resultData;
 		}
 		
@@ -253,7 +253,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			int totalRowNum = sheet.getLastRowNum();
 			if(!check(sheet.getRow(0))) {
 				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！（非用户结构数据）");
+				resultData.setMessage(Internationalization.getMessageInternationalization(4000003));
 				return resultData;
 			}
 			
@@ -278,14 +278,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 				
 				
 				if(!StringUtils.hasText(adminUser.getAccount())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，account不能为空");
+					resultData.setCode(4000004);
+					resultData.setMessage(Internationalization.getMessageInternationalization(4000004).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 				
 				if(!StringUtils.hasText(adminUser.getName())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，name不能为空");
+					resultData.setCode(4000005);
+					resultData.setMessage(Internationalization.getMessageInternationalization(4000005).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 //				if(!StringUtils.hasText(adminUser.getEmail())) {
@@ -307,14 +307,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 				
 				
 				if(!StringUtils.hasText(getCellValue(row.getCell(5)).toString())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，role不能为空");
+					resultData.setCode(4000006);
+					resultData.setMessage(Internationalization.getMessageInternationalization(4000006).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 				
 				if(this.adminUserService.findByAccount(adminUser.getAccount())!=null) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，"+adminUser.getAccount()+"已存在！");
+					resultData.setCode(4000007);
+					resultData.setMessage(Internationalization.getMessageInternationalization(4000007).replace("{1}", String.valueOf(i)).replace("{2}",adminUser.getAccount()));
 					return resultData;
 				}
 				
@@ -322,8 +322,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 				String roleName = getCellValue(row.getCell(5)).toString();
 				Role role = this.roleService.findByName(roleName);
 				if(role==null) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，role角色错误！");
+					resultData.setCode(4000008);
+					resultData.setMessage(Internationalization.getMessageInternationalization(4000008).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 				
@@ -332,26 +332,26 @@ public class UserController extends BaseControllerImpl implements BaseController
 					String departmentGroupName= getCellValue(row.getCell(7)).toString();
 					String isManager= getCellValue(row.getCell(8)).toString();
 					if(StringUtils.hasText(isManager)&&!(isManager.toLowerCase().equals("true")||isManager.toLowerCase().equals("false"))) {
-						resultData.setCode(4000006);
-						resultData.setMessage("数据错误！第"+i+"行，isManager数据错误！");
+						resultData.setCode(4000009);
+						resultData.setMessage(Internationalization.getMessageInternationalization(4000009).replace("{1}", String.valueOf(i)));
 						return resultData;
 					}
 					if(!StringUtils.hasText(departmentName)) {
-						resultData.setCode(4000004);
-						resultData.setMessage("数据错误！第"+i+"行，department不能为空！");
+						resultData.setCode(4000010);
+						resultData.setMessage(Internationalization.getMessageInternationalization(4000010).replace("{1}", String.valueOf(i)));
 						return resultData;
 					}else {
 						List<Department> listDepartment = this.departmentService.findByName(departmentName);
 						if(listDepartment.size()!=1) {
-							resultData.setCode(4000005);
-							resultData.setMessage("数据错误！第"+i+"行，department错误（找到多个/没有找到部门）！");
+							resultData.setCode(4000011);
+							resultData.setMessage(Internationalization.getMessageInternationalization(4000011).replace("{1}", String.valueOf(i)));
 							return resultData;
 						}else {
 							Department department = listDepartment.get(0);
 							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndName(department.getId(), departmentGroupName);
 							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
-								resultData.setCode(4000005);
-								resultData.setMessage("数据错误！第"+i+"行，DepartmentGroup错误（找到多个/没有找到部门组）！");
+								resultData.setCode(4000012);
+								resultData.setMessage(Internationalization.getMessageInternationalization(4000012).replace("{1}", String.valueOf(i)));
 								return resultData;
 							}else {
 								adminUser.setDepartmentId(department.getId());

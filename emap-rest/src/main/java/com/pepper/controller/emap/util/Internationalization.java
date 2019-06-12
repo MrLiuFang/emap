@@ -8,6 +8,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -48,13 +49,18 @@ public class Internationalization {
 
 	public static String getMessageInternationalization(@NotNull final Integer code) {
 		String language = getLanguage();
+		String message = "";
 		if (language.toLowerCase().equals("zh")) {
-			return  zhtw.getProperty(String.valueOf(code), "");
+			message = zhtw.getProperty(String.valueOf(code), "");
 		} else if (language.toLowerCase().equals("en")) {
-			return  enus.getProperty(String.valueOf(code), "");
+			message =  enus.getProperty(String.valueOf(code), "");
 		} else {
-			return zhtw.getProperty(String.valueOf(code), "");
+			message = zhtw.getProperty(String.valueOf(code), "");
 		}
+		if(!StringUtils.hasText(message)&&!language.toLowerCase().equals("zh")) {
+			message =  zhtw.getProperty(String.valueOf(code), "");
+		}
+		return message;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -69,11 +75,11 @@ public class Internationalization {
 			language = request.getHeader("language").toString();
 		}
 		if (!StringUtils.hasText(language)){
-			RedisTemplate<String, String> redisTemplate = (RedisTemplate<String, String>) SpringContextUtil.getBean("redisTemplate");
+			StringRedisTemplate stringRedisTemplate = (StringRedisTemplate) SpringContextUtil.getBean("stringRedisTemplate");
 			ICurrentUser iCurrentUser = (ICurrentUser) SpringContextUtil.getBean("currentUserUtil");
 			AdminUser adminUser =  (AdminUser)iCurrentUser.getCurrentUser();
 			if(adminUser!=null) {
-				language = redisTemplate.opsForValue().get(adminUser.getId()+"_language");
+				language = stringRedisTemplate.opsForValue().get(adminUser.getId()+"_language");
 			}
 		}
 		if (!StringUtils.hasText(language)){

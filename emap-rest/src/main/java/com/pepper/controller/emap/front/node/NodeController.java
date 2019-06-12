@@ -259,8 +259,8 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		int totalRowNum = sheet.getLastRowNum();
 		List<Node> list = new ArrayList<Node>();
 		if(!check(sheet.getRow(0))) {
-			resultData.setCode(4000003);
-			resultData.setMessage("数据错误！（非设备结构数据）");
+			resultData.setCode(1100001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(1100001) );
 			return resultData;
 		}
 		for(int i = 1 ; i <= totalRowNum ; i++)
@@ -276,8 +276,8 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			List<com.pepper.model.emap.map.Map> listMap = this.mapService.findByName(getCellValue(row.getCell(4)).toString());
 			
 			if(listMap.size()!=1) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行，map数据错误");
+				resultData.setCode(1100002);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100002).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}else {
 				node.setMapId(listMap.get(0).getId());
@@ -290,32 +290,32 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				node.setWarningLevel(Integer.valueOf(getCellValue(row.getCell(10)).toString()));
 			}
 			if(!StringUtils.hasText(node.getCode())) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行，code数据错误");
+				resultData.setCode(1100003);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100003).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}
 			
 			if(!StringUtils.hasText(node.getName())) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行，name数据错误");
+				resultData.setCode(1100004);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100004).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}
 			
 			if(!StringUtils.hasText(node.getSource())) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行，source数据错误");
+				resultData.setCode(1100005);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100005).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}
 			
 			if(!StringUtils.hasText(node.getSourceCode())) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行,sourceCode数据错误");
+				resultData.setCode(1100006);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100006).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}
 			
 			if(!StringUtils.hasText(node.getMapId())) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行,map数据错误");
+				resultData.setCode(1100007);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100007).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}
 			
@@ -412,29 +412,29 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			}else {
 				List<NodeType> listNodeType = this.nodeTypeService.findByName(node.getNodeTypeId());
 				if(listNodeType.size()!=1) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，nodeType数据错误");
+					resultData.setCode(1100008);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1100008).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}else {
 					node.setNodeTypeId(listNodeType.get(0).getId());
 				}
 				
 				if(!StringUtils.hasText(node.getNodeTypeId())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行nodeType数据错误");
+					resultData.setCode(1100009);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1100009).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 			}
 			
 			if(nodeService.findByCode(node.getCode())!=null) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行，"+node.getCode()+"已存在");
+				resultData.setCode(1100010);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100010).replace("{1}", String.valueOf(i)).replace("{2}", node.getCode()));
 				return resultData;
 			}
 			
 			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！第"+i+"行，"+node.getSourceCode()+"已存在");
+				resultData.setCode(1100011);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1100011).replace("{1}", String.valueOf(i)).replace("{2}", node.getSourceCode()));
 				return resultData;
 			}
 			list.add(node);

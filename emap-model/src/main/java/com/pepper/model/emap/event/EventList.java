@@ -69,6 +69,12 @@ public class EventList extends BaseModel  {
 	@Column(name ="assign_date")
 	private Date assignDate;
 	
+	@Column(name ="is_special")
+	private Boolean isSpecial;
+	
+	@Column(name ="is_not_found_employee")
+	private Boolean isNotFoundEmployee;
+	
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -195,6 +201,22 @@ public class EventList extends BaseModel  {
 
 	public void setAssignDate(Date assignDate) {
 		this.assignDate = assignDate;
+	}
+
+	public Boolean getIsSpecial() {
+		return isSpecial;
+	}
+
+	public void setIsSpecial(Boolean isSpecial) {
+		this.isSpecial = isSpecial;
+	}
+
+	public Boolean getIsNotFoundEmployee() {
+		return isNotFoundEmployee;
+	}
+
+	public void setIsNotFoundEmployee(Boolean isNotFoundEmployee) {
+		this.isNotFoundEmployee = isNotFoundEmployee;
 	}
 	
 	

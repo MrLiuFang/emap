@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
@@ -161,8 +162,8 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	        Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();
 			if(!check(sheet.getRow(0))) {
-				resultData.setCode(4000003);
-				resultData.setMessage("数据错误！（非staff结构数据）");
+				resultData.setCode(1200001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(1200001) );
 				return resultData;
 			}
 			for(int i = 1 ; i <= totalRowNum ; i++)
@@ -174,8 +175,8 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				staff.setPassword(getCellValue(row.getCell(2)).toString());
 				staff.setIdCard(getCellValue(row.getCell(3)).toString());
 				if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，"+staff.getIdCard()+"已存在");
+					resultData.setCode(1200002);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1200002).replace("{1}", String.valueOf(i)).replace("{2}", staff.getIdCard()));
 					return resultData;
 				}
 //				String needChangePassword = getCellValue(row.getCell(4)).toString().toLowerCase();
@@ -209,16 +210,16 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				if(StringUtils.hasText(site)) {
 					List<SiteInfo> listSiteInfo = this.siteInfoService.findByName(site);
 					if(listSiteInfo.size()!=1) {
-						resultData.setCode(4000003);
-						resultData.setMessage("数据错误！第"+i+"行，site数据错误(空值/找到多个site)");
+						resultData.setCode(1200003);
+						resultData.setMessage(Internationalization.getMessageInternationalization(1200003).replace("{1}", String.valueOf(i)));
 						return resultData;
 					}
 					staff.setSiteId(listSiteInfo.get(0).getId());
 				}
 				
 				if(!StringUtils.hasText(staff.getName())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，name不能为空");
+					resultData.setCode(1200004);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1200004).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 				
@@ -229,8 +230,8 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 //				}
 				
 				if(!StringUtils.hasText(staff.getPassword())) {
-					resultData.setCode(4000003);
-					resultData.setMessage("数据错误！第"+i+"行，password不能为空");
+					resultData.setCode(1200005);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1200005).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 				

@@ -146,6 +146,8 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		resultData.setData("role", role);
 		if(map.containsKey("language")) {
 			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
+		}else if(this.request.getParameter("language")!=null) {
+			stringValueOperationsService.set(userReal.getId()+"_language", request.getParameter("language")==null?"zh":request.getParameter("language") );
 		}
 		
 		systemLogService.log("user login", this.request.getRequestURI(),userReal);

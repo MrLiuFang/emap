@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.event.EventDispatch;
@@ -97,6 +98,8 @@ public class EventScheduler {
 			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
 					assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getResult());
+					eventList.setIsSpecial(true);
+					eventListService.update(eventList);
 					return ;
 				}
 			}
@@ -138,22 +141,26 @@ public class EventScheduler {
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 				if(endTime<=startTime) {
 					if((time>=startTime&&time<=2359)||(time<=endTime&&time>=1)) {
-						user=this.getCurrentHandleUser(eventList, departmentGroup);
+						user=this.getCurrentHandleUser( departmentGroup);
 						break;
 					}
 				}else {
 					if(time>=startTime&&time<=endTime) {
-						user=this.getCurrentHandleUser(eventList, departmentGroup);
+						user=this.getCurrentHandleUser( departmentGroup);
 						break;
 					}
 				}
 			}
 		}
 		if(user== null) {
+			eventList.setIsNotFoundEmployee(true);
+			eventListService.update(eventList);
 			return false;
 		}	
+		eventList.setIsNotFoundEmployee(false);
+		eventListService.update(eventList);
 		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工单",eventList.getEventName(),eventList.getId());
+		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: Internationalization.getMessageInternationalization(7000001),eventList.getEventName(),eventList.getId());
 		eventList.setCurrentHandleUser(user.getId());
 		eventList.setStatus("A");
 		eventList.setAssignDate(new Date());
@@ -174,7 +181,7 @@ public class EventScheduler {
 		return true;
 	}
 	
-	private AdminUser getCurrentHandleUser(EventList eventList,DepartmentGroup departmentGroup) {
+	private AdminUser getCurrentHandleUser(DepartmentGroup departmentGroup) {
 		List<AdminUser> list = adminUserService.findByDepartmentGroupId(departmentGroup.getId(), true);
 		for(AdminUser user : list) {
 			return user;

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.ResultEnum.Status;
 import com.pepper.core.base.BaseController;
@@ -185,7 +186,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(int i = 0; i <arrayNode.size(); i++) {
 			EventList eventList = eventListService.findById(arrayNode.get(i).asText());
 			if(StringUtils.hasText(eventList.getOperator())){
-				resultData.setMessage(new String("操作失败！("+eventList.getEventName()+")被其它用户以处理！"));
+				resultData.setMessage(Internationalization.getMessageInternationalization(9000001).replace("{1}", eventList.getEventName()));
 				resultData.setStatus(Status.LOGIC_ERROR.getKey());
 				return resultData;
 			}
@@ -324,13 +325,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
 		if(eventList==null) {
-			resultData.setCode(800001);
-			resultData.setMessage("事件无效");
+			resultData.setCode(9000002);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000002));
 			return resultData;
 		}
 		if(!map.containsKey("employeeId")) {
-			resultData.setCode(800002);
-			resultData.setMessage("请选择工人");
+			resultData.setCode(900003);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000003));
 			return resultData;
 		}
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
@@ -357,7 +358,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		try {
 			String employeeId = map.get("employeeId").toString();
 			String deviceId = valueOperationsService.get("userDeviceId_"+employeeId);
-			messageService.send(deviceId, "您有新的工单",eventList.getEventName(),eventList.getId());
+			messageService.send(deviceId, Internationalization.getMessageInternationalization(7000001),eventList.getEventName(),eventList.getId());
 		}catch (Exception e) {
 			// TODO: handle exception
 		}
