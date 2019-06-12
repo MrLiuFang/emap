@@ -149,10 +149,14 @@ public class EventScheduler {
 			}
 		}
 		if(user== null) {
+			List<AdminUser> list = this.adminUserService.findByDepartmentId(departmentId, true);
+			user = getCurrentHandleUser(list);
+		}	
+		if(user== null) {
 			eventList.setIsNotFoundEmployee(true);
 			eventListService.update(eventList);
 			return false;
-		}	
+		}
 		eventList.setIsNotFoundEmployee(false);
 		eventListService.update(eventList);
 		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
@@ -179,6 +183,10 @@ public class EventScheduler {
 	
 	private AdminUser getCurrentHandleUser(DepartmentGroup departmentGroup) {
 		List<AdminUser> list = adminUserService.findByDepartmentGroupId(departmentGroup.getId(), true);
+		return getCurrentHandleUser(list);
+	}
+	
+	private AdminUser getCurrentHandleUser(List<AdminUser> list) {
 		for(AdminUser user : list) {
 			return user;
 		}
