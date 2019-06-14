@@ -2,6 +2,7 @@ package com.pepper.model.emap.node;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.DynamicUpdate;
@@ -19,7 +20,7 @@ public class Node extends BaseModel {
 	 */
 	private static final long serialVersionUID = -2480337669147928582L;
 	
-	@Column(name = "code",unique = true)
+	@Column(name = "code",unique = true,nullable=false)
 	private String code;
 	
 	@Column(name = "name")
@@ -28,13 +29,13 @@ public class Node extends BaseModel {
 	@Column(name = "source")
 	private String source;
 	
-	@Column(name = "source_code",unique = true)
+	@Column(name = "source_code",unique = true,nullable=false)
 	private String sourceCode;
 	
 	@Column(name = "map_id")
 	private String mapId;
 	
-	@Column(name = "node_type_id")
+	@Column(name = "node_type_id",nullable=false)
 	private String nodeTypeId;
 	
 	@Column(name = "parent_node")

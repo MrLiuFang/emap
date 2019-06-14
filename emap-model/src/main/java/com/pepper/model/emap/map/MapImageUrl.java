@@ -18,7 +18,7 @@ public class MapImageUrl extends BaseModel {
 	 */
 	private static final long serialVersionUID = -264496489362510062L;
 	
-	@Column(name = "map_id")
+	@Column(name = "map_id",nullable=false)
 	private String mapId;
 	
 	@Column(name = "code")

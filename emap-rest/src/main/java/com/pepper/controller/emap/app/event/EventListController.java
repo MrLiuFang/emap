@@ -38,6 +38,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
@@ -53,6 +54,7 @@ import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.event.ActionListService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
+import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
@@ -78,6 +80,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //	获取发生告警的设备位置图
 	@Reference
 	private EventListService eventListService;
+	
+	@Reference
+	private EventRuleService eventRuleService;
 	
 	@Resource
 	private Environment environment;
@@ -268,7 +273,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		
 		resultData.setData("remark", eventList.getContent());
 		resultData.setData("currentHelpId", eventList.getHelpId());
-		resultData.setData("isUrgent", eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
+		resultData.setData("isUrgent", eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		if(StringUtils.hasText(eventList.getCurrentHandleUser())) {
 			if(eventList.getCurrentHandleUser().equals(user.getId())) {
@@ -452,7 +457,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(node !=null) {
 			eventListVo.setNodeName(node.getName());
 		}
-		eventListVo.setIsUrgent(eventList.getWarningLevel()>=Integer.valueOf(environment.getProperty("warningLevel", "0")));
+		eventListVo.setIsUrgent(eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
 		EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 		if(eventDispatch!=null) {
 			AdminUser dispatchFrom = this.adminUserService.findById(eventDispatch.getDispatchFrom());
@@ -473,6 +478,16 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		return returnList;
 	}
+	
+	private Integer getUrgentWarningLevel(EventList eventList) {
+		Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+		EventRule eventRule = this.eventRuleService.findByNodeId(node.getId());
+		if(eventRule == null) {
+			eventRule = eventRuleService.findByNodeTypeId(node.getNodeTypeId());
+		}
+		return eventRule==null?0:eventRule.getUrgentWarningLevel();
+	}
+	
 	
 	@RequestMapping("/toMp3")
 	@ResponseBody

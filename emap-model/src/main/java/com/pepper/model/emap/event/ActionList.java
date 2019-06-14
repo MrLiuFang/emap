@@ -20,7 +20,7 @@ public class ActionList extends BaseModel {
 	 */
 	private static final long serialVersionUID = 1306017114585728921L;
 
-	@Column(name ="event_list_id")
+	@Column(name ="event_list_id",nullable=false)
 	private String eventListId;
 	
 	@Column(name ="task_id")

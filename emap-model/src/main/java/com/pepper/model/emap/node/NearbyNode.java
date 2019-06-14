@@ -18,10 +18,10 @@ public class NearbyNode  extends BaseModel {
 	 */
 	private static final long serialVersionUID = 6897127330587140083L;
 
-	@Column(name = "node_id")
+	@Column(name = "node_id",nullable=false)
 	private String nodeId;
 	
-	@Column(name = "nearby_node_id")
+	@Column(name = "nearby_node_id",nullable=false)
 	private String nearbyNodeId;
 
 	public String getNodeId() {

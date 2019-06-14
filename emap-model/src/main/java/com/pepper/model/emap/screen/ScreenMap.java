@@ -19,10 +19,10 @@ public class ScreenMap extends BaseModel {
 	 */
 	private static final long serialVersionUID = 7252980146297351728L;
 
-	@Column(name = "screen_id")
+	@Column(name = "screen_id",nullable=false)
 	private String screenId;
 
-	@Column(name = "map_id")
+	@Column(name = "map_id",nullable=false)
 	private String mapId;
 	
 

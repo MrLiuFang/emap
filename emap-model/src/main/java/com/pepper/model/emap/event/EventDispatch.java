@@ -26,13 +26,13 @@ public class EventDispatch extends BaseModel{
 	@Column(name ="event_id")
 	private String eventId;
 	
-	@Column(name ="event_list_id")
+	@Column(name ="event_list_id",nullable=false)
 	private String eventListId;
 	
 	@Column(name ="handle_time")
 	private Date handleTime; 
 	
-	@Column(name ="operator")
+	@Column(name ="operator",nullable=false)
 	private String operator; 
 	
 	@Column(name ="dispatch_from")

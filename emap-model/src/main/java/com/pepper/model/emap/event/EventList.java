@@ -33,7 +33,7 @@ public class EventList extends BaseModel  {
 	@Column(name = "source")
 	private String source;
 	
-	@Column(name = "source_code")
+	@Column(name = "source_code",nullable=false)
 	private String sourceCode;
 	
 	@Column(name = "warning_level")
