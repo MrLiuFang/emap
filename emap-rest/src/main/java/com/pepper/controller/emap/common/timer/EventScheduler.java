@@ -27,7 +27,7 @@ import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
-//@Component
+@Component
 public class EventScheduler {
 
 	@Reference
@@ -105,11 +105,17 @@ public class EventScheduler {
 				Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""));
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
-				if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-					assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
-					return ;
+				if(to<from) {
+					if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
+						assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+						return ;
+					}
+				}else {
+					if(time>=from&&time<=to) {
+						assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+						return ;
+					}
 				}
-				
 			}
 			
 			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
@@ -123,6 +129,7 @@ public class EventScheduler {
 			}
 			
 		}catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -160,7 +167,7 @@ public class EventScheduler {
 		eventList.setIsNotFoundEmployee(false);
 		eventListService.update(eventList);
 		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: Internationalization.getMessageInternationalization(7000001),eventList.getEventName(),eventList.getId());
+		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
 		eventList.setCurrentHandleUser(user.getId());
 		eventList.setStatus("A");
 		eventList.setAssignDate(new Date());
@@ -196,7 +203,7 @@ public class EventScheduler {
 	public static void main(String agrs[]) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
 		String test = simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", "");
-		System.out.println(test);
+		System.out.println( Integer.valueOf("00:00".replaceFirst("^0*", "").replace(":", "")));
 	}
 	
 	private Node getNode(String sourceCode) {
