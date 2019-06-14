@@ -372,7 +372,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		actionListService.save(actionList);
 		
-		systemLogService.log("App event finish", this.request.getRequestURL().toString());
+		systemLogService.log("App event finish", this.request.getRequestURL().toString(),str);
 		return resultData;
 	}
 	
@@ -485,7 +485,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(eventRule == null) {
 			eventRule = eventRuleService.findByNodeTypeId(node.getNodeTypeId());
 		}
-		return eventRule==null?0:eventRule.getUrgentWarningLevel();
+		return eventRule==null?0:eventRule.getWarningLevel();
 	}
 	
 	

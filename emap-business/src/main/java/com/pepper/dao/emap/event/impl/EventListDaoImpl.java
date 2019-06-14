@@ -24,11 +24,11 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		StringBuffer jpql = new StringBuffer();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		jpql.append(" from EventList where id in ( ");
-		jpql.append("  select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<=");
-		jpql.append(" (select  er.urgentWarningLevel from EventRule er join Node n on er.nodeId=n.id where el.sourceCode=n.sourceCode) ) ");
+		jpql.append("  select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<");
+		jpql.append(" (select  er.warningLevel from EventRule er join Node n on er.nodeId=n.id where el.sourceCode=n.sourceCode) ) ");
 		jpql.append( " or id in ( ");
-		jpql.append(" select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<=");
-		jpql.append(" (select  er.urgentWarningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode) ) ");
+		jpql.append(" select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<");
+		jpql.append(" (select  er.warningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode) ) ");
 		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 		
