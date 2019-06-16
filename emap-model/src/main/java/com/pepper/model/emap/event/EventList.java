@@ -75,6 +75,9 @@ public class EventList extends BaseModel  {
 	@Column(name ="is_not_found_employee")
 	private Boolean isNotFoundEmployee;
 	
+	@Column(name ="is_not_found_event_rule")
+	private Boolean isNotFoundEventRule;
+	
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -217,6 +220,14 @@ public class EventList extends BaseModel  {
 
 	public void setIsNotFoundEmployee(Boolean isNotFoundEmployee) {
 		this.isNotFoundEmployee = isNotFoundEmployee;
+	}
+
+	public Boolean getIsNotFoundEventRule() {
+		return isNotFoundEventRule;
+	}
+
+	public void setIsNotFoundEventRule(Boolean isNotFoundEventRule) {
+		this.isNotFoundEventRule = isNotFoundEventRule;
 	}
 	
 	

@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,17 +20,20 @@ import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventRule;
+import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.EventRuleService;
+import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
 @Component
+@Order(value=Ordered.HIGHEST_PRECEDENCE)
 public class EventScheduler {
 
 	@Reference
@@ -53,6 +59,9 @@ public class EventScheduler {
 	
 	@Reference
 	private DepartmentGroupService departmentGroupService;
+	
+	@Reference
+	private HelpListService helpListService;
 	
 
 	@Scheduled(fixedRate = 5000)
@@ -81,6 +90,10 @@ public class EventScheduler {
 						eventRule = this.eventRuleService.findByNodeTypeId(node.getNodeTypeId());
 						if(eventRule!=null) {
 							eventRule(eventList,eventRule);
+						}else {
+							eventList.setIsNotFoundEventRule(true);
+							eventList.setIsNotFoundEmployee(true);
+							eventListService.update(eventList);
 						}
 					}
 				}
@@ -128,6 +141,8 @@ public class EventScheduler {
 				return ;
 			}
 			
+			
+			
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -165,17 +180,27 @@ public class EventScheduler {
 			return false;
 		}
 		eventList.setIsNotFoundEmployee(false);
-		eventListService.update(eventList);
-		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
 		eventList.setCurrentHandleUser(user.getId());
 		eventList.setStatus("A");
 		eventList.setAssignDate(new Date());
 		eventList.setContent("系統自動派單");
+		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+		if(node!=null) {
+			List<HelpList> list = helpListService.findByNodeTypeId(node.getNodeTypeId());
+			StringBuffer sb = new StringBuffer("[");
+			for (int i = 0, len = list.size(); i < len; ++i) {
+	            if (i > 0) {
+	                sb.append(',');
+	            }
+	            sb.append("\""+list.get(i).getId()+"\"");
+	        }
+			sb.append("]");
+			eventList.setHelpId(sb.toString());
+		}
 		if(!StringUtils.hasText(eventList.getCurrentHandleUser())) {
 			return false;
 		}
-		updateEventListStatus(eventList);
+		eventListService.update(eventList);
 		
 		EventDispatch eventDispatch = new EventDispatch();
 		eventDispatch.setOperator(user.getId());
@@ -185,6 +210,9 @@ public class EventScheduler {
 		eventDispatch.setDispatchFrom("000000000000");
 		eventDispatch.setTitle(eventList.getEventName());
 		eventDispatchService.save(eventDispatch);
+		
+		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
+		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
 		return true;
 	}
 	
@@ -210,7 +238,4 @@ public class EventScheduler {
 		return nodeService.findBySourceCode(sourceCode);
 	}
 	
-	private void updateEventListStatus(EventList eventList) {
-		eventListService.update(eventList);
-	}
 }

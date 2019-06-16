@@ -3,6 +3,7 @@ package com.pepper.controller.emap.front.systemlog;
 import java.util.Date;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -40,7 +41,7 @@ public class SystemLogController extends BaseControllerImpl implements BaseContr
 		if(endDate!=null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
 		}
-		pager.getJpqlParameter().setSortParameter("createDate", "DESC");
+		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		pager = systemLogService.findNavigator(pager);
 		pager.setData("systemlog",pager.getResults());
 		pager.setResults(null);

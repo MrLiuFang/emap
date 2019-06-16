@@ -28,8 +28,8 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
-	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent,String id) {
-		return eventListDao.List(pager, warningLevel,isUrgent,id);
+	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
+		return eventListDao.List(pager,isUrgent);
 	}
 
 	@Override

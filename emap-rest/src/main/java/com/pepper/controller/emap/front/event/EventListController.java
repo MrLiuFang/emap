@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -140,7 +141,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	public Object list(Boolean isUrgent,String id) {
 		Pager<EventList> pager = new Pager<EventList>();
-		pager = eventListService.List(pager, Integer.valueOf(environment.getProperty("warningLevel", "0")),isUrgent,id);
+		pager = eventListService.List(pager,isUrgent);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
@@ -158,6 +159,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
+		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -233,6 +235,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
+		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);

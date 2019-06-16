@@ -20,7 +20,7 @@ import com.pepper.model.emap.event.HelpList;
 public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventListDaoEx {
 
 	@Override
-	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent,String id) {
+	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		jpql.append(" from EventList where id in ( ");
@@ -28,7 +28,7 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		jpql.append(" (select  er.warningLevel from EventRule er join Node n on er.nodeId=n.id where el.sourceCode=n.sourceCode) ) ");
 		jpql.append( " or id in ( ");
 		jpql.append(" select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<");
-		jpql.append(" (select  er.warningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode) ) ");
+		jpql.append(" (select  er.warningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode) ) order by createDate desc  ");
 		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 		

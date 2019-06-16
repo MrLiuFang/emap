@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -134,7 +135,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			Pager<EventList> pager = new Pager<EventList>();
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
-			pager.getJpqlParameter().setSortParameter("assignDate", "DESC");
+			pager.getJpqlParameter().setSortParameter("assignDate", Direction.DESC);
 			pager = eventListService.findNavigator(pager);
 			pager.setData("eventList",convertVo(pager.getResults()));
 			pager.setResults(null);
@@ -143,7 +144,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			Pager<ActionList> pager1 = new Pager<ActionList>();
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","B");
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_operator",adminUser.getId());
-			pager1.getJpqlParameter().setSortParameter("assignDate", "DESC");
+			pager1.getJpqlParameter().setSortParameter("assignDate", Direction.DESC);
 			pager1 = actionListService.findNavigator(pager1);
 			List<ActionList> list = pager1.getResults();
 			List<EventListVo> listEventList = new ArrayList<EventListVo>();

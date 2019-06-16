@@ -25,7 +25,7 @@ public interface EventListService extends BaseService<EventList> {
 	 * @param warningLevel
 	 * @return
 	 */
-	public Pager<EventList> List(Pager<EventList> pager, Integer warningLevel,Boolean isUrgent,String id);
+	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent);
 	
 	/**
 	 * 查询历史事件
