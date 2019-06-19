@@ -95,6 +95,11 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
 		staff.setAvailableTime(new Date());
+		if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
+			resultData.setCode(1200002);
+			resultData.setMessage(Internationalization.getMessageInternationalization(1200002).replace("第{1}行，", "").replace("{2}", staff.getIdCard()));
+			return resultData;
+		}
 		staffService.save(staff);
 		systemLogService.log("staff add", this.request.getRequestURL().toString());
 		return resultData;
@@ -107,6 +112,16 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
+		if(StringUtils.hasText(staff.getIdCard())){
+			List<Staff> list = staffService.findByIdCard(staff.getIdCard());
+			for(Staff obj : list) {
+				if(!obj.getId().equals(staff.getId())) {
+					resultData.setCode(1200002);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1200002).replace("第{1}行，", "").replace("{2}", staff.getIdCard()));
+					return resultData;
+				}
+			}
+		}
 		staffService.update(staff);
 		systemLogService.log("staff update", this.request.getRequestURL().toString());
 		return resultData;

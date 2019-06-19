@@ -328,7 +328,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 					helpListVo.add(obj1);
 				}
 			}else {
-				helpListVo.add(obj1);
+//				helpListVo.add(obj1);
 			}
 		}
 		return helpListVo;
