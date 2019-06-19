@@ -14,6 +14,7 @@ import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -545,6 +546,32 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		resultData.setData("eventList", list);
 		systemLogService.log("event to operator round robin", this.request.getRequestURL().toString());
 		return resultData;
+	}
+	
+	@RequestMapping("/workbench/door/attendance")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object attendance(String eventListId,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date endDate) {
+		ResultData resultData = new ResultData();
+		Pager<EventList> pager = new Pager<EventList>();
+		EventList eventList = this.eventListService.findById(eventListId);
+		if(eventList!=null) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_sourceCode", eventList.getSourceCode());
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTEQUAL+"_id",eventListId);
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_warningLevel", 0);
+			if(startDate!=null) { 
+				pager.getJpqlParameter().setSearchParameter(SearchConstant.GREATER_THAN_OR_EQUAL_TO+"_createDate", startDate);
+			}
+			if(endDate!=null) {
+				pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
+			}
+			pager = eventListService.findNavigator(pager);
+			pager.setData("eventList", convertVo(pager.getResults()));
+			pager.setResults(null);
+			return pager;
+		}
+		return resultData;
+		
 	}
 	
 	
