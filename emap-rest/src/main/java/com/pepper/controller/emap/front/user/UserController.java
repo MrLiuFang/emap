@@ -87,6 +87,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 	public Object getUserInfo() {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		if(adminUser!=null) {
+			adminUser = this.adminUserService.findById(adminUser.getId());
+		}else {
+			return resultData;
+		}
 		adminUser.setPassword("");
 		AdminUserVo  adminUserVo = new AdminUserVo();
 		BeanUtils.copyProperties(adminUser, adminUserVo);
@@ -105,10 +110,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId) {
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		
-		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId);
+		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork);
 		Role role = null;
 		for (AdminUser u : pager.getResults()) {
 			role = roleService.findByUserId(u.getId());
@@ -221,6 +226,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return resultData;
 		}
 		
+		if(adminUser==null||!adminUser.getIsWork()) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(4000013));
+			resultData.setCode(4000013);
+			return resultData;
+		}
+		
 		Role role = roleService.findByUserId(adminUser.getId());
 		if (role == null) {
 			resultData.setCode(4000001);
@@ -236,6 +247,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 		
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		eventListService.handover(adminUser.getId(), currentUser.getId());
+		if(currentUser!=null) {
+			currentUser = this.adminUserService.findById(currentUser.getId());
+			currentUser.setIsWork(false);
+			this.adminUserService.update(currentUser);
+		}
 		systemLogService.log("work handover", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -428,6 +444,22 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUserService.update(adminUser);
 		jdkValueOperationsService.set(adminUser.getId(), adminUser);
 		systemLogService.log("user update head portrait", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/work")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object work(@RequestBody java.util.Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		adminUser = adminUserService.findById(adminUser.getId());
+		if(map.containsKey("work")) {
+			adminUser.setIsWork(Boolean.valueOf(map.get("work").toString()));
+			adminUserService.update(adminUser);
+		}
+		
+		systemLogService.log("app user work", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

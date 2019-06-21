@@ -73,6 +73,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 	public Object getUserInfo() {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		if(adminUser!=null) {
+			adminUser = this.adminUserService.findById(adminUser.getId());
+		}else {
+			return resultData;
+		}
 		adminUser.setPassword("");
 		AdminUserVo  adminUserVo = new AdminUserVo();
 		BeanUtils.copyProperties(adminUser, adminUserVo);
