@@ -26,6 +26,7 @@ import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.vo.AdminUserEventAssistVo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
 import com.pepper.model.emap.vo.DepartmentVo1;
@@ -66,6 +67,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private DepartmentGroupService departmentGroupService;
+	
+	@Reference
+	private com.pepper.service.emap.event.EventListAssistService EventListAssistService;
 	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
@@ -130,7 +134,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 //		}
 //		resultData.setData("user", returnList);
 //		
-//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+//		
 //		return resultData;
 		
 		ResultData resultData = new ResultData();
@@ -160,8 +164,8 @@ public class UserController extends BaseControllerImpl implements BaseController
 			listDepartmentGroupV1.add(departmentGroupV1);
 		}
 		departmentVo1.setDepartmentGroup(listDepartmentGroupV1);
-			
 		resultData.setData("user", departmentVo1);
+		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -174,6 +178,30 @@ public class UserController extends BaseControllerImpl implements BaseController
 		
 		systemLogService.log("app bind device id", this.request.getRequestURL().toString());
 		return new ResultData();
-	} 
+	}
+	
+	@RequestMapping(value = "/department/user")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object departmentUser(String eventListId) {
+		ResultData resultData = new ResultData();
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
+		currentUser = adminUserService.findById(currentUser.getId());
+		List<AdminUser> list = adminUserService.findByDepartmentId(currentUser.getDepartmentId(),currentUser.getId());
+		List<AdminUserEventAssistVo> returnList = new ArrayList<AdminUserEventAssistVo>();
+		for(AdminUser user : list) {
+			AdminUserEventAssistVo adminUserEventAssistVo = new AdminUserEventAssistVo();
+			BeanUtils.copyProperties(user, adminUserEventAssistVo);
+			if(StringUtils.hasText(user.getHeadPortrait())) {
+				adminUserEventAssistVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
+			}
+			adminUserEventAssistVo.setPassword("");
+			adminUserEventAssistVo.setIsRequestAssist(this.EventListAssistService.findEventListAssist(eventListId, user.getId(), false)==null?false:true);
+			returnList.add(adminUserEventAssistVo);
+		}
+		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+		resultData.setData("user", returnList);
+		return resultData;
+	}
 	
 }

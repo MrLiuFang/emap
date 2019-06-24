@@ -8,7 +8,9 @@ import com.pepper.model.emap.event.ActionList;
 public interface ActionListDao extends BaseDao<ActionList> {
 
 
-	public ActionList findByEventId(String eventId); 
+	public ActionList findFirstByEventId(String eventId); 
+	
+	public ActionList findFirstByEventListAssistId(String eventListAssistId); 
 	
 	public List<ActionList> findByEventListId(String eventListId); 
 }

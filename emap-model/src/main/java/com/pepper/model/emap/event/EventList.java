@@ -78,6 +78,9 @@ public class EventList extends BaseModel  {
 	@Column(name ="is_not_found_event_rule")
 	private Boolean isNotFoundEventRule;
 	
+	@Column(name = "id_card" ,unique= true)
+	private String idCard;
+	
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -228,6 +231,14 @@ public class EventList extends BaseModel  {
 
 	public void setIsNotFoundEventRule(Boolean isNotFoundEventRule) {
 		this.isNotFoundEventRule = isNotFoundEventRule;
+	}
+
+	public String getIdCard() {
+		return idCard;
+	}
+
+	public void setIdCard(String idCard) {
+		this.idCard = idCard;
 	}
 	
 	

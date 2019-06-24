@@ -1,5 +1,6 @@
 package com.pepper.dao.emap.event;
 
+import java.util.Date;
 import java.util.List;
 
 import com.pepper.core.Pager;
@@ -27,6 +28,25 @@ public interface EventListDaoEx {
 	 * @return
 	 */
 	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom);
+	
+	/**
+	 *  查询打卡记录
+	 * @param pager
+	 * @param eventListId
+	 * @param startDate
+	 * @param endDate
+	 * @param staffId
+	 * @return
+	 */
+	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,Date startDate,Date endDate,String staffId);
+	
+	/**
+	 * 获取我被请求协助的事件
+	 * @param pager
+	 * @param userId
+	 * @return
+	 */
+	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId);
 	
 
 }

@@ -85,6 +85,12 @@ public class ActionList extends BaseModel {
 	
 	@Column(name ="operatorcontent")
 	private String operatorContent;
+	
+	@Column(name ="is_assist")
+	private Boolean isAssist;
+	
+	@Column(name ="event_list_assist_id")
+	private String eventListAssistId;
 
 	
 	public String getEventListId() {
@@ -264,6 +270,20 @@ public class ActionList extends BaseModel {
 	public void setFinishDate(Date finishDate) {
 		this.finishDate = finishDate;
 	}
-	
-	
+
+	public Boolean getIsAssist() {
+		return isAssist;
+	}
+
+	public void setIsAssist(Boolean isAssist) {
+		this.isAssist = isAssist;
+	}
+
+	public String getEventListAssistId() {
+		return eventListAssistId;
+	}
+
+	public void setEventListAssistId(String eventListAssistId) {
+		this.eventListAssistId = eventListAssistId;
+	}
 }

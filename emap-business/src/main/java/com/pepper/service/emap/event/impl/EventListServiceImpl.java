@@ -1,5 +1,6 @@
 package com.pepper.service.emap.event.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -49,6 +50,17 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public Pager<EventList> transferList(Pager<EventList> pager, String dispatchFrom) {
 		return eventListDao.transferList(pager, dispatchFrom);
+	}
+
+	@Override
+	public Pager<EventList> doorAttendance(Pager<EventList> pager, String eventListId, Date startDate, Date endDate,
+			String staffId) {
+		return eventListDao.doorAttendance(pager, eventListId, startDate, endDate, staffId);
+	}
+
+	@Override
+	public Pager<EventList> assistEventList(Pager<EventList> pager, String userId) {
+		return eventListDao.assistEventList(pager, userId);
 	}
 	
 
