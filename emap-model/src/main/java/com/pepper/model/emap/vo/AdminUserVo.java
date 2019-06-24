@@ -18,11 +18,21 @@ public class AdminUserVo extends AdminUser {
 	private Role role;
 	
 	private String headPortraitUrl;
-
+	private Boolean isRequestAssist = false;
 	
 	private Department department;
 	
 	private com.pepper.model.emap.department.DepartmentGroup departmentGroup;
+
+
+	public Boolean getIsRequestAssist() {
+		return isRequestAssist;
+	}
+
+
+	public void setIsRequestAssist(Boolean isRequestAssist) {
+		this.isRequestAssist = isRequestAssist;
+	}
 
 
 	public Department getDepartment() {
