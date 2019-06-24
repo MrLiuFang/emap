@@ -29,6 +29,7 @@ import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.vo.AdminUserEventAssistVo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
+import com.pepper.model.emap.vo.DepartmentGroupVo2;
 import com.pepper.model.emap.vo.DepartmentVo1;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
@@ -187,20 +188,26 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		currentUser = adminUserService.findById(currentUser.getId());
-		List<AdminUser> list = adminUserService.findByDepartmentId(currentUser.getDepartmentId(),currentUser.getId());
-		List<AdminUserEventAssistVo> returnList = new ArrayList<AdminUserEventAssistVo>();
-		for(AdminUser user : list) {
-			AdminUserEventAssistVo adminUserEventAssistVo = new AdminUserEventAssistVo();
-			BeanUtils.copyProperties(user, adminUserEventAssistVo);
-			if(StringUtils.hasText(user.getHeadPortrait())) {
-				adminUserEventAssistVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
+		List<DepartmentGroup> listDepartmentGroup = departmentGroupService.findByDepartmentId(currentUser.getDepartmentId());
+		List<DepartmentGroupVo2> listDepartmentGroupVo2 = new ArrayList<DepartmentGroupVo2>();
+		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
+			DepartmentGroupVo2 departmentGroupVo2 = new DepartmentGroupVo2();
+			BeanUtils.copyProperties(departmentGroup, departmentGroupVo2);
+			List<AdminUser> listAdminUser = this.adminUserService.findByDepartmentGroupIdAndIdNot(departmentGroup.getId(),currentUser.getId());
+			List<AdminUserEventAssistVo> listAdminUserVo = new ArrayList<AdminUserEventAssistVo>();
+			for(AdminUser adminUser : listAdminUser) {
+				AdminUserEventAssistVo adminUserVo = new AdminUserEventAssistVo();
+				BeanUtils.copyProperties(adminUser, adminUserVo);
+				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+				adminUserVo.setPassword("");
+				adminUserVo.setIsRequestAssist(this.EventListAssistService.findEventListAssist(eventListId, adminUser.getId(), false)==null?false:true);
+				listAdminUserVo.add(adminUserVo);
 			}
-			adminUserEventAssistVo.setPassword("");
-			adminUserEventAssistVo.setIsRequestAssist(this.EventListAssistService.findEventListAssist(eventListId, user.getId(), false)==null?false:true);
-			returnList.add(adminUserEventAssistVo);
+			departmentGroupVo2.setUser(listAdminUserVo);
+			listDepartmentGroupVo2.add(departmentGroupVo2);
 		}
 		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
-		resultData.setData("user", returnList);
+		resultData.setData("departmentGroup", listDepartmentGroupVo2);
 		return resultData;
 	}
 	
