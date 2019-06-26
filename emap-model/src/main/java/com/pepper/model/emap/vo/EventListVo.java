@@ -41,6 +41,8 @@ public class EventListVo extends EventList {
 	
 	private Staff staff;
 	
+	private Boolean isAssistFinish;
+	
 	public String getNodeName() {
 		return nodeName;
 	}
@@ -121,5 +123,15 @@ public class EventListVo extends EventList {
 	public void setStaff(Staff staff) {
 		this.staff = staff;
 	}
+
+	public Boolean getIsAssistFinish() {
+		return isAssistFinish;
+	}
+
+	public void setIsAssistFinish(Boolean isAssistFinish) {
+		this.isAssistFinish = isAssistFinish;
+	}
+	
+	
 
 }

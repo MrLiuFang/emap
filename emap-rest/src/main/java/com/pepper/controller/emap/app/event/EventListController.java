@@ -70,6 +70,7 @@ import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
+import com.pepper.util.BeanToMapUtil;
 
 import it.sauronsoftware.jave.AudioUtils;
 
@@ -270,25 +271,31 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		
 		List<EventListAssist> listEventListAssist = this.eventListAssistService.findByeventListId(eventList.getId());
-		List<EventListAssistVo> listEventListAssistVo = new ArrayList<EventListAssistVo>();
+//		List<EventListAssistVo> listEventListAssistVo = new ArrayList<EventListAssistVo>();
+		List<Map<String,Object>> assistMap = new ArrayList<Map<String,Object>>();
 		for(EventListAssist eventListAssist : listEventListAssist) {
-			EventListAssistVo eventListAssistVo = new EventListAssistVo();
-			BeanUtils.copyProperties(eventListAssist, eventListAssistVo);
-			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
-			if(actionList !=null) {
-				eventListAssistVo.setActionList(convertActionListVo(actionList,node));
-			}
+			Map<String,Object> map = new HashMap<String, Object>();
+			map = BeanToMapUtil.transBeanToMap(eventListAssist);
+//			EventListAssistVo eventListAssistVo = new EventListAssistVo();
+//			BeanUtils.copyProperties(eventListAssist, eventListAssistVo);
+//			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
+//			if(actionList !=null) {
+//				eventListAssistVo.setActionList(convertActionListVo(actionList,node));
+//			}
 			if(StringUtils.hasText(eventListAssist.getUserId())) {
 				AdminUser assistUser = this.adminUserService.findById(eventListAssist.getUserId());
-				AdminUserVo adminUserVo = new AdminUserVo();
-				BeanUtils.copyProperties(assistUser, adminUserVo);
-				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUserVo.getHeadPortrait()));
-				eventListAssistVo.setUser(adminUserVo);
+//				AdminUserVo adminUserVo = new AdminUserVo();
+//				BeanUtils.copyProperties(assistUser, adminUserVo);
+//				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUserVo.getHeadPortrait()));
+//				eventListAssistVo.setUser(adminUserVo);
+				map.put("userName", assistUser.getName());
+				map.put("account", assistUser.getAccount());
+				
 			}
-			listEventListAssistVo.add(eventListAssistVo);
+			assistMap.add(map);
 		}
 		
-		resultData.setData("assistList", listEventListAssistVo);
+		resultData.setData("assistList", assistMap);
 		systemLogService.log("App event info", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -484,6 +491,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object assist(@RequestBody String data) throws IOException {
+		AdminUser user = (AdminUser) this.getCurrentUser();
+		
 		ResultData resultData = new ResultData();
 		ObjectMapper objectMapper = new ObjectMapper();
 		JsonNode jsonNode = objectMapper.readTree(data);
@@ -512,6 +521,19 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 				eventListAssist.setUserId(userNode.asText(""));
 				eventListAssist.setIsFinish(false);
 				this.eventListAssistService.save(eventListAssist);
+				
+				EventDispatch eventDispatchOld = this.eventDispatchService.findEventDispatch(eventList.getId(),user.getId());
+				
+				EventDispatch eventDispatch = new EventDispatch();
+				eventDispatch.setEventId(eventList.getEventId());
+				eventDispatch.setEventListId(eventList.getId());
+				eventDispatch.setOperator(userNode.asText(""));
+				eventDispatch.setDispatchFrom(eventDispatchOld.getDispatchFrom());
+				eventDispatch.setTitle(eventList.getEventName());
+				eventDispatch.setCreateDate(eventList.getCreateDate());
+				eventDispatch.setAssignDate(new Date());
+				
+				eventDispatchService.save(eventDispatch);
 				try {
 					String deviceId = valueOperationsService.get("userDeviceId_"+eventListAssist.getUserId());
 					messageService.send(deviceId, Internationalization.getMessageInternationalization(7000003),eventList.getEventName(),eventList.getId());
@@ -589,13 +611,12 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		Pager<EventList> pager = new  Pager<EventList>();
 		pager = this.eventListService.assistEventList(pager, ((AdminUser)this.getCurrentUser()).getId());
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
-		List<EventListVo1> returnList = new ArrayList<EventListVo1>();
+		List<EventListVo> returnList = new ArrayList<EventListVo>();
 		for(EventList eventList :pager.getResults() ) {
-			EventListVo1 eventListVo1 = new EventListVo1();
-			BeanUtils.copyProperties(eventList, eventListVo1);
+			EventListVo eventListVo = this.convertVo(eventList);
 			EventListAssist eventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId(), adminUser.getId());
-			eventListVo1.setIsAssistFinish(eventListAssist==null?false:eventListAssist.getIsFinish());
-			returnList.add(eventListVo1);
+			eventListVo.setIsAssistFinish(eventListAssist==null?false:eventListAssist.getIsFinish());			
+			returnList.add(eventListVo);
 		}
 		pager.setData("eventList", returnList);
 		pager.setResults(null);
