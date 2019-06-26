@@ -614,8 +614,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					eventListVo.setCurrentHandleUserVo(adminUserVo);
 				}
 			}
-			List<Staff> listStaff = staffService.findByIdCard(eventList.getIdCard());
-			eventListVo.setStaff(listStaff.size()>0?listStaff.get(0):null);
+			if(StringUtils.hasText(eventList.getIdCard())) {
+				List<Staff> listStaff = staffService.findByIdCard(eventList.getIdCard());
+				eventListVo.setStaff(listStaff.size()>0?listStaff.get(0):null);
+			}
 			returnList.add(eventListVo);
 		}
 		return returnList;
