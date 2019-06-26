@@ -7,6 +7,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.node.Node;
+import com.pepper.model.emap.staff.Staff;
 
 /**
  * 
@@ -37,6 +38,8 @@ public class EventListVo extends EventList {
 	private List<ActionListVo> actionList;
 	
 	private String actionListId;
+	
+	private Staff staff;
 	
 	public String getNodeName() {
 		return nodeName;
@@ -111,8 +114,12 @@ public class EventListVo extends EventList {
 		this.actionListId = actionListId;
 	}
 
-	
+	public Staff getStaff() {
+		return staff;
+	}
 
-	
-	
+	public void setStaff(Staff staff) {
+		this.staff = staff;
+	}
+
 }

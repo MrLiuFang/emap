@@ -43,6 +43,7 @@ import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.ActionListVo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
@@ -67,6 +68,7 @@ import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
+import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.MapToBeanUtil;
@@ -125,6 +127,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	
 	@Reference
 	private DepartmentGroupService departmentGroupService;
+	
+	@Reference
+	private StaffService staffService;
 	
 	@RequestMapping(value = "/add")
 	@ResponseBody
@@ -609,7 +614,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					eventListVo.setCurrentHandleUserVo(adminUserVo);
 				}
 			}
-			
+			List<Staff> listStaff = staffService.findByIdCard(eventList.getIdCard());
+			eventListVo.setStaff(listStaff.size()>0?listStaff.get(0):null);
 			returnList.add(eventListVo);
 		}
 		return returnList;

@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
@@ -499,6 +500,11 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		
 		if(jsonNode.get("userId").isArray()) {
+			if(((ArrayNode)jsonNode.get("userId")).size()<=0) {
+				resultData.setCode(8000005);
+				resultData.setMessage(Internationalization.getMessageInternationalization(8000005));
+				return resultData;
+			}
 			for(JsonNode userNode : jsonNode.get("userId")) {
 				EventListAssist eventListAssist = new EventListAssist();
 				eventListAssist.setAssistRemark(jsonNode.get("assistRemark").asText(""));
@@ -513,6 +519,10 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 					// TODO: handle exception
 				}
 			}
+		}else {
+			resultData.setCode(8000005);
+			resultData.setMessage(Internationalization.getMessageInternationalization(8000005));
+			return resultData;
 		}
 		
 		systemLogService.log("App event assist", this.request.getRequestURL().toString());

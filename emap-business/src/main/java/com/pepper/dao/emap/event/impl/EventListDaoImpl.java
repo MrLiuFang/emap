@@ -57,7 +57,7 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			jpql.append(" join Staff s on el.idCard = s.idCard  ");
 		}
 		
-		jpql.append(" where 1=1 ");
+		jpql.append(" where el.warningLevel=0 ");
 		
 		if(StringUtils.hasText(eventListId)) {
 			Optional<EventList> optional = baseDao.findById(eventListId);
@@ -76,6 +76,11 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		if(endDate!=null) {
 			jpql.append(" and el.createDate <=:endDate ");
 			searchParameter.put("endDate",endDate);
+		}
+		
+		if(StringUtils.hasText(staffId)) {
+			jpql.append(" and s.id =:staffId ");
+			searchParameter.put("staffId",staffId);
 		}
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
