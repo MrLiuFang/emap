@@ -146,6 +146,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			Pager<ActionList> pager1 = new Pager<ActionList>();
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_status","B");
 			pager1.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_operator",adminUser.getId());
+			pager1.getJpqlParameter().setSearchParameter(SearchConstant.IS_FALSE+ "_isAssist",null);
 			pager1.getJpqlParameter().setSortParameter("assignDate", Direction.DESC);
 			pager1 = actionListService.findNavigator(pager1);
 			List<ActionList> list = pager1.getResults();
@@ -290,6 +291,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //				eventListAssistVo.setUser(adminUserVo);
 				map.put("userName", assistUser.getName());
 				map.put("account", assistUser.getAccount());
+				map.put("headPortraitUrl", this.fileService.getUrl(assistUser.getHeadPortrait()));
 				
 			}
 			assistMap.add(map);
@@ -405,6 +407,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
+		actionList.setIsAssist(false);
 		if(jsonNode.has("helpId")) {
 			actionList.setHelpId(jsonNode.get("helpId").toString());
 		}
