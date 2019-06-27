@@ -78,7 +78,7 @@ public class EventList extends BaseModel  {
 	@Column(name ="is_not_found_event_rule")
 	private Boolean isNotFoundEventRule;
 	
-	@Column(name = "id_card" ,unique= true)
+	@Column(name = "id_card")
 	private String idCard;
 	
 	public String getEventDate() {
