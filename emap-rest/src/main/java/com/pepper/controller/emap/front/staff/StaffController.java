@@ -63,16 +63,22 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String name,String email,String siteId) {
+	public Object list(String name,String email,String siteId,String idCard,String keyword) {
 		Pager<Staff> pager = new Pager<Staff>();
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
 		}
 		if(StringUtils.hasText(siteId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_siteId",siteId );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_siteId",siteId );
 		}
 		if(StringUtils.hasText(email)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_email",email );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_email",email );
+		}
+		if(StringUtils.hasText(idCard)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_idCard",idCard );
+		}
+		if(StringUtils.hasText(keyword)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_name&email&idCard",keyword );
 		}
 		pager = staffService.findNavigator(pager);
 		List<Staff> list = pager.getResults();
