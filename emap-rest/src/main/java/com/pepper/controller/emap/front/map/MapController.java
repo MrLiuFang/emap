@@ -82,7 +82,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String areaCode,String areaName,String buildId) {
+	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord) {
 		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
@@ -99,6 +99,9 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		
 		if(StringUtils.hasText(buildId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",buildId );
+		}
+		if(StringUtils.hasText(keyWord)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_name&code&areaName&areaCode",keyWord );
 		}
 		pager = mapService.findNavigator(pager);
 		

@@ -85,9 +85,9 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY) {
+	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) {
 		Pager<Node> pager = new Pager<Node>();	
-		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY);
+		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY,keyWord);
 		List<Node> list = pager.getResults();
 		List<NodeVo> returnList = new ArrayList<NodeVo>();
 		for(Node node : list) {

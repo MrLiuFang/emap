@@ -49,7 +49,7 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String nodeTypeId,Integer warningLevel) {
+	public Object list(String code,String name,String nodeTypeId,Integer warningLevel,String keyWord) {
 		Pager<HelpList> pager = new Pager<HelpList>();
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code);
@@ -62,6 +62,10 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		}
 		if(warningLevel!=null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_warningLevel",warningLevel);
+		}
+		
+		if(StringUtils.hasText(keyWord)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_name&code",keyWord );
 		}
 		pager = helpListService.findNavigator(pager);
 		List<HelpList> list = pager.getResults();

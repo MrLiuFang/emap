@@ -110,10 +110,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork) {
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		
-		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork);
+		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork, keyWord);
 		Role role = null;
 		for (AdminUser u : pager.getResults()) {
 			role = roleService.findByUserId(u.getId());

@@ -21,7 +21,7 @@ public interface NodeService extends BaseService<Node> {
 	 * @param parameter
 	 * @return
 	 */
-	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY);
+	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord);
 	
 	/**
 	 * 

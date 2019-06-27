@@ -30,7 +30,7 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 
 	@Override
 	public Pager<Node> findNavigator(Pager<Node> pager, String code, String name, String source, String sourceCode,
-			String mapId, String nodeTypeId, String siteId, String buildId, String floor,String hasXY) {
+			String mapId, String nodeTypeId, String siteId, String buildId, String floor,String hasXY,String keyWord) {
 		StringBuffer jpql = new StringBuffer(" select n from Node n left join Map m on n.mapId = m.id left join BuildingInfo b on m.buildId = b.id left join SiteInfo s on s.id = b.siteInfoId where 1=1 ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		if(StringUtils.hasText(code)) {
@@ -73,6 +73,11 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 			jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
 		}else if(StringUtils.hasText(hasXY)&&hasXY.toLowerCase().equals("false")) {
 			jpql.append(" and ( n.x is null or n.x = ''  or n.y is null or n.y = '' ) ");
+		}
+		
+		if(StringUtils.hasText(keyWord)) {
+			jpql.append(" and ( n.code  like :keyWord or n.name  like :keyWord or n.source  like :keyWord or n.sourceCode  like :keyWord )");
+			searchParameter.put("keyWord", "%"+keyWord+"%");
 		}
 		
 //		jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
