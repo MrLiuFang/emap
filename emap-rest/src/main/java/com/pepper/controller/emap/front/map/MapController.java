@@ -82,7 +82,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord) {
+	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) {
 		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );

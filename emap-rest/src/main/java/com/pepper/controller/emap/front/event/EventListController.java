@@ -39,6 +39,7 @@ import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.model.emap.event.EventListAssist;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
@@ -59,6 +60,7 @@ import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.event.ActionListService;
 import com.pepper.service.emap.event.EventDispatchService;
+import com.pepper.service.emap.event.EventListAssistService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
@@ -79,6 +81,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 	@Reference
 	private EventListService eventListService;
+	
+	@Reference
+	private EventListAssistService eventListAssistService;
 	
 	@Reference
 	private EventRuleService eventRuleService;
@@ -573,6 +578,21 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 	}
 	
+	@RequestMapping("/workbench/forNode")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object forNode(String nodeId) {
+		Pager<EventList> pager = new Pager<EventList>();
+		Node node =  this.nodeService.findById(nodeId);
+		pager.getJpqlParameter().setSearchParameter("sourceCode", node==null?null:node.getSourceCode());
+		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
+		pager = this.eventListService.findNavigator(pager);
+		List<EventListVo> list = this.convertVo(pager.getResults());
+		pager.setData("eventList", list);
+		pager.setResults(null);
+		return pager;
+	}
+	
 	
 		
 	private List<EventListVo> convertVo(List<EventList> list){
@@ -618,6 +638,17 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				List<Staff> listStaff = staffService.findByIdCard(eventList.getIdCard());
 				eventListVo.setStaff(listStaff.size()>0?listStaff.get(0):null);
 			}
+			
+			List<EventListAssist> listEventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId());
+			List<Map<String,Object>> listEventListAssistMap= new ArrayList<Map<String,Object>>();
+			for(EventListAssist eventListAssist :  listEventListAssist) {
+				Map<String,Object> map = new HashMap<String, Object>();
+				AdminUser user =  this.adminUserService.findById(eventListAssist.getUserId());
+				map.put("assistUserName", user==null?"":user.getName());
+				map.put("finish", eventListAssist.getIsEmployeeConfirmFinish());
+				listEventListAssistMap.add(map);
+			}
+			eventListVo.setAssist(listEventListAssistMap);
 			returnList.add(eventListVo);
 		}
 		return returnList;

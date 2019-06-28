@@ -1,7 +1,9 @@
 package com.pepper.model.emap.vo;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.event.ActionList;
@@ -42,6 +44,8 @@ public class EventListVo extends EventList {
 	private Staff staff;
 	
 	private Boolean isAssistFinish;
+	
+	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
 	
 	public String getNodeName() {
 		return nodeName;
@@ -130,6 +134,14 @@ public class EventListVo extends EventList {
 
 	public void setIsAssistFinish(Boolean isAssistFinish) {
 		this.isAssistFinish = isAssistFinish;
+	}
+
+	public List<Map<String, Object>> getAssist() {
+		return assist;
+	}
+
+	public void setAssist(List<Map<String, Object>> assist) {
+		this.assist = assist;
 	}
 	
 	
