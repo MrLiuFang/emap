@@ -82,15 +82,21 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			jpql.append(" and s.id =:staffId ");
 			searchParameter.put("staffId",staffId);
 		}
+		jpql.append(" order by el.createDate desc ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
 	
-	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId){
+	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish){
 		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer();
-		jpql.append(" select el from EventList el join EventListAssist ea on el.id = ea.eventListId where ea.userId = :userId order by ea.isFinish asc,ea.createDate desc ");
+		jpql.append(" select el from EventList el join EventListAssist ea on el.id = ea.eventListId where ea.userId = :userId  ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		searchParameter.put("userId", userId);
+		if(isFinish!=null) {
+			jpql.append(" and el.isFinish = :isFinish ");
+			searchParameter.put("isFinish", isFinish);
+		}
+		jpql.append(" order by ea.createDate desc ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	} 
 

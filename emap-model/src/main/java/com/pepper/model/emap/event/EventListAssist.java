@@ -29,6 +29,12 @@ public class EventListAssist extends BaseModel {
 	
 	@Column(name = "is_finish")
 	private Boolean isFinish;
+	
+	@Column(name ="is_unable_finish")
+	private Boolean isUnableFinish;
+	
+	@Column(name ="is_employee_confirm_finish")
+	private Boolean isEmployeeConfirmFinish;
 
 	public String getEventListId() {
 		return eventListId;
@@ -60,6 +66,22 @@ public class EventListAssist extends BaseModel {
 
 	public void setIsFinish(Boolean isFinish) {
 		this.isFinish = isFinish;
+	}
+
+	public Boolean getIsUnableFinish() {
+		return isUnableFinish;
+	}
+
+	public void setIsUnableFinish(Boolean isUnableFinish) {
+		this.isUnableFinish = isUnableFinish;
+	}
+
+	public Boolean getIsEmployeeConfirmFinish() {
+		return isEmployeeConfirmFinish;
+	}
+
+	public void setIsEmployeeConfirmFinish(Boolean isEmployeeConfirmFinish) {
+		this.isEmployeeConfirmFinish = isEmployeeConfirmFinish;
 	}
 	
 	

@@ -16,5 +16,7 @@ public interface EventListAssistService extends BaseService< EventListAssist>{
 	 * @param eventListId
 	 * @return
 	 */
-	public List<EventListAssist> findByeventListId(String eventListId);
+	public List<EventListAssist> findEventListAssist(String eventListId);
+	
+	public List<EventListAssist> findEventListAssist(String eventListId,Boolean isFinish);
 }

@@ -91,6 +91,10 @@ public class ActionList extends BaseModel {
 	
 	@Column(name ="event_list_assist_id")
 	private String eventListAssistId;
+	
+	@Column(name ="is_unable_finish")
+	private Boolean isUnableFinish;
+	
 
 	
 	public String getEventListId() {
@@ -286,4 +290,14 @@ public class ActionList extends BaseModel {
 	public void setEventListAssistId(String eventListAssistId) {
 		this.eventListAssistId = eventListAssistId;
 	}
+
+	public Boolean getIsUnableFinish() {
+		return isUnableFinish;
+	}
+
+	public void setIsUnableFinish(Boolean isUnableFinish) {
+		this.isUnableFinish = isUnableFinish;
+	}
+	
+	
 }

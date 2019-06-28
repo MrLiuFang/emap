@@ -46,7 +46,7 @@ public interface EventListDaoEx {
 	 * @param userId
 	 * @return
 	 */
-	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId);
+	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish);
 	
 
 }

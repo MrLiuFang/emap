@@ -271,7 +271,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("isMeHandle", false);
 		}
 		
-		List<EventListAssist> listEventListAssist = this.eventListAssistService.findByeventListId(eventList.getId());
+		List<EventListAssist> listEventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId());
 //		List<EventListAssistVo> listEventListAssistVo = new ArrayList<EventListAssistVo>();
 		List<Map<String,Object>> assistMap = new ArrayList<Map<String,Object>>();
 		for(EventListAssist eventListAssist : listEventListAssist) {
@@ -292,8 +292,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 				map.put("userName", assistUser.getName());
 				map.put("account", assistUser.getAccount());
 				map.put("headPortraitUrl", this.fileService.getUrl(assistUser.getHeadPortrait()));
-				
 			}
+//			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
+//			map.put("assistIsUnableFinish", actionList==null?null:actionList.getIsUnableFinish());
 			assistMap.add(map);
 		}
 		
@@ -383,12 +384,13 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		String image2 = jsonNode.get("image2").asText("");
 		String image3 = jsonNode.get("image3").asText("");
 		String voice1 = jsonNode.get("voice1").asText("");
+		Boolean isUnableFinish = jsonNode.get("isUnableFinish").asBoolean(false);
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);
 		if(eventList == null) {
 			return resultData;
 		}
-		
+		eventList.setIsUnableFinish(isUnableFinish);
 		eventList.setStatus("B");
 		eventListService.update(eventList);
 		
@@ -408,12 +410,57 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
 		actionList.setIsAssist(false);
+		actionList.setIsUnableFinish(false);
 		if(jsonNode.has("helpId")) {
 			actionList.setHelpId(jsonNode.get("helpId").toString());
 		}
 		actionListService.save(actionList);
 		
-		systemLogService.log("App event finish", this.request.getRequestURL().toString(),str);
+		List<EventListAssist> eventListAssistList = this.eventListAssistService.findEventListAssist(eventList.getId(), false);
+		for(EventListAssist eventListAssist : eventListAssistList )	{
+//			eventListAssist.setIsFinish(true);
+			eventListAssist.setIsUnableFinish(isUnableFinish);
+			eventListAssist.setIsEmployeeConfirmFinish(false);
+			eventListAssistService.update(eventListAssist);
+		}
+		
+		if(jsonNode.get("assistUserId").isArray()) {
+			for(JsonNode assistUserId : jsonNode.get("assistUserId")) {
+				if(StringUtils.hasText(assistUserId.asText(""))) {
+					EventListAssist eventListAssist = eventListAssistService.findEventListAssist(eventList.getId(), assistUserId.textValue(), false);
+					if(eventListAssist==null) {
+						continue;
+					}
+					ActionList actionListAssist = new ActionList();
+					actionListAssist.setEventId(eventList.getEventId());
+					actionListAssist.setEventListAssistId(eventListAssist.getId());
+					actionListAssist.setEventListId(eventList.getId());
+					actionListAssist.setOperator(eventListAssist.getUserId());
+					actionListAssist.setAssignDate(eventList.getAssignDate());
+					actionListAssist.setFinishDate(new Date());
+					actionListAssist.setStatus("B");
+					actionListAssist.setOperatorHelpId(eventList.getHelpId());
+					actionListAssist.setOperatorContent(eventList.getContent());
+					actionListAssist.setIsAssist(true);
+					actionListAssist.setIsUnableFinish(isUnableFinish);
+					actionListService.save(actionListAssist);
+					
+					
+					eventListAssist.setIsEmployeeConfirmFinish(true);
+					eventListAssist.setIsUnableFinish(isUnableFinish);
+					eventListAssist.setIsFinish(true);
+					eventListAssistService.update(eventListAssist);
+				}
+			}
+		}
+		
+		for(EventListAssist eventListAssist : eventListAssistList )	{
+			eventListAssist.setIsFinish(true);
+			eventListAssistService.update(eventListAssist);
+		}
+		
+		
+		systemLogService.log("App event finish", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -610,9 +657,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@RequestMapping("/assist/forMe")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object assistForMe() {
+	public Object assistForMe(Boolean isFinish) {
 		Pager<EventList> pager = new  Pager<EventList>();
-		pager = this.eventListService.assistEventList(pager, ((AdminUser)this.getCurrentUser()).getId());
+		pager = this.eventListService.assistEventList(pager, ((AdminUser)this.getCurrentUser()).getId(),isFinish);
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		List<EventListVo> returnList = new ArrayList<EventListVo>();
 		for(EventList eventList :pager.getResults() ) {

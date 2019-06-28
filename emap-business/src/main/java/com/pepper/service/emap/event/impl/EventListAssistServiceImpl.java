@@ -28,8 +28,13 @@ public class EventListAssistServiceImpl extends BaseServiceImpl<EventListAssist>
 	}
 
 	@Override
-	public List<EventListAssist> findByeventListId(String eventListId) {
+	public List<EventListAssist> findEventListAssist(String eventListId) {
 		return eventListAssistDao.findByeventListId(eventListId);
+	}
+
+	@Override
+	public List<EventListAssist> findEventListAssist(String eventListId, Boolean isFinish) {
+		return eventListAssistDao.findByeventListIdAndIsFinish(eventListId, isFinish);
 	}
 
 }

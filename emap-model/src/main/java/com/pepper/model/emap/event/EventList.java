@@ -81,6 +81,9 @@ public class EventList extends BaseModel  {
 	@Column(name = "id_card")
 	private String idCard;
 	
+	@Column(name ="is_unable_finish")
+	private Boolean isUnableFinish;
+	
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -239,6 +242,14 @@ public class EventList extends BaseModel  {
 
 	public void setIdCard(String idCard) {
 		this.idCard = idCard;
+	}
+
+	public Boolean getIsUnableFinish() {
+		return isUnableFinish;
+	}
+
+	public void setIsUnableFinish(Boolean isUnableFinish) {
+		this.isUnableFinish = isUnableFinish;
 	}
 	
 	

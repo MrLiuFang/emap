@@ -59,8 +59,8 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
-	public Pager<EventList> assistEventList(Pager<EventList> pager, String userId) {
-		return eventListDao.assistEventList(pager, userId);
+	public Pager<EventList> assistEventList(Pager<EventList> pager, String userId,Boolean isFinish) {
+		return eventListDao.assistEventList(pager, userId,isFinish);
 	}
 	
 
