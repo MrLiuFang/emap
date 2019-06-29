@@ -70,7 +70,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	private DepartmentGroupService departmentGroupService;
 	
 	@Reference
-	private com.pepper.service.emap.event.EventListAssistService EventListAssistService;
+	private com.pepper.service.emap.event.EventListAssistService eventListAssistService;
 	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
@@ -186,7 +186,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		DepartmentVo1 departmentVo1 = convertDepartmentVo1(department);
 		for(DepartmentGroupVo1 departmentGroupVo1  : departmentVo1.getDepartmentGroup()) {
 			for(AdminUserVo adminUser : departmentGroupVo1.getUser()) {
-				adminUser.setIsRequestAssist(this.EventListAssistService.findEventListAssist(eventListId, adminUser.getId(), false)==null?false:true);
+				adminUser.setIsRequestAssist(this.eventListAssistService.findEventListAssist(eventListId, adminUser.getId())==null?false:true);
 			}
 		}
 		resultData.setData("user", departmentVo1);

@@ -410,7 +410,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
 		actionList.setIsAssist(false);
-		actionList.setIsUnableFinish(false);
+		actionList.setIsUnableFinish(isUnableFinish);
 		if(jsonNode.has("helpId")) {
 			actionList.setHelpId(jsonNode.get("helpId").toString());
 		}
@@ -431,19 +431,19 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 					if(eventListAssist==null) {
 						continue;
 					}
-					ActionList actionListAssist = new ActionList();
-					actionListAssist.setEventId(eventList.getEventId());
-					actionListAssist.setEventListAssistId(eventListAssist.getId());
-					actionListAssist.setEventListId(eventList.getId());
-					actionListAssist.setOperator(eventListAssist.getUserId());
-					actionListAssist.setAssignDate(eventList.getAssignDate());
-					actionListAssist.setFinishDate(new Date());
-					actionListAssist.setStatus("B");
-					actionListAssist.setOperatorHelpId(eventList.getHelpId());
-					actionListAssist.setOperatorContent(eventList.getContent());
-					actionListAssist.setIsAssist(true);
-					actionListAssist.setIsUnableFinish(isUnableFinish);
-					actionListService.save(actionListAssist);
+//					ActionList actionListAssist = new ActionList();
+//					actionListAssist.setEventId(eventList.getEventId());
+//					actionListAssist.setEventListAssistId(eventListAssist.getId());
+//					actionListAssist.setEventListId(eventList.getId());
+//					actionListAssist.setOperator(eventListAssist.getUserId());
+//					actionListAssist.setAssignDate(eventList.getAssignDate());
+//					actionListAssist.setFinishDate(new Date());
+//					actionListAssist.setStatus("B");
+//					actionListAssist.setOperatorHelpId(eventList.getHelpId());
+//					actionListAssist.setOperatorContent(eventList.getContent());
+//					actionListAssist.setIsAssist(true);
+//					actionListAssist.setIsUnableFinish(isUnableFinish);
+//					actionListService.save(actionListAssist);
 					
 					
 					eventListAssist.setIsEmployeeConfirmFinish(true);
@@ -569,7 +569,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 				eventListAssist.setAssistRemark(jsonNode.get("assistRemark").asText(""));
 				eventListAssist.setEventListId(eventListId);
 				eventListAssist.setUserId(userNode.asText(""));
-				eventListAssist.setIsFinish(false);
+//				eventListAssist.setIsFinish(false);
 				this.eventListAssistService.save(eventListAssist);
 				
 				EventDispatch eventDispatchOld = this.eventDispatchService.findEventDispatch(eventList.getId(),user.getId());
@@ -665,7 +665,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		for(EventList eventList :pager.getResults() ) {
 			EventListVo eventListVo = this.convertVo(eventList);
 			EventListAssist eventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId(), adminUser.getId());
-			eventListVo.setIsAssistFinish(eventListAssist==null?false:eventListAssist.getIsFinish());			
+			eventListVo.setIsAssistFinish(eventListAssist.getIsFinish());			
 			returnList.add(eventListVo);
 		}
 		pager.setData("eventList", returnList);

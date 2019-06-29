@@ -93,8 +93,10 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		searchParameter.put("userId", userId);
 		if(isFinish!=null) {
-			jpql.append(" and el.isFinish = :isFinish ");
+			jpql.append(" and ea.isFinish = :isFinish ");
 			searchParameter.put("isFinish", isFinish);
+		}else {
+			jpql.append(" and ea.isFinish is null ");
 		}
 		jpql.append(" order by ea.createDate desc ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
