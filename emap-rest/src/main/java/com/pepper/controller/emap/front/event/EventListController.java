@@ -459,6 +459,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				Map<String,Object> map = BeanToMapUtil.transBeanToMap(eventListAssist);
 				AdminUser user =  this.adminUserService.findById(eventListAssist.getUserId());
 				map.put("assistUserName", user==null?"":user.getName());
+				assist.add(map);
 			}
 			
 			tmp.setAssist(assist);
