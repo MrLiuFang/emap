@@ -26,6 +26,7 @@ import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.event.EventListAssist;
 import com.pepper.model.emap.vo.AdminUserEventAssistVo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
@@ -186,7 +187,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		DepartmentVo1 departmentVo1 = convertDepartmentVo1(department);
 		for(DepartmentGroupVo1 departmentGroupVo1  : departmentVo1.getDepartmentGroup()) {
 			for(AdminUserVo adminUser : departmentGroupVo1.getUser()) {
-				adminUser.setIsRequestAssist(this.eventListAssistService.findEventListAssist(eventListId, adminUser.getId())==null?false:true);
+				adminUser.setIsRequestAssist(this.eventListAssistService.findEventListAssist(eventListId, adminUser.getId(),currentUser.getId())==null?false:true);
 			}
 		}
 		resultData.setData("user", departmentVo1);

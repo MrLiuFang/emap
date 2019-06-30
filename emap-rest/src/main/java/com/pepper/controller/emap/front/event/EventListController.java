@@ -73,6 +73,7 @@ import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
+import com.pepper.util.BeanToMapUtil;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
@@ -451,6 +452,16 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					tmp.setEmployee(adminUserVo);
 				}
 			}
+			
+			List<EventListAssist> listEventListAssist= this.eventListAssistService.findByActionListId(obj1.getId());
+			List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
+			for(EventListAssist eventListAssist : listEventListAssist) {
+				Map<String,Object> map = BeanToMapUtil.transBeanToMap(eventListAssist);
+				AdminUser user =  this.adminUserService.findById(eventListAssist.getUserId());
+				map.put("assistUserName", user==null?"":user.getName());
+			}
+			
+			tmp.setAssist(assist);
 			actionListVo.add(tmp);
 		}
 		resultData.setData("actionList", actionListVo);
@@ -639,16 +650,16 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				eventListVo.setStaff(listStaff.size()>0?listStaff.get(0):null);
 			}
 			
-			List<EventListAssist> listEventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId());
-			List<Map<String,Object>> listEventListAssistMap= new ArrayList<Map<String,Object>>();
-			for(EventListAssist eventListAssist :  listEventListAssist) {
-				Map<String,Object> map = new HashMap<String, Object>();
-				AdminUser user =  this.adminUserService.findById(eventListAssist.getUserId());
-				map.put("assistUserName", user==null?"":user.getName());
-				map.put("finish", eventListAssist.getIsEmployeeConfirmFinish());
-				listEventListAssistMap.add(map);
-			}
-			eventListVo.setAssist(listEventListAssistMap);
+//			List<EventListAssist> listEventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId());
+//			List<Map<String,Object>> listEventListAssistMap= new ArrayList<Map<String,Object>>();
+//			for(EventListAssist eventListAssist :  listEventListAssist) {
+//				Map<String,Object> map = new HashMap<String, Object>();
+//				AdminUser user =  this.adminUserService.findById(eventListAssist.getUserId());
+//				map.put("assistUserName", user==null?"":user.getName());
+//				map.put("finish", eventListAssist.getIsEmployeeConfirmFinish());
+//				listEventListAssistMap.add(map);
+//			}
+//			eventListVo.setAssist(listEventListAssistMap);
 			returnList.add(eventListVo);
 		}
 		return returnList;

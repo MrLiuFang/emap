@@ -9,7 +9,7 @@ public interface ActionListService extends BaseService<ActionList> {
 
 	public ActionList findByEventId(String eventId); 
 	
-	public ActionList findActionList(String eventListAssistId);
+//	public ActionList findActionList(String eventListAssistId);
 	
 	public List<ActionList> findByEventListId(String eventListId); 
 }

@@ -411,25 +411,26 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
-		actionList.setIsAssist(false);
+//		actionList.setIsAssist(false);
 		actionList.setIsUnableFinish(isUnableFinish);
 		if(jsonNode.has("helpId")) {
 			actionList.setHelpId(jsonNode.get("helpId").toString());
 		}
-		actionListService.save(actionList);
+		actionList = actionListService.save(actionList);
 		
 		List<EventListAssist> eventListAssistList = this.eventListAssistService.findEventListAssist(eventList.getId());
 		for(EventListAssist eventListAssist : eventListAssistList )	{
 			eventListAssist.setIsFinish(isUnableFinish);
 			eventListAssist.setIsUnableFinish(isUnableFinish);
 			eventListAssist.setIsEmployeeConfirmFinish(false);
+			eventListAssist.setActionListId(actionList.getId());
 			eventListAssistService.update(eventListAssist);
 		}
 		
 		if(jsonNode.get("assistUserId").isArray()) {
 			for(JsonNode assistUserId : jsonNode.get("assistUserId")) {
 				if(StringUtils.hasText(assistUserId.asText(""))) {
-					EventListAssist eventListAssist = eventListAssistService.findEventListAssist(eventList.getId(), assistUserId.textValue(), false);
+					EventListAssist eventListAssist = eventListAssistService.findEventListAssist(eventList.getId(), assistUserId.textValue());
 					if(eventListAssist==null) {
 						continue;
 					}
@@ -564,21 +565,22 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 				eventListAssist.setAssistRemark(jsonNode.get("assistRemark").asText(""));
 				eventListAssist.setEventListId(eventListId);
 				eventListAssist.setUserId(userNode.asText(""));
+				eventListAssist.setEmployeeId(user.getId());
 //				eventListAssist.setIsFinish(false);
 				this.eventListAssistService.save(eventListAssist);
 				
-				EventDispatch eventDispatchOld = this.eventDispatchService.findEventDispatch(eventList.getId(),user.getId());
-				
-				EventDispatch eventDispatch = new EventDispatch();
-				eventDispatch.setEventId(eventList.getEventId());
-				eventDispatch.setEventListId(eventList.getId());
-				eventDispatch.setOperator(userNode.asText(""));
-				eventDispatch.setDispatchFrom(eventDispatchOld.getDispatchFrom());
-				eventDispatch.setTitle(eventList.getEventName());
-				eventDispatch.setCreateDate(eventList.getCreateDate());
-				eventDispatch.setAssignDate(new Date());
-				
-				eventDispatchService.save(eventDispatch);
+//				EventDispatch eventDispatchOld = this.eventDispatchService.findEventDispatch(eventList.getId(),user.getId());
+//				
+//				EventDispatch eventDispatch = new EventDispatch();
+//				eventDispatch.setEventId(eventList.getEventId());
+//				eventDispatch.setEventListId(eventList.getId());
+//				eventDispatch.setOperator(userNode.asText(""));
+//				eventDispatch.setDispatchFrom(eventDispatchOld.getDispatchFrom());
+//				eventDispatch.setTitle(eventList.getEventName());
+//				eventDispatch.setCreateDate(eventList.getCreateDate());
+//				eventDispatch.setAssignDate(new Date());
+//				
+//				eventDispatchService.save(eventDispatch);
 				try {
 					String deviceId = valueOperationsService.get("userDeviceId_"+eventListAssist.getUserId());
 					messageService.send(deviceId, Internationalization.getMessageInternationalization(7000003),eventList.getEventName(),eventList.getId());
@@ -625,7 +627,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
 		actionList.setContent(jsonNode.get("content").asText(""));
-		actionList.setIsAssist(true);
+//		actionList.setIsAssist(true);
 		EventListAssist eventListAssist = this.eventListAssistService.findEventListAssist(id, user.getId(), false);
 		if(eventListAssist==null) {
 			resultData.setCode(8000003);
@@ -636,7 +638,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setMessage(Internationalization.getMessageInternationalization(8000004));
 			return resultData;
 		}
-		actionList.setEventListAssistId(eventListAssist.getId());
+//		actionList.setEventListAssistId(eventListAssist.getId());
 		if(jsonNode.has("helpId")) {
 			actionList.setHelpId(jsonNode.get("helpId").toString());
 		}

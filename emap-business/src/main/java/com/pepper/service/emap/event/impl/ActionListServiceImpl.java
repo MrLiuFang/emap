@@ -27,9 +27,9 @@ public class ActionListServiceImpl extends BaseServiceImpl<ActionList> implement
 		return actionListDao.findByEventListId(eventListId);
 	}
 
-	@Override
-	public ActionList findActionList(String eventListAssistId) {
-		return actionListDao.findFirstByEventListAssistId(eventListAssistId);
-	}
+//	@Override
+//	public ActionList findActionList(String eventListAssistId) {
+//		return actionListDao.findFirstByEventListAssistId(eventListAssistId);
+//	}
 
 }

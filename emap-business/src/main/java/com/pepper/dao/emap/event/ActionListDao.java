@@ -10,7 +10,7 @@ public interface ActionListDao extends BaseDao<ActionList> {
 
 	public ActionList findFirstByEventId(String eventId); 
 	
-	public ActionList findFirstByEventListAssistId(String eventListAssistId); 
+//	public ActionList findFirstByEventListAssistId(String eventListAssistId); 
 	
 	public List<ActionList> findByEventListId(String eventListId); 
 }

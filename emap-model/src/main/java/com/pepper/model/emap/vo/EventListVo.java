@@ -45,7 +45,7 @@ public class EventListVo extends EventList {
 	
 	private Boolean isAssistFinish;
 	
-	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
+//	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
 	
 	public String getNodeName() {
 		return nodeName;
@@ -136,13 +136,13 @@ public class EventListVo extends EventList {
 		this.isAssistFinish = isAssistFinish;
 	}
 
-	public List<Map<String, Object>> getAssist() {
-		return assist;
-	}
-
-	public void setAssist(List<Map<String, Object>> assist) {
-		this.assist = assist;
-	}
+//	public List<Map<String, Object>> getAssist() {
+//		return assist;
+//	}
+//
+//	public void setAssist(List<Map<String, Object>> assist) {
+//		this.assist = assist;
+//	}
 	
 	
 

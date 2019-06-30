@@ -35,6 +35,13 @@ public class EventListAssist extends BaseModel {
 	
 	@Column(name ="is_employee_confirm_finish")
 	private Boolean isEmployeeConfirmFinish;
+	
+	@Column(name ="action_list_id")
+	private String actionListId;
+	
+	@Column(name ="employee_id")
+	private String employeeId;
+	
 
 	public String getEventListId() {
 		return eventListId;
@@ -83,7 +90,21 @@ public class EventListAssist extends BaseModel {
 	public void setIsEmployeeConfirmFinish(Boolean isEmployeeConfirmFinish) {
 		this.isEmployeeConfirmFinish = isEmployeeConfirmFinish;
 	}
-	
-	
 
+	public String getActionListId() {
+		return actionListId;
+	}
+
+	public void setActionListId(String actionListId) {
+		this.actionListId = actionListId;
+	}
+
+	public String getEmployeeId() {
+		return employeeId;
+	}
+
+	public void setEmployeeId(String employeeId) {
+		this.employeeId = employeeId;
+	}
+	
 }
