@@ -30,7 +30,7 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 
 	@Override
 	public Node findBySourceCode(String sourceCode) {
-		return nodeDao.findBySourceCode(sourceCode);
+		return nodeDao.findFirstBySourceCode(sourceCode);
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 
 	@Override
 	public Node findByCode(String code) {
-		return nodeDao.findByCode(code);
+		return nodeDao.findFirstByCode(code);
 	}
 
 	

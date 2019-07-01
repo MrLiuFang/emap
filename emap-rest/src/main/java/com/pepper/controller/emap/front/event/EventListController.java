@@ -626,7 +626,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(EventList eventList : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
-			Node node = nodeService.findBySourceCode(eventList.getSourceCode());
+			Node node = nodeService.findBySourceCode(StringUtils.hasText(eventList.getSourceCode())?eventList.getSourceCode():"!@#$%%^&^*($&%&*%$");
 			if(node!=null) {
 				NodeVo nodeVo = new NodeVo();
 				BeanUtils.copyProperties(node, nodeVo);

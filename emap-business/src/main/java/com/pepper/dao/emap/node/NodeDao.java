@@ -19,7 +19,7 @@ public interface NodeDao extends BaseDao<Node> , NodeDaoEx<Node> {
 	 * @param sourceCode
 	 * @return
 	 */
-	public Node findBySourceCode(String sourceCode);
+	public Node findFirstBySourceCode(String sourceCode);
 	
 	/**
 	 * 根据地图ID查询有事件的设备
@@ -35,5 +35,5 @@ public interface NodeDao extends BaseDao<Node> , NodeDaoEx<Node> {
 	 * @param code
 	 * @return
 	 */
-	public Node findByCode(String code);
+	public Node findFirstByCode(String code);
 }
