@@ -271,7 +271,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("isMeHandle", false);
 		}
 		
-		List<EventListAssist> listEventListAssist = this.eventListAssistService.findEventListAssist(eventList.getId());
+		List<EventListAssist> listEventListAssist = this.eventListAssistService.findByActionListId(actionId);
 //		List<EventListAssistVo> listEventListAssistVo = new ArrayList<EventListAssistVo>();
 		List<Map<String,Object>> assistMap = new ArrayList<Map<String,Object>>();
 		for(EventListAssist eventListAssist : listEventListAssist) {

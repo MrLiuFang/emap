@@ -53,9 +53,9 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
-	public Pager<EventList> doorAttendance(Pager<EventList> pager, String eventListId, Date startDate, Date endDate,
+	public Pager<EventList> doorAttendance(Pager<EventList> pager, String eventListId,String nodeId, Date startDate, Date endDate,
 			String staffId) {
-		return eventListDao.doorAttendance(pager, eventListId, startDate, endDate, staffId);
+		return eventListDao.doorAttendance(pager, eventListId,nodeId, startDate, endDate, staffId);
 	}
 
 	@Override

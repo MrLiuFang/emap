@@ -38,7 +38,7 @@ public interface EventListDaoEx {
 	 * @param staffId
 	 * @return
 	 */
-	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,Date startDate,Date endDate,String staffId);
+	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,String nodeId,Date startDate,Date endDate,String staffId);
 	
 	/**
 	 * 获取我被请求协助的事件

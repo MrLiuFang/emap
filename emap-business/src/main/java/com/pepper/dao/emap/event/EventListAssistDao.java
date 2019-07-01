@@ -33,6 +33,7 @@ public interface EventListAssistDao extends BaseDao<EventListAssist> {
 	 */
 	public EventListAssist findFirstByEventListIdAndUserIdAndEmployeeId(String eventListId,String userId,String employeeId);
 	
+	public EventListAssist findFirstByEventListIdAndUserIdAndEmployeeIdAndIsFinish(String eventListId,String userId,String employeeId,Boolean isFinish);
 	/**
 	 * 
 	 * @param eventListId

@@ -47,7 +47,7 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 	}
 
 
-	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,Date startDate,Date endDate,String staffId){
+	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,String nodeId,Date startDate,Date endDate,String staffId){
 		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -55,6 +55,9 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		jpql.append(" select el from EventList el  ");
 		if(StringUtils.hasText(staffId)) {
 			jpql.append(" join Staff s on el.idCard = s.idCard  ");
+		}
+		if(StringUtils.hasText(nodeId)) {
+			jpql.append(" join Node n on n.sourceCode = el.sourceCode  ");
 		}
 		
 		jpql.append(" where el.warningLevel=0 ");
@@ -65,6 +68,8 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			if(eventList!=null) {
 				jpql.append(" and el.sourceCode =:sourceCode ");
 				searchParameter.put("sourceCode", eventList.getSourceCode());
+			}else {
+				return pager;
 			}
 		}
 		
@@ -81,6 +86,11 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		if(StringUtils.hasText(staffId)) {
 			jpql.append(" and s.id =:staffId ");
 			searchParameter.put("staffId",staffId);
+		}
+		
+		if(StringUtils.hasText(nodeId)) {
+			jpql.append(" and n.id =:nodeId ");
+			searchParameter.put("nodeId",nodeId);
 		}
 		jpql.append(" order by el.createDate desc ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);

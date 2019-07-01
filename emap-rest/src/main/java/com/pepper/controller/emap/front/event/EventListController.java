@@ -383,13 +383,27 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/historyEvent")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object historyEvent(String id) throws IOException {
+	public Object historyEvent(String id,String nodeId) throws IOException {
 		Pager<EventList> pager = new Pager<EventList>();
-		EventList eventList = this.eventListService.findById(id);
-		if(eventList==null) {
+		
+		
+		if(StringUtils.hasText(id)) {
+			EventList eventList = this.eventListService.findById(id);
+			if(eventList==null) {
+				return pager;
+			}
+			pager = this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId(),pager);
+		}else if(StringUtils.hasText(nodeId)) {
+			Node node = this.nodeService.findById(nodeId);
+			if(node==null) {
+				return pager;
+			}
+			eventListService.findBySourceCodeAndIdNot( node.getSourceCode(), "1111111111", pager);
+		}else {
 			return pager;
 		}
-		pager = this.eventListService.findBySourceCodeAndIdNot(eventList.getSourceCode(), eventList.getId(),pager);
+		
+		
 		List<EventList> list= pager.getResults();
 		
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
@@ -581,9 +595,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/door/attendance")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object attendance(String eventListId,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date endDate,String staffId) {
+	public Object attendance(String eventListId,String nodeId,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date endDate,String staffId) {
 		Pager<EventList> pager = new Pager<EventList>();
-		pager = eventListService.doorAttendance(pager, eventListId, startDate, endDate, staffId);
+		pager = eventListService.doorAttendance(pager, eventListId,nodeId, startDate, endDate, staffId);
 		pager.setData("eventList", convertVo(pager.getResults()));
 		pager.setResults(null);
 		return pager;

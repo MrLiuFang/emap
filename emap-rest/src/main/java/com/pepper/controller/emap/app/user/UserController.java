@@ -187,7 +187,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		DepartmentVo1 departmentVo1 = convertDepartmentVo1(department);
 		for(DepartmentGroupVo1 departmentGroupVo1  : departmentVo1.getDepartmentGroup()) {
 			for(AdminUserVo adminUser : departmentGroupVo1.getUser()) {
-				adminUser.setIsRequestAssist(this.eventListAssistService.findEventListAssist(eventListId, adminUser.getId(),currentUser.getId())==null?false:true);
+				adminUser.setIsRequestAssist(this.eventListAssistService.findEventListAssist(eventListId, adminUser.getId(),currentUser.getId(),null)==null?false:true);
 			}
 		}
 		resultData.setData("user", departmentVo1);
