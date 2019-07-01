@@ -43,4 +43,6 @@ public interface EventListAssistDao extends BaseDao<EventListAssist> {
 	public List<EventListAssist> findByEventListIdAndIsFinish(String eventListId,Boolean isFinish);
 	
 	public List<EventListAssist> findByActionListId(String actionListId);
+	
+	public List<EventListAssist> findByEventListIdAndEmployeeId(String eventListId,String employeeId);
 }

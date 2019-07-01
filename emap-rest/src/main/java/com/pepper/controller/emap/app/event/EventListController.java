@@ -418,9 +418,10 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		actionList = actionListService.save(actionList);
 		
-		List<EventListAssist> eventListAssistList = this.eventListAssistService.findEventListAssist(eventList.getId());
+		
+		List<EventListAssist> eventListAssistList = this.eventListAssistService.findByEventListIdAndEmployeeId(eventList.getId(),user.getId());
 		for(EventListAssist eventListAssist : eventListAssistList )	{
-			eventListAssist.setIsFinish(isUnableFinish);
+			eventListAssist.setIsFinish(false);
 			eventListAssist.setIsUnableFinish(isUnableFinish);
 			eventListAssist.setIsEmployeeConfirmFinish(false);
 			eventListAssist.setActionListId(actionList.getId());
@@ -430,7 +431,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(jsonNode.get("assistUserId").isArray()) {
 			for(JsonNode assistUserId : jsonNode.get("assistUserId")) {
 				if(StringUtils.hasText(assistUserId.asText(""))) {
-					EventListAssist eventListAssist = eventListAssistService.findEventListAssist(eventList.getId(), assistUserId.textValue());
+					EventListAssist eventListAssist = eventListAssistService.findEventListAssist(eventList.getId(), assistUserId.textValue(),user.getId());
 					if(eventListAssist==null) {
 						continue;
 					}
@@ -448,7 +449,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //					actionListAssist.setIsUnableFinish(isUnableFinish);
 //					actionListService.save(actionListAssist);
 					
-					
+					eventListAssist.setIsFinish(true);
 					eventListAssist.setIsEmployeeConfirmFinish(true);
 					eventListAssistService.update(eventListAssist);
 				}
