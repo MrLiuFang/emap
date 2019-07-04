@@ -221,9 +221,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/forMe/handle")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object eventForMeHandle(Boolean isHandle,String id) {
+	public Object eventForMeHandle(Boolean isHandle,String id,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss" ) Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss" ) Date endDate) {
 		systemLogService.log("event for me handle", this.request.getRequestURL().toString());
-		return eventForMeEx(true,id);
+		return eventForMeEx(true,id,startDate,endDate);
 	}
 	
 	@RequestMapping("/workbench/forMe/noHandle")
@@ -231,10 +231,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	public Object eventForMeNoHandle(Boolean isHandle,String id) {
 		systemLogService.log("event for me no handle", this.request.getRequestURL().toString());
-		return eventForMeEx(false,id);
+		return eventForMeEx(false,id,null,null);
 	}
 	
-	private Pager<EventList> eventForMeEx(Boolean isHandle,String id){
+	private Pager<EventList> eventForMeEx(Boolean isHandle,String id, Date startDate, Date endDate){
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_operator", currentUser.getId());
@@ -246,6 +246,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
+		}
+		if(startDate!=null) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.GREATER_THAN_OR_EQUAL_TO+"_createDate", startDate);
+		}
+		if(endDate!=null) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
 		}
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		eventListService.findNavigator(pager).getResults();
