@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.xmlbeans.impl.inst2xsd.VenetianBlindStrategy;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -19,6 +20,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.model.emap.event.EventMessage;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
@@ -26,6 +28,7 @@ import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
+import com.pepper.service.emap.event.EventMessageService;
 import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.message.MessageService;
@@ -63,6 +66,8 @@ public class EventScheduler {
 	@Reference
 	private HelpListService helpListService;
 	
+	@Reference
+	private EventMessageService eventMessageService;
 
 	@Scheduled(fixedRate = 5000)
 	public void scheduled() {
@@ -106,9 +111,32 @@ public class EventScheduler {
 			
 			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
-					assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getResult());
+					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent());
 					eventList.setIsSpecial(true);
 					eventListService.update(eventList);
+					
+					EventMessage eventMessage = new EventMessage();
+					
+					eventMessage.setEventId(eventList.getEventId());
+					eventMessage.setEventListId(eventList.getId());
+					eventMessage.setUserId(user.getId());
+					eventMessage.setUserName(user.getName());
+					
+					if(StringUtils.hasText(eventRule.getEmailAccount())) {
+						eventMessage.setType(1);
+						eventMessage.setEmail(eventRule.getEmailAccount());
+						eventMessage.setTitle(eventRule.getEmailTitle());
+						eventMessage.setMessage(eventRule.getEmailContent());
+						eventMessageService.save(eventMessage);
+					}
+					
+					if(StringUtils.hasText(eventRule.getsMSReceiver())) {
+						eventMessage.setType(2);
+						eventMessage.setMobile(eventRule.getsMSReceiver());
+						eventMessage.setMessage(eventRule.getsMSContent());
+						eventMessageService.save(eventMessage);
+					}
+					
 					return ;
 				}
 			}
@@ -120,24 +148,24 @@ public class EventScheduler {
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 				if(to<from) {
 					if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-						assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+						assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
 						return ;
 					}
 				}else {
 					if(time>=from&&time<=to) {
-						assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+						assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
 						return ;
 					}
 				}
 			}
 			
 			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
-				assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+				assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
 				return ;
 			}
 			
 			if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-				assignment(eventRule.getDepartmentId(),eventList,eventRule.getResult());
+				assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
 				return ;
 			}
 			
@@ -148,7 +176,7 @@ public class EventScheduler {
 		}
 	}
 	
-	private Boolean assignment(String departmentId,EventList eventList,String pushTitle) {
+	private AdminUser assignment(String departmentId,EventList eventList,String pushTitle) {
 		List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentId(departmentId);
 		AdminUser user = null;
 		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
@@ -177,7 +205,7 @@ public class EventScheduler {
 		if(user== null) {
 			eventList.setIsNotFoundEmployee(true);
 			eventListService.update(eventList);
-			return false;
+			return null;
 		}
 		eventList.setIsNotFoundEmployee(false);
 		eventList.setCurrentHandleUser(user.getId());
@@ -198,7 +226,7 @@ public class EventScheduler {
 			eventList.setHelpId(sb.toString());
 		}
 		if(!StringUtils.hasText(eventList.getCurrentHandleUser())) {
-			return false;
+			return null;
 		}
 		eventListService.update(eventList);
 		
@@ -213,7 +241,7 @@ public class EventScheduler {
 		
 		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
 		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
-		return true;
+		return user;
 	}
 	
 	private AdminUser getCurrentHandleUser(DepartmentGroup departmentGroup) {

@@ -40,6 +40,7 @@ import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventListAssist;
+import com.pepper.model.emap.event.EventMessage;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
@@ -62,6 +63,7 @@ import com.pepper.service.emap.event.ActionListService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListAssistService;
 import com.pepper.service.emap.event.EventListService;
+import com.pepper.service.emap.event.EventMessageService;
 import com.pepper.service.emap.event.EventRuleService;
 import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.log.SystemLogService;
@@ -137,14 +139,22 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Reference
 	private StaffService staffService;
 	
+	@Reference
+	private EventMessageService eventMessageService;
+	
 	@RequestMapping(value = "/add")
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
 		EventList eventList = new EventList();
 		MapToBeanUtil.convert(eventList, map);
-		eventList.setIsOperatorTransfer(false);
-		eventListService.save(eventList);
+		eventList.setIsOperatorTransfer(false);		
+		if(map.containsKey("isConsole")&&map.get("isConsole")!=null&&((Boolean)map.get("isConsole"))) {
+			AdminUser currentUser = (AdminUser) this.getCurrentUser();
+			eventList.setStatus("W");
+			eventList.setOperator(currentUser.getId());
+		}
+		eventList = eventListService.save(eventList);
 		return resultData;
 	}
 	
@@ -626,6 +636,40 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return pager;
 	}
 	
+	@RequestMapping("/workbench/sms")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object sms(@RequestBody Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		EventMessage eventMessage = new EventMessage();
+		MapToBeanUtil.convert(eventMessage, map);
+		EventList eventList = this.eventListService.findById(eventMessage.getEventListId());
+		if(eventList==null) {
+			resultData.setCode(9000002);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000002));
+			return resultData;
+		}
+		
+		AdminUser user = this.adminUserService.findById(eventList.getCurrentHandleUser());
+		if(user==null) {
+			resultData.setCode(9000005);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000005));
+			return resultData;
+		}
+		
+		if(!StringUtils.hasText(user.getMobile()))
+		{
+			resultData.setCode(9000005);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000005));
+			return resultData;
+		}
+		eventMessage.setMobile(user.getMobile());
+		eventMessage.setUserId(user.getId());
+		eventMessage.setUserName(user.getName());
+		eventMessage.setType(2);
+		eventMessageService.save(eventMessage);
+		return resultData;
+	}
 	
 		
 	private List<EventListVo> convertVo(List<EventList> list){
@@ -633,7 +677,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(EventList eventList : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
-			Node node = nodeService.findBySourceCode(StringUtils.hasText(eventList.getSourceCode())?eventList.getSourceCode():"!@#$%%^&^*($&%&*%$");
+			Node node = nodeService.findBySourceCode(StringUtils.hasText(eventList.getSourceCode())?eventList.getSourceCode():"111111111");
 			if(node!=null) {
 				NodeVo nodeVo = new NodeVo();
 				BeanUtils.copyProperties(node, nodeVo);

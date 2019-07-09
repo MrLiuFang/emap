@@ -584,7 +584,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //				eventDispatchService.save(eventDispatch);
 				try {
 					String deviceId = valueOperationsService.get("userDeviceId_"+eventListAssist.getUserId());
-					messageService.send(deviceId, Internationalization.getMessageInternationalization(7000003),eventList.getEventName(),eventList.getId());
+					messageService.send(deviceId, Internationalization.getMessageInternationalization(7000003),eventList.getEventName(),eventList.getId(),true);
 				}catch (Exception e) {
 					// TODO: handle exception
 				}

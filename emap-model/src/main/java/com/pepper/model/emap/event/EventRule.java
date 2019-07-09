@@ -69,6 +69,15 @@ public class EventRule extends BaseModel {
 	@Column(name = "special_department_id")
 	private String specialDepartmentId;
 	
+	@Column(name = "email_title")
+	private String emailTitle;
+	
+	@Column(name = "email_content")
+	private String emailContent;
+	
+	@Column(name = "push_content")
+	private String pushContent;
+	
 //	@Column(name = "urgent_warning_level",nullable=false)
 //	private Integer urgentWarningLevel;
 
@@ -206,6 +215,30 @@ public class EventRule extends BaseModel {
 
 	public void setSpecialDepartmentId(String specialDepartmentId) {
 		this.specialDepartmentId = specialDepartmentId;
+	}
+
+	public String getEmailTitle() {
+		return emailTitle;
+	}
+
+	public void setEmailTitle(String emailTitle) {
+		this.emailTitle = emailTitle;
+	}
+
+	public String getEmailContent() {
+		return emailContent;
+	}
+
+	public void setEmailContent(String emailContent) {
+		this.emailContent = emailContent;
+	}
+
+	public String getPushContent() {
+		return pushContent;
+	}
+
+	public void setPushContent(String pushContent) {
+		this.pushContent = pushContent;
 	}
 
 //	public Integer getUrgentWarningLevel() {
