@@ -271,33 +271,34 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setData("isMeHandle", false);
 		}
 		
-		List<EventListAssist> listEventListAssist = this.eventListAssistService.findByActionListId(actionId);
-//		List<EventListAssistVo> listEventListAssistVo = new ArrayList<EventListAssistVo>();
 		List<Map<String,Object>> assistMap = new ArrayList<Map<String,Object>>();
-		for(EventListAssist eventListAssist : listEventListAssist) {
-			Map<String,Object> map = new HashMap<String, Object>();
-			map = BeanToMapUtil.transBeanToMap(eventListAssist);
-//			EventListAssistVo eventListAssistVo = new EventListAssistVo();
-//			BeanUtils.copyProperties(eventListAssist, eventListAssistVo);
-//			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
-//			if(actionList !=null) {
-//				eventListAssistVo.setActionList(convertActionListVo(actionList,node));
-//			}
-			if(StringUtils.hasText(eventListAssist.getUserId())) {
-				AdminUser assistUser = this.adminUserService.findById(eventListAssist.getUserId());
-//				AdminUserVo adminUserVo = new AdminUserVo();
-//				BeanUtils.copyProperties(assistUser, adminUserVo);
-//				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUserVo.getHeadPortrait()));
-//				eventListAssistVo.setUser(adminUserVo);
-				map.put("userName", assistUser.getName());
-				map.put("account", assistUser.getAccount());
-				map.put("headPortraitUrl", this.fileService.getUrl(assistUser.getHeadPortrait()));
+		if(StringUtils.hasText(actionId)) {
+			List<EventListAssist> listEventListAssist = this.eventListAssistService.findByActionListId(actionId);
+	//		List<EventListAssistVo> listEventListAssistVo = new ArrayList<EventListAssistVo>();
+			for(EventListAssist eventListAssist : listEventListAssist) {
+				Map<String,Object> map = new HashMap<String, Object>();
+				map = BeanToMapUtil.transBeanToMap(eventListAssist);
+	//			EventListAssistVo eventListAssistVo = new EventListAssistVo();
+	//			BeanUtils.copyProperties(eventListAssist, eventListAssistVo);
+	//			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
+	//			if(actionList !=null) {
+	//				eventListAssistVo.setActionList(convertActionListVo(actionList,node));
+	//			}
+				if(StringUtils.hasText(eventListAssist.getUserId())) {
+					AdminUser assistUser = this.adminUserService.findById(eventListAssist.getUserId());
+	//				AdminUserVo adminUserVo = new AdminUserVo();
+	//				BeanUtils.copyProperties(assistUser, adminUserVo);
+	//				adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUserVo.getHeadPortrait()));
+	//				eventListAssistVo.setUser(adminUserVo);
+					map.put("userName", assistUser.getName());
+					map.put("account", assistUser.getAccount());
+					map.put("headPortraitUrl", this.fileService.getUrl(assistUser.getHeadPortrait()));
+				}
+	//			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
+	//			map.put("assistIsUnableFinish", actionList==null?null:actionList.getIsUnableFinish());
+				assistMap.add(map);
 			}
-//			ActionList actionList = this.actionListService.findActionList(eventListAssist.getId());
-//			map.put("assistIsUnableFinish", actionList==null?null:actionList.getIsUnableFinish());
-			assistMap.add(map);
 		}
-		
 		resultData.setData("assistList", assistMap);
 		systemLogService.log("App event info", this.request.getRequestURL().toString());
 		return resultData;
