@@ -62,6 +62,12 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	public Pager<EventList> assistEventList(Pager<EventList> pager, String userId,Boolean isFinish) {
 		return eventListDao.assistEventList(pager, userId,isFinish);
 	}
+
+	@Override
+	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer warningLevel, String node,
+			String nodeType, String mapName, String buildName, String stieName, String operator, String status) {
+		return eventListDao.historyEventList(pager, event, warningLevel, node, nodeType, mapName, buildName, stieName, operator, status);
+	}
 	
 
 }

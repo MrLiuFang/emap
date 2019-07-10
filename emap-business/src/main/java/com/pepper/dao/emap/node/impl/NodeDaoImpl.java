@@ -76,7 +76,8 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 		}
 		
 		if(StringUtils.hasText(keyWord)) {
-			jpql.append(" and ( n.code  like :keyWord or n.name  like :keyWord or n.source  like :keyWord or n.sourceCode  like :keyWord )");
+//			jpql.append(" and ( n.code  like :keyWord or n.name  like :keyWord or n.source  like :keyWord or n.sourceCode  like :keyWord )");
+			jpql.append(" and n.name like :keyWord ");
 			searchParameter.put("keyWord", "%"+keyWord+"%");
 		}
 		

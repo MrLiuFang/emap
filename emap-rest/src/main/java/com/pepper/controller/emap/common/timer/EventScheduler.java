@@ -241,6 +241,16 @@ public class EventScheduler {
 		
 		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
 		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
+		
+		EventMessage eventMessage = new EventMessage();
+		eventMessage.setEventId(eventList.getEventId());
+		eventMessage.setEventListId(eventList.getId());
+		eventMessage.setUserId(user.getId());
+		eventMessage.setUserName(user.getName());
+		eventMessage.setType(3);
+		eventMessage.setMessage(StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單"+":"+eventList.getEventName());
+		eventMessageService.save(eventMessage);
+		
 		return user;
 	}
 	

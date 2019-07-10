@@ -8,6 +8,7 @@ import java.util.Map;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.event.ActionList;
 import com.pepper.model.emap.event.EventList;
+import com.pepper.model.emap.event.EventMessage;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.staff.Staff;
 
@@ -44,6 +45,8 @@ public class EventListVo extends EventList {
 	private Staff staff;
 	
 	private Boolean isAssistFinish;
+	
+	private List<EventMessage> eventMessage;
 	
 //	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
 	
@@ -135,6 +138,16 @@ public class EventListVo extends EventList {
 	public void setIsAssistFinish(Boolean isAssistFinish) {
 		this.isAssistFinish = isAssistFinish;
 	}
+
+	public List<EventMessage> getEventMessage() {
+		return eventMessage;
+	}
+
+	public void setEventMessage(List<EventMessage> eventMessage) {
+		this.eventMessage = eventMessage;
+	}
+	
+	
 
 //	public List<Map<String, Object>> getAssist() {
 //		return assist;

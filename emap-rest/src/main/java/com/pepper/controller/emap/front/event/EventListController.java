@@ -267,7 +267,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventListService.findNavigator(pager).getResults();
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
-		pager.setData("eventList",convertVo(list));
+		List<EventListVo> listEventListVo = convertVo(list);
+		setEventMessage(listEventListVo);
+		pager.setData("eventList",listEventListVo);
 		
 		return pager;
 	}
@@ -422,6 +424,28 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		List<EventList> list= pager.getResults();
 		
+		
+		pager.setData("historyEvent", convertHistoryEventList(list));
+		pager.setResults(null);
+		systemLogService.log("event history list", this.request.getRequestURL().toString());
+		return pager;
+	}
+	
+	@RequestMapping("/workbench/historyEventList")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object historyEventList(String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operator,String status ){
+		Pager<EventList> pager = new Pager<EventList>();
+		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeType, mapName, buildName, siteName, operator, status);
+		
+		pager.setData("historyEvent",  convertHistoryEventList(pager.getResults()));
+		pager.setResults(null);
+		systemLogService.log("event historyEventList ", this.request.getRequestURL().toString());
+		return pager;
+	}
+	
+	
+	private List<EventListVo> convertHistoryEventList(List<EventList> list){
 		List<EventListVo> returnList  = new ArrayList<EventListVo>();
 		for(EventList obj : list) {
 			EventListVo eventListVo = new EventListVo();
@@ -447,10 +471,15 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 			returnList.add(eventListVo);
 		}
-		pager.setData("historyEvent", returnList);
-		pager.setResults(null);
-		systemLogService.log("event history list", this.request.getRequestURL().toString());
-		return pager;
+		setEventMessage(returnList);
+		return returnList;
+	}
+	
+	private void setEventMessage(List<EventListVo> list) {
+		for(EventListVo eventListVo : list) {
+			List<EventMessage> listEventMessage= this.eventMessageService.findEventMessage(eventListVo.getId());
+			eventListVo.setEventMessage(listEventMessage);
+		}
 	}
 	
 	@RequestMapping("/workbench/actionList")

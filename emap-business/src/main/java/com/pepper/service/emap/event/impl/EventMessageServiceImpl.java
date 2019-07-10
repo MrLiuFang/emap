@@ -1,5 +1,7 @@
 package com.pepper.service.emap.event.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -15,5 +17,10 @@ public class EventMessageServiceImpl extends BaseServiceImpl<EventMessage>  impl
 
 	@Resource
 	private EventMessageDao eventMessageDao;
+
+	@Override
+	public List<EventMessage> findEventMessage(String eventListId) {
+		return eventMessageDao.findByEventListIdOrderByCreateDateDesc(eventListId);
+	}
 
 }

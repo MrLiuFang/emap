@@ -113,6 +113,107 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		}
 		jpql.append(" order by ea.createDate desc ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
+	}
+
+	@Override
+	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer warningLevel, String node,
+			String nodeType, String mapName, String buildName, String stieName, String operator, String status) {
+		StringBuffer jpql = new StringBuffer();
+		Map<String,String> joinKey = new HashMap<String, String>();
+		Map<String,Object> searchParameter = new HashMap<String, Object>();
+		jpql.append(" select el from EventList el ");
+		if(StringUtils.hasText(node)) {
+			joinKey.put("node", "");
+			jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+		}
+		if(StringUtils.hasText(nodeType)) {
+			joinKey.put("nodeType", "");
+			if(!joinKey.containsKey("node")) {
+				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+			}
+			jpql.append(" join NodeType nt on n.nodeTypeId = nt.id ");
+		}
+		if(StringUtils.hasText(mapName)) {
+			joinKey.put("map", "");
+			if(!joinKey.containsKey("node")) {
+				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+			}
+			jpql.append(" join Map m on n.mapId = m.id ");
+		}
+		
+		if(StringUtils.hasText(buildName)) {
+			joinKey.put("build", "");
+			if(!joinKey.containsKey("node")) {
+				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+			}
+			if(!joinKey.containsKey("map")) {
+				jpql.append(" join Map m on n.mapId = m.id ");
+			}
+			jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
+		}
+		
+		if(StringUtils.hasText(stieName)) {
+			if(!joinKey.containsKey("node")) {
+				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+			}
+			if(!joinKey.containsKey("map")) {
+				jpql.append(" join Map m on n.mapId = m.id ");
+			}
+			if(!joinKey.containsKey("build")) {
+				jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
+			}
+			jpql.append(" join SiteInfo si on si.id = bi.siteInfoId ");
+		}
+		
+		if(StringUtils.hasText(operator)) {
+			jpql.append(" join AdminUser au on au.id = el.operator ");
+		}
+		
+		jpql.append(" where 1=1 ");
+		
+		
+		if(StringUtils.hasText(status)) {
+			jpql.append(" and el.status = :status  ");
+			searchParameter.put("status", status);
+		}
+		if(StringUtils.hasText(event)) {
+			jpql.append(" and ( el.id like :event or  el.eventName like :event ) ");
+			searchParameter.put("event", "%"+event+"%");
+		}
+		if(warningLevel!=null) {
+			jpql.append(" and el.warningLevel = :warningLevel ");
+			searchParameter.put("warningLevel", warningLevel);
+		}
+		if(StringUtils.hasText(node)) {
+			jpql.append(" and ( n.code like :node or n.name like :node or n.sourceCode like :node or n.source like :node ) ");
+			searchParameter.put("node", "%"+node+"%");
+		}
+		if(StringUtils.hasText(nodeType)) {
+			jpql.append(" and nt.name like :nodeType ");
+			searchParameter.put("nodeType", "%"+nodeType+"%");
+		}
+		if(StringUtils.hasText(mapName)) {
+			jpql.append(" and m.name like :mapName ");
+			searchParameter.put("mapName", "%"+mapName+"%");
+		}
+		if(StringUtils.hasText(buildName)) {
+			jpql.append(" and bi.name like :mapName ");
+			searchParameter.put("mapName", "%"+mapName+"%");
+		}
+		if(StringUtils.hasText(stieName)) {
+			jpql.append(" and si.name like :stieName ");
+			searchParameter.put("stieName", "%"+stieName+"%");
+		}
+		
+		if(StringUtils.hasText(operator)) {
+			jpql.append(" and au.name like :operator ");
+			searchParameter.put("operator", "%"+operator+"%");
+		}
+		
+		
+		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
+		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	} 
+	
 
 }
