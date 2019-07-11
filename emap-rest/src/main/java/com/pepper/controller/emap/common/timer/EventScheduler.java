@@ -36,7 +36,7 @@ import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
 @Component
-@Order(value=Ordered.HIGHEST_PRECEDENCE)
+@Order(value=Ordered.LOWEST_PRECEDENCE)
 public class EventScheduler {
 
 	@Reference

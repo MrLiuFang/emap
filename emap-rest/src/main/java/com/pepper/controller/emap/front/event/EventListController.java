@@ -450,6 +450,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(EventList obj : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(obj, eventListVo);
+			setNode(obj,eventListVo);
 			if(StringUtils.hasText(obj.getOperator())) {
 				AdminUser operatorUser = this.adminUserService.findById(obj.getOperator());
 				if(operatorUser!=null) {
@@ -706,31 +707,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(EventList eventList : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(eventList, eventListVo);
-			Node node = nodeService.findBySourceCode(StringUtils.hasText(eventList.getSourceCode())?eventList.getSourceCode():"111111111");
-			if(node!=null) {
-				NodeVo nodeVo = new NodeVo();
-				BeanUtils.copyProperties(node, nodeVo);
-				if(node.getStatus()!=null) {
-					nodeVo.setStatusCode(node.getStatus().getName());
-				}
-				com.pepper.model.emap.map.Map map = mapService.findById(node.getMapId());
-				if(map!=null) {
-					MapVo mapVo = new MapVo();
-					BeanUtils.copyProperties(map, mapVo);
-					nodeVo.setMap(mapVo);
-					NodeTypeVo nodeTypeVo = new NodeTypeVo();
-					NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
-					if(nodeType != null) {
-						BeanUtils.copyProperties(nodeType, nodeTypeVo);
-						nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
-						nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
-						nodeVo.setNodeType(nodeTypeVo);
-					}
-					mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
-				}
-				
-				eventListVo.setNode(nodeVo);
-			}
+			setNode(eventList,eventListVo);
 			if(StringUtils.hasText(eventList.getCurrentHandleUser()) ) {
 				AdminUser currentHandleUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
 				if(currentHandleUser!=null) {
@@ -758,6 +735,34 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			returnList.add(eventListVo);
 		}
 		return returnList;
+	}
+	
+	private void setNode(EventList eventList,EventListVo eventListVo) {
+		Node node = nodeService.findBySourceCode(StringUtils.hasText(eventList.getSourceCode())?eventList.getSourceCode():"111111111");
+		if(node!=null) {
+			NodeVo nodeVo = new NodeVo();
+			BeanUtils.copyProperties(node, nodeVo);
+			if(node.getStatus()!=null) {
+				nodeVo.setStatusCode(node.getStatus().getName());
+			}
+			com.pepper.model.emap.map.Map map = mapService.findById(node.getMapId());
+			if(map!=null) {
+				MapVo mapVo = new MapVo();
+				BeanUtils.copyProperties(map, mapVo);
+				nodeVo.setMap(mapVo);
+				NodeTypeVo nodeTypeVo = new NodeTypeVo();
+				NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
+				if(nodeType != null) {
+					BeanUtils.copyProperties(nodeType, nodeTypeVo);
+					nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+					nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+					nodeVo.setNodeType(nodeTypeVo);
+				}
+				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+			}
+			
+			eventListVo.setNode(nodeVo);
+		}
 	}
 	
 }

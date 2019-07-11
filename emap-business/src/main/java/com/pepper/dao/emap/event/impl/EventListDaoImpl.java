@@ -189,16 +189,16 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			searchParameter.put("node", "%"+node+"%");
 		}
 		if(StringUtils.hasText(nodeType)) {
-			jpql.append(" and nt.name like :nodeType ");
-			searchParameter.put("nodeType", "%"+nodeType+"%");
+			jpql.append(" and nt.id = :nodeType ");
+			searchParameter.put("nodeType", nodeType);
 		}
 		if(StringUtils.hasText(mapName)) {
 			jpql.append(" and m.name like :mapName ");
 			searchParameter.put("mapName", "%"+mapName+"%");
 		}
 		if(StringUtils.hasText(buildName)) {
-			jpql.append(" and bi.name like :mapName ");
-			searchParameter.put("mapName", "%"+mapName+"%");
+			jpql.append(" and bi.name like :buildName ");
+			searchParameter.put("buildName", "%"+buildName+"%");
 		}
 		if(StringUtils.hasText(stieName)) {
 			jpql.append(" and si.name like :stieName ");
@@ -206,8 +206,8 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		}
 		
 		if(StringUtils.hasText(operator)) {
-			jpql.append(" and au.name like :operator ");
-			searchParameter.put("operator", "%"+operator+"%");
+			jpql.append(" and au.id = :operator ");
+			searchParameter.put("operator", operator);
 		}
 		
 		
