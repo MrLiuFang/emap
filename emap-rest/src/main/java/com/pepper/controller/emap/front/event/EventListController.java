@@ -434,9 +434,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/historyEventList")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object historyEventList(String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operator,String status ){
+	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ){
 		Pager<EventList> pager = new Pager<EventList>();
-		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeType, mapName, buildName, siteName, operator, status);
+		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status);
 		
 		pager.setData("historyEvent",  convertHistoryEventList(pager.getResults()));
 		pager.setResults(null);

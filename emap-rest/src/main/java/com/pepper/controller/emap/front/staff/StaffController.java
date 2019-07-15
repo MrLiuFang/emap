@@ -228,9 +228,13 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 //				}
 				
 				String site = getCellValue(row.getCell(4)).toString().toLowerCase();
-				if(StringUtils.hasText(site)) {
+				if(!StringUtils.hasText(site)) {
+					resultData.setCode(1200003);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1200003).replace("{1}", String.valueOf(i)));
+					return resultData;
+				}else {
 					List<SiteInfo> listSiteInfo = this.siteInfoService.findByName(site);
-					if(listSiteInfo.size()!=1) {
+					if(listSiteInfo.size()<=0) {
 						resultData.setCode(1200003);
 						resultData.setMessage(Internationalization.getMessageInternationalization(1200003).replace("{1}", String.valueOf(i)));
 						return resultData;

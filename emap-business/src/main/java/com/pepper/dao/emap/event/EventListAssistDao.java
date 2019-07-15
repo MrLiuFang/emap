@@ -22,7 +22,7 @@ public interface EventListAssistDao extends BaseDao<EventListAssist> {
 	 * @param userId
 	 * @return
 	 */
-	public EventListAssist findFirstByEventListIdAndUserId(String eventListId,String userId);
+	public List<EventListAssist> findByEventListIdAndUserId(String eventListId,String userId);
 	
 	/**
 	 * 
@@ -46,4 +46,6 @@ public interface EventListAssistDao extends BaseDao<EventListAssist> {
 	public List<EventListAssist> findByActionListId(String actionListId);
 	
 	public List<EventListAssist> findByEventListIdAndEmployeeId(String eventListId,String employeeId);
+	
+	public void deleteByEventListIdAndEmployeeIdAndIsFinish(String eventListId,String employeeId,Boolean isFinish);
 }

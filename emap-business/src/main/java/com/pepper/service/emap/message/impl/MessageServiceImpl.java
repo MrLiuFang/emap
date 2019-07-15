@@ -21,14 +21,16 @@ import cn.jpush.api.push.model.notification.Notification;
 public class MessageServiceImpl implements MessageService {
 
 	@Override
-	public void send(String deviceId, String title, String message,String eventId,Boolean isAssist) {
+	public void send(String deviceId, String title, String message,String eventId,Boolean isAssist,String requestAssistName) {
 		if(!StringUtils.hasText(deviceId)) {
 			return ;
 		}
 		Map<String,String> extras = new HashMap<String, String>();
 		extras.put("eventId", eventId);
 		extras.put("isAssist", isAssist==null?"false":isAssist.toString());
-		
+		if(requestAssistName!=null) {
+			extras.put("requestAssistName", requestAssistName);
+		}
 		JPushClient jpushClient = new JPushClient("85501c0630cb06d57e5bd3c1", "c77dc96a2368b516a3c1d922");
 		PushPayload payload = PushPayload.newBuilder()
 				.setPlatform(Platform.android())
@@ -72,6 +74,6 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	public void send(String deviceId, String title, String message, String eventId) {
-		send(deviceId, title, message, eventId,false);
+		send(deviceId, title, message, eventId,false,null);
 	}
 }
