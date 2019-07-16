@@ -182,7 +182,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
-		eventListService.findNavigator(pager).getResults();
+		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
