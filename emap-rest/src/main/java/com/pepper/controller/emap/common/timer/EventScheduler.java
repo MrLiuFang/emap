@@ -35,7 +35,7 @@ import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
-//@Component
+@Component
 @Order(value=Ordered.LOWEST_PRECEDENCE)
 public class EventScheduler {
 
