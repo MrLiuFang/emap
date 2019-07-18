@@ -76,6 +76,7 @@ import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.BeanToMapUtil;
+import com.pepper.util.HttpUtil;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
@@ -141,6 +142,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	
 	@Reference
 	private EventMessageService eventMessageService;
+	
+
 	
 	@RequestMapping(value = "/add")
 	@ResponseBody
@@ -264,7 +267,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
 		}
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
-		eventListService.findNavigator(pager).getResults();
+		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		List<EventListVo> listEventListVo = convertVo(list);
@@ -362,6 +365,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			resultData.setMessage(Internationalization.getMessageInternationalization(9000002));
 			return resultData;
 		}
+		this.eventListAssistService.delete(eventList.getId(), eventList.getCurrentHandleUser(), null);
 		if(!map.containsKey("employeeId")) {
 			resultData.setCode(900003);
 			resultData.setMessage(Internationalization.getMessageInternationalization(9000003));
@@ -700,6 +704,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventMessageService.save(eventMessage);
 		return resultData;
 	}
+	
+	
 	
 		
 	private List<EventListVo> convertVo(List<EventList> list){

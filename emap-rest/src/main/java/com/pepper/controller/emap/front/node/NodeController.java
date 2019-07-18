@@ -3,8 +3,11 @@ package com.pepper.controller.emap.front.node;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.ss.usermodel.Cell;
@@ -13,6 +16,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,6 +51,7 @@ import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
 import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.service.file.FileService;
+import com.pepper.util.HttpUtil;
 import com.pepper.util.MapToBeanUtil;
 
 /**
@@ -60,6 +65,9 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	
 	@Reference
 	private NodeService nodeService;
+	
+	@Resource
+	private Environment environment;
 	
 	@Reference
 	private NodeTypeService nodeTypeService;
@@ -538,6 +546,37 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		resultData.setData("node", returnList);
 		systemLogService.log("get node for map list", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	@RequestMapping("/openDoor")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object openDoor(String nodeId) throws Exception {
+		systemLogService.log("open door", this.request.getRequestURL().toString());
+		ResultData resultData = new ResultData();
+		Node node = this.nodeService.findById(nodeId);
+		if(node==null) {
+			resultData.setCode(9000006);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000006));
+			return resultData;
+		}
+		if(!StringUtils.hasText(node.getSourceType())) {
+			resultData.setCode(1100012);
+			resultData.setMessage(Internationalization.getMessageInternationalization(1100012));
+			return resultData;
+		}
+		
+		String url = environment.getProperty("openDoorUrl", "");
+		if(StringUtils.hasText(url)) {
+			HttpUtil httpUtil = new HttpUtil();
+			Map<String,String> parameter = new HashMap<String, String>();
+			parameter.put("controllerIp", node.getPaneId());
+			parameter.put("controllerType", node.getSourceType());
+			parameter.put("controllerId", node.getPaneId());
+			parameter.put("doorId", node.getReaderId());
+			httpUtil.post(url, parameter);
+		}
 		return resultData;
 	}
 	

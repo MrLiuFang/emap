@@ -228,6 +228,8 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(eventList == null) {
 			return resultData;
 		}
+		resultData.setData("createDate", eventList.getCreateDate());
+		resultData.setData("eventDate", eventList.getEventDate());
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 		if(eventDispatch != null) {
@@ -281,9 +283,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		resultData.setData("assistList", assistMap);
 		
-		EventListAssist eventListAssist = this.eventListAssistService.findEventListAssist(id,eventList.getCurrentHandleUser(), adminUser.getId());
+		EventListAssist eventListAssist = this.eventListAssistService.findEventListAssist(id,adminUser.getId(),eventList.getCurrentHandleUser());
 		if(eventListAssist!=null) {
-			AdminUser requestAssistUser = this.adminUserService.findById(eventListAssist.getUserId());
+			AdminUser requestAssistUser = this.adminUserService.findById(eventListAssist.getEmployeeId());
 			resultData.setData("requestAssistName",requestAssistUser.getName());
 		}else {
 			resultData.setData("requestAssistName",null);
@@ -484,6 +486,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setMessage(Internationalization.getMessageInternationalization(8000002));
 			return resultData;
 		}
+		this.eventListAssistService.delete(eventList.getId(), eventList.getCurrentHandleUser(), null);
 		eventList.setAssignDate(new Date());
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventListService.update(eventList);
@@ -564,7 +567,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			return resultData;
 		}
 		
-		this.eventListAssistService.delete(eventList.getId(), eventList.getCurrentHandleUser(), null);
+//		this.eventListAssistService.delete(eventList.getId(), eventList.getCurrentHandleUser(), null);
 		
 		if(jsonNode.get("userId").isArray()) {
 			if(((ArrayNode)jsonNode.get("userId")).size()<=0) {

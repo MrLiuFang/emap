@@ -26,6 +26,9 @@ public class Node extends BaseModel {
 	@Column(name = "name")
 	private String name;
 	
+	@Column(name = "source_type")
+	private String sourceType;
+	
 	@Column(name = "source")
 	private String source;
 	
@@ -284,7 +287,12 @@ public class Node extends BaseModel {
 		this.status = status;
 	}
 
-	
-	
-	
+	public String getSourceType() {
+		return sourceType;
+	}
+
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+
 }
