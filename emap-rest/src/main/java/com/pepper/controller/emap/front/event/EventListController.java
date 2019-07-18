@@ -600,7 +600,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		String operatorId = map.get("operatorId").toString();
 		AdminUser adminUser = this.adminUserService.findById(operatorId);
-		if(!(adminUser!=null && adminUser.getIsManager())) {
+		if(adminUser==null || !adminUser.getIsWork()) {
 			resultData.setCode(9000004);
 			resultData.setMessage(Internationalization.getMessageInternationalization(9000004));
 			return resultData;
