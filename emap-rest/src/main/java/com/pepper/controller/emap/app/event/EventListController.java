@@ -228,6 +228,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(eventList == null) {
 			return resultData;
 		}
+		resultData.setData("eventName", eventList.getEventName());
 		resultData.setData("createDate", eventList.getCreateDate());
 		resultData.setData("eventDate", eventList.getEventDate());
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
@@ -250,6 +251,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
 		if(node!=null) {
+			resultData.setData("nodeName", node.getName());
 			resultData.setData("nodeId",node.getId());
 			resultData.setData("helpList", convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),null,eventList.getHelpId()));
 		}
@@ -292,6 +294,12 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		
 		
+		List<ActionList> listActionList= this.actionListService.findByEventListId(eventList.getId());
+		List<ActionListVo> finishActionList = new ArrayList<ActionListVo>();
+		for(ActionList actionList : listActionList) {
+			finishActionList.add(convertActionListVo(actionList,node));
+		}
+		resultData.setData("finishActionList",finishActionList);
 		
 		systemLogService.log("App event info", this.request.getRequestURL().toString());
 		return resultData;

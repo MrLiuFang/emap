@@ -159,6 +159,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setCode(3000001);
 			return resultData;
 		}
+		
+		if(!StringUtils.hasText(adminUser.getName())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(3000002));
+			resultData.setCode(3000002);
+			return resultData;
+		}
 				
 		adminUser.setStatus(Status.NORMAL);
 		adminUser.setUserType(UserType.EMPLOYEE);
@@ -191,6 +197,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUser old = adminUserService.findById(adminUser.getId());
 		adminUser.setPassword(old.getPassword());
 		adminUser.setAccount(old.getAccount());
+		if(!StringUtils.hasText(adminUser.getName())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(3000002));
+			resultData.setCode(3000002);
+			return resultData;
+		}
 		adminUserService.updateUser(adminUser, map.get("roleId").toString());
 		systemLogService.log("get user update", this.request.getRequestURL().toString());
 		return resultData;
