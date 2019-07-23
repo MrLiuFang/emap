@@ -731,9 +731,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	
 	private Integer getUrgentWarningLevel(EventList eventList) {
 		Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
-		EventRule eventRule = this.eventRuleService.findByNodeId(node.getId());
+		EventRule eventRule = this.eventRuleService.findByNodeId(node==null?"0":node.getId());
 		if(eventRule == null) {
-			eventRule = eventRuleService.findByNodeTypeId(node.getNodeTypeId());
+			eventRule = eventRuleService.findByNodeTypeId(node==null?"0":node.getNodeTypeId());
 		}
 		return eventRule==null?0:eventRule.getWarningLevel();
 	}

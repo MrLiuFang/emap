@@ -124,8 +124,8 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		
 		if(nodeService.findBySourceCode(node.getSourceCode())!=null) {
-			resultData.setCode(2000001);
-			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			resultData.setCode(2000002);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000002));
 			return resultData;
 		}
 		
@@ -154,8 +154,8 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		Node oldNode1 = nodeService.findBySourceCode(node.getSourceCode());
 		if(oldNode1!=null && oldNode1.getSourceCode()!=null&&node.getSourceCode()!=null) {
 			if(!node.getId().equals(oldNode1.getId())){
-				resultData.setCode(2000001);
-				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				resultData.setCode(2000002);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000002));
 				return resultData;
 			}
 		}
