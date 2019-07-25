@@ -371,6 +371,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			resultData.setMessage(Internationalization.getMessageInternationalization(9000003));
 			return resultData;
 		}
+		eventList.setIsUnableFinish(false);
+		eventList.setIsNotFoundEmployee(false);
+		eventList.setIsNotFoundEventRule(false);
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
 		eventList.setStatus("A");
 		if(map.containsKey("helpId")) {
