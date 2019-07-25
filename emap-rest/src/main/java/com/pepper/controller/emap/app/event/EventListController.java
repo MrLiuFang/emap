@@ -494,6 +494,9 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			resultData.setMessage(Internationalization.getMessageInternationalization(8000002));
 			return resultData;
 		}
+		eventList.setIsUnableFinish(false);
+		eventList.setIsNotFoundEmployee(false);
+		eventList.setIsNotFoundEventRule(false);
 		this.eventListAssistService.delete(eventList.getId(), eventList.getCurrentHandleUser(), null);
 		eventList.setAssignDate(new Date());
 		eventList.setCurrentHandleUser(map.get("employeeId").toString());
