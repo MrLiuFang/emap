@@ -295,7 +295,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			node.setX(getCellValue(row.getCell(6)).toString());
 			node.setY(getCellValue(row.getCell(7)).toString());
 			if(StringUtils.hasText(getCellValue(row.getCell(10)).toString())) {
-				node.setWarningLevel(Integer.valueOf(getCellValue(row.getCell(10)).toString()));
+				node.setWarningLevel(Double.valueOf(getCellValue(row.getCell(10)).toString()).intValue());
 			}
 			if(!StringUtils.hasText(node.getCode())) {
 				resultData.setCode(1100003);

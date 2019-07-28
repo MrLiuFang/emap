@@ -1,5 +1,6 @@
 package com.pepper.dao.emap.event.impl;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,12 +117,11 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 	}
 
 	@Override
-	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer warningLevel, String node,
-			String nodeType, String mapName, String buildName, String stieName, String operator, String status) {
+	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
-		jpql.append(" select el from EventList el ");
+		jpql.append(" select distinct el from EventList el ");
 		if(StringUtils.hasText(node)) {
 			joinKey.put("node", "");
 			jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
@@ -152,7 +152,7 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
 		}
 		
-		if(StringUtils.hasText(stieName)) {
+		if(StringUtils.hasText(siteName)) {
 			if(!joinKey.containsKey("node")) {
 				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
 			}
@@ -165,8 +165,12 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			jpql.append(" join SiteInfo si on si.id = bi.siteInfoId ");
 		}
 		
-		if(StringUtils.hasText(operator)) {
+		if(StringUtils.hasText(operatorId)) {
 			jpql.append(" join AdminUser au on au.id = el.operator ");
+		}
+		
+		if(StringUtils.hasText(employeeId)) {
+			jpql.append(" join ActionList al on el.id = al.eventListId ");
 		}
 		
 		jpql.append(" where 1=1 ");
@@ -200,16 +204,32 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 			jpql.append(" and bi.name like :buildName ");
 			searchParameter.put("buildName", "%"+buildName+"%");
 		}
-		if(StringUtils.hasText(stieName)) {
-			jpql.append(" and si.name like :stieName ");
-			searchParameter.put("stieName", "%"+stieName+"%");
+		if(StringUtils.hasText(siteName)) {
+			jpql.append(" and si.name like :siteName ");
+			searchParameter.put("siteName", "%"+siteName+"%");
 		}
 		
-		if(StringUtils.hasText(operator)) {
+		if(StringUtils.hasText(operatorId)) {
 			jpql.append(" and au.id = :operator ");
-			searchParameter.put("operator", operator);
+			searchParameter.put("operator", operatorId);
 		}
 		
+		if(StringUtils.hasText(employeeId)) {
+			jpql.append(" and al.operator = :employeeId ");
+			searchParameter.put("employeeId", employeeId);
+		}
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if(eventStartDate!=null) {
+			jpql.append(" and  el.eventDate >= :eventStartDate ");
+			searchParameter.put("eventStartDate", dateFormat.format(eventStartDate));
+		}
+		
+		if(eventEndDate!=null) {
+			jpql.append(" and  el.eventDate <= :eventEndDate ");
+			searchParameter.put("eventEndDate", dateFormat.format(eventEndDate));
+		}
+		
+		jpql.append(" order by   el.createDate desc ");
 		
 		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);

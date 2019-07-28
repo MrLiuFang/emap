@@ -1,6 +1,7 @@
 package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -157,6 +158,19 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setStatus("W");
 			eventList.setOperator(currentUser.getId());
 		}
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		try {
+			dateFormat.parse(eventList.getEventDate());
+		}catch (Exception e) {
+			eventList.setEventDate(null);
+		}
+		
+		if(!StringUtils.hasText(eventList.getEventDate())) {
+			eventList.setCreateDate(new Date());
+			eventList.setEventDate(dateFormat.format(eventList.getCreateDate()));
+		}
+		
 		eventList = eventListService.save(eventList);
 		return resultData;
 	}

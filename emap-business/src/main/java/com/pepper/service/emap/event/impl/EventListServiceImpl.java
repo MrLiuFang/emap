@@ -66,7 +66,14 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer warningLevel, String node,
 			String nodeType, String mapName, String buildName, String stieName, String operator, String status) {
-		return eventListDao.historyEventList(pager, event, warningLevel, node, nodeType, mapName, buildName, stieName, operator, status);
+		return eventListDao.historyEventList(pager,null,null, event, warningLevel, node, nodeType, mapName, buildName, stieName, operator, status,null);
+	}
+
+	@Override
+	public Pager<EventList> report(Pager<EventList> pager, Date eventStartDate, Date eventEndDate, String event,
+			Integer warningLevel, String node, String nodeTypeId, String mapName, String buildName, String siteName,
+			String operatorId, String status, String employeeId) {
+		return eventListDao.historyEventList(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId);
 	}
 	
 
