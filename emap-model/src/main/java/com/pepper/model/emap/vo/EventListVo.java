@@ -48,6 +48,7 @@ public class EventListVo extends EventList {
 	
 	private List<EventMessage> eventMessage;
 	
+	
 //	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
 	
 	public String getNodeName() {

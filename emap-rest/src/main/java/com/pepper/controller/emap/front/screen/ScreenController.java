@@ -197,9 +197,11 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		for(ScreenMap screenMap :listScreenMap  ) {
 			com.pepper.model.emap.map.Map map = mapService.findById(screenMap.getMapId());
 			MapVo mapVo = new MapVo();
-			BeanUtils.copyProperties(map, mapVo);
-			mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
-			listMapVo.add(mapVo);
+			if(map!=null) {
+				BeanUtils.copyProperties(map, mapVo);
+				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+				listMapVo.add(mapVo);
+			}
 		}
 		screenVo.setMap(listMapVo);
 		return  screenVo;
