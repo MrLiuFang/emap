@@ -194,7 +194,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object automaticList(String id) {
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_status", new String[] {"A","B"});
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.ISNULL+"_operator", null);
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_NULL+"_operator", null);
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
@@ -679,7 +679,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		Pager<EventList> pager = new Pager<EventList>();
 		Node node =  this.nodeService.findById(nodeId);
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_sourceCode", node==null?null:node.getSourceCode());
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTEQUAL+"_status","P");
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.NOT_EQUAL+"_status","P");
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		pager = this.eventListService.findNavigator(pager);
 		List<EventListVo> list = this.convertVo(pager.getResults());

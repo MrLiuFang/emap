@@ -55,7 +55,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		}
 		
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_code&name",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_code&name",keyWord );
 		}
 		pager = departmentService.findNavigator(pager);
 		pager.setData("department",pager.getResults());

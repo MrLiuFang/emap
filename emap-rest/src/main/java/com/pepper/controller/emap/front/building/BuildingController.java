@@ -59,7 +59,7 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_siteInfoId",siteId );
 		}
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_siteInfoId&code&name",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_siteInfoId&code&name",keyWord );
 		}
 		pager = buildingInfoService.findNavigator(pager);
 		

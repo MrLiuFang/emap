@@ -136,7 +136,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(!isFinish) {
 			Pager<EventList> pager = new Pager<EventList>();
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+ "_currentHandleUser", adminUser.getId());
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOTIN+ "_status",new String[] {"P","B"});
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.NOT_IN+ "_status",new String[] {"P","B"});
 			pager.getJpqlParameter().setSortParameter("assignDate", Direction.DESC);
 			pager = eventListService.findNavigator(pager);
 			pager.setData("eventList",convertVo(pager.getResults()));

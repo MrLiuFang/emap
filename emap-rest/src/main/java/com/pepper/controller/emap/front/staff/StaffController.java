@@ -78,7 +78,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_idCard",idCard );
 		}
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_name&email&idCard",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&email&idCard",keyWord );
 		}
 		pager = staffService.findNavigator(pager);
 		List<Staff> list = pager.getResults();

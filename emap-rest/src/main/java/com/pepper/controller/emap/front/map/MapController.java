@@ -101,7 +101,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",buildId );
 		}
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_name&code&areaName&areaCode",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&code&areaName&areaCode",keyWord );
 //			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",keyWord );
 		}
 		pager = mapService.findNavigator(pager);

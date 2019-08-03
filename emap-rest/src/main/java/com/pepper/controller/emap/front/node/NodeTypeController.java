@@ -56,7 +56,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_code&name",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_code&name",keyWord );
 		}
 		pager = nodeTypeService.findNavigator(pager);
 		List<NodeType> list = pager.getResults();

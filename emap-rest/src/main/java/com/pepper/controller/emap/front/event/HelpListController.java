@@ -65,7 +65,7 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		}
 		
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_name&code",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&code",keyWord );
 		}
 		pager = helpListService.findNavigator(pager);
 		List<HelpList> list = pager.getResults();
