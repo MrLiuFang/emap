@@ -192,33 +192,48 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		document.add(paragraph);
 		PdfPTable table = new PdfPTable(7);
 		table.setWidthPercentage(100);
-		table.addCell(new Paragraph("事件時間", FontChinese));
-		table.addCell(new Paragraph("事件名稱", FontChinese));
-		table.addCell(new Paragraph("告警級別", FontChinese));
-//		table.addCell(new Paragraph("狀態", FontChinese));
-		table.addCell(new Paragraph("是否特急", FontChinese));
-		table.addCell(new Paragraph("是否緊急", FontChinese));
+		table.addCell(new Paragraph("發生時間", FontChinese));
+		table.addCell(new Paragraph("説明", FontChinese));
 		table.addCell(new Paragraph("設備名稱", FontChinese));
-//		table.addCell(new Paragraph("地圖名稱",FontChinese));
-//		table.addCell(new Paragraph("建築名稱",FontChinese));
-//		table.addCell(new Paragraph("設備類型",FontChinese));
+		table.addCell(new Paragraph("警告級別", FontChinese));
+		table.addCell(new Paragraph("緊急", FontChinese));
+		table.addCell(new Paragraph("特急", FontChinese));
 		table.addCell(new Paragraph("操作員", FontChinese));
+		table.addCell(new Paragraph("處理人",FontChinese));
+		table.addCell(new Paragraph("狀態",FontChinese));
+		table.addCell(new Paragraph("地圖",FontChinese));
+		table.addCell(new Paragraph("設備類型", FontChinese));
 
 		for (EventListVo eventListVo : (List<EventListVo>) pager.getData().get("event")) {
 			table.addCell(new Paragraph(eventListVo.getEventDate(), FontChinese));
-			table.addCell(new Paragraph(eventListVo.getEventName(), FontChinese));
+			table.addCell(new Paragraph(eventListVo.getEventName(), FontChinese));			
+			table.addCell(new Paragraph(eventListVo.getNode()==null?"":eventListVo.getNode().getName(), FontChinese));
 			table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
-//			table.addCell(new Paragraph(eventListVo.getStatus(), FontChinese));
-			table.addCell(new Paragraph(
-					eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
 			table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",
 					FontChinese));
-			table.addCell(
-					new Paragraph(eventListVo.getNode() == null ? "" : eventListVo.getNode().getName(), FontChinese));
-//			table.addCell(new Paragraph(eventListVo.getNode().getMap().getName(),FontChinese));
-//			table.addCell(new Paragraph(eventListVo.getNode().getMap().getBuild().getName(),FontChinese));
 			table.addCell(new Paragraph(
-					eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
+					eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
+			table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
+			table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
+			if(eventListVo.getNode()!=null) {
+				if(eventListVo.getNode().getMap()!=null) {
+					table.addCell(new Paragraph(eventListVo.getNode().getMap().getName(),FontChinese));
+					table.addCell(new Paragraph(eventListVo.getNode().getMap().getBuild()==null?"":eventListVo.getNode().getMap().getBuild().getName(),FontChinese));
+				}else {
+					table.addCell(new Paragraph("",FontChinese));
+					table.addCell(new Paragraph("",FontChinese));
+				}
+			}else {
+				table.addCell(new Paragraph("",FontChinese));
+				table.addCell(new Paragraph("",FontChinese));
+			}
+			if(eventListVo.getNode()!=null) {
+				table.addCell(new Paragraph(eventListVo.getNode().getNodeType()==null?"":eventListVo.getNode().getName(),FontChinese));
+			}else {
+				table.addCell(new Paragraph("",FontChinese));
+			}
+			
+			
 		}
 		document.add(table);
 		document.close();
@@ -271,13 +286,13 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		document.add(paragraph);
 		PdfPTable table = new PdfPTable(6);
 		table.setWidthPercentage(100);
-		table.addCell(new Paragraph("門襟時間", FontChinese));
+		table.addCell(new Paragraph("事件時間", FontChinese));
 		table.addCell(new Paragraph("設備編碼", FontChinese));
 		table.addCell(new Paragraph("設備名稱", FontChinese));
 		table.addCell(new Paragraph("設備來源", FontChinese));
 		table.addCell(new Paragraph("設備來源編碼", FontChinese));
 //		table.addCell(new Paragraph("建築名稱", FontChinese));
-		table.addCell(new Paragraph("開門人", FontChinese));
+		table.addCell(new Paragraph("員工", FontChinese));
 
 		for (EventListVo eventListVo : (List<EventListVo>) pager.getData().get("event")) {
 			table.addCell(new Paragraph(eventListVo.getEventDate(), FontChinese));

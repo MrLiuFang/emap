@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -250,18 +251,26 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
-			return importNode(file.getInputStream());
+			return importNode(file.getInputStream(),fileName);
 		}
 		systemLogService.log("node import camera", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
-	private ResultData importNode(InputStream inputStream) throws IOException {
+	private ResultData importNode(InputStream inputStream,String fileName) throws IOException {
 		ResultData resultData = new ResultData();
 		if (inputStream == null) {
 			return resultData;
 		}
-		Workbook wookbook = new XSSFWorkbook(inputStream);
+		Workbook wookbook = null;
+        try {
+        	if(isExcel2003(fileName)){
+        		wookbook = new HSSFWorkbook(inputStream);
+        	}else if(isExcel2007(fileName)){
+        		wookbook = new XSSFWorkbook(inputStream);
+        	}
+        } catch (IOException e) {
+        }
         Sheet sheet = wookbook.getSheetAt(0);
         Row rowHead = sheet.getRow(0);
 		int totalRowNum = sheet.getLastRowNum();
@@ -452,6 +461,13 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		systemLogService.log("node import", this.request.getRequestURL().toString());
 		return resultData;
 	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
 	
 	private Boolean check(Row row) {
 		if(!getCellValue(row.getCell(0)).toString().equals("code")) {

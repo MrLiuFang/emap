@@ -1,15 +1,16 @@
 
 public class Test {
 
-	private String name;
+	private String eventDate;
 
-	public String getName() {
-		return name;
+	public String getEventDate() {
+		return eventDate;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setEventDate(String eventDate) {
+		this.eventDate = eventDate;
 	}
-	
+
+
 	
 }

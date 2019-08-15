@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -277,7 +278,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 		List<Map<String,AdminUser>> list = new ArrayList<Map<String,AdminUser>>();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
-			Workbook wookbook = new XSSFWorkbook(file.getInputStream());
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
 	        Sheet sheet = wookbook.getSheetAt(0);
 	        Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();
@@ -408,6 +417,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 		systemLogService.log("user import", this.request.getRequestURL().toString());
 		return resultData;
 	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
 	
 	private Boolean check(Row row) {
 		if(!getCellValue(row.getCell(0)).toString().equals("account")) {

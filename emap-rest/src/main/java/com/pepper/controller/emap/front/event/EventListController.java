@@ -370,6 +370,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	
 	private ResultData toEmployeeEx(String str) throws JsonParseException, JsonMappingException, IOException  {
 		ObjectMapper objectMapper = new ObjectMapper();
+		AdminUser user =  (AdminUser) this.getCurrentUser();
 		Map<String,Object> map = objectMapper.readValue(str, Map.class);
 //		String eventId,String employeeId,String helpId,String content 
 		ResultData resultData = new ResultData();
@@ -379,6 +380,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			resultData.setMessage(Internationalization.getMessageInternationalization(9000002));
 			return resultData;
 		}
+		
+		if(!eventList.getOperator().equals(user.getId())) {
+			resultData.setCode(9000007);
+			resultData.setMessage(Internationalization.getMessageInternationalization(9000007));
+			return resultData;
+		}
+		
 		this.eventListAssistService.delete(eventList.getId(), eventList.getCurrentHandleUser(), null);
 		if(!map.containsKey("employeeId")) {
 			resultData.setCode(900003);

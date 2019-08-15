@@ -83,7 +83,7 @@
 		</dependency>
 		
 		
-		<!-- <dependency>
+		<dependency>
 		    <groupId>net.sf.jasperreports</groupId>
 		    <artifactId>jasperreports-fonts</artifactId>
 		    <version>6.9.0</version>
@@ -117,7 +117,7 @@
 		    <groupId>net.sf.jasperreports</groupId>
 		    <artifactId>jasperreports-custom-visualization</artifactId>
 		    <version>6.9.0</version>
-		</dependency> -->
+		</dependency>
 		<!-- <dependency>
 		    <groupId>com.itextpdf</groupId>
 		    <artifactId>itextpdf</artifactId>
