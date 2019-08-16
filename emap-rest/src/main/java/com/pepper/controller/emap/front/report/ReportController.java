@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
+import javax.sql.DataSource;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
@@ -75,6 +77,17 @@ import com.pepper.service.emap.report.ReportService;
 import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.PdfExporterConfiguration;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 
 @Controller()
 @RequestMapping(value = "/front/report")
@@ -145,6 +158,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	
 	@Reference
 	private ReportService reportService;
+	
+	@Resource
+	private DataSource dataSource;
 
 	@RequestMapping(value = "/event")
 	@Authorize(authorizeResources = false)
@@ -403,6 +419,27 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		document.close();
 		servletOutputStream.flush();
 		servletOutputStream.close();
+		return null;
+	}
+	
+	@RequestMapping(value = "/test")
+	@ResponseBody
+	public Object test() throws JRException, SQLException, IOException {
+		File reportFile = new File("E:","Blank_A4_Landscape.jasper");
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		parameters.put("event_id", "lif_20190723151512_235618");
+		JasperPrint jasperPrint = JasperFillManager.fillReport(reportFile.getPath(), parameters, this.dataSource.getConnection());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/pdf");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("test.pdf", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		JRPdfExporter exporter = new JRPdfExporter();
+		SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+		exporter.setConfiguration(configuration);
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+        exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+        exporter.exportReport();
+        outputStream.close();
 		return null;
 	}
 	
