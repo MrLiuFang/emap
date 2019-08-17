@@ -6,22 +6,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseDao;
-import com.pepper.core.base.curd.DaoExImpl;
 import com.pepper.dao.emap.event.EventListDaoEx;
 import com.pepper.model.emap.event.EventList;
-import com.pepper.model.emap.event.HelpList;
 
 /**
  * 
  * @author Mr.Liu
  *
  */
-public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventListDaoEx {
+public class EventListDaoImpl  implements EventListDaoEx {
 
+	@Autowired
+	private BaseDao<EventList> baseDao;
 	@Override
 	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
 		StringBuffer jpql = new StringBuffer();
@@ -35,14 +36,12 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		jpql.append(" and el.id not in (select t2.id from EventList t2 join Node t3 on t2.sourceCode = t3.sourceCode join EventRule t4 on t3.id = t4.nodeId where t2.status = 'N'  )   ");
 		jpql.append(" ) order by createDate desc   ");
 		
-		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 		
 	}
 
 	@Override
 	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom) {
-		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer();
 		jpql.append("select  distinct el from  EventList el join EventDispatch ed on el.id = ed.eventListId where ed.dispatchFrom = :dispatchFrom order by ed.createDate desc ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -52,7 +51,6 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 
 
 	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,String nodeId,Date startDate,Date endDate,String staffId){
-		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		
@@ -101,7 +99,6 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 	}
 	
 	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish){
-		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer();
 		jpql.append(" select el from EventList el join EventListAssist ea on el.id = ea.eventListId where ea.userId = :userId  ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -231,7 +228,6 @@ public class EventListDaoImpl  extends DaoExImpl<EventList> implements EventList
 		
 		jpql.append(" order by   el.createDate desc ");
 		
-		BaseDao<EventList> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	} 
 	

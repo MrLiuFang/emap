@@ -2,15 +2,18 @@ package com.pepper.dao.emap.map.impl;
 
 import java.util.HashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseDao;
-import com.pepper.core.base.curd.DaoExImpl;
 import com.pepper.dao.emap.map.MapDaoEx;
 import com.pepper.model.emap.map.Map;
 
-public class MapDaoImpl  extends DaoExImpl<Map> implements MapDaoEx {
+public class MapDaoImpl implements MapDaoEx {
+	
+	@Autowired
+	private BaseDao<Map> baseDao;
 
 	@Override
 	public Pager<Map> findNavigator(Pager<Map> pager, String code, String name, String areaCode, String areaName,
@@ -57,7 +60,6 @@ public class MapDaoImpl  extends DaoExImpl<Map> implements MapDaoEx {
 			searchParameter.put("keyWord", keyWord);
 		}
 		
-		BaseDao<Map> baseDao =  this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
 

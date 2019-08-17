@@ -1,18 +1,21 @@
 package com.pepper.dao.emap.report.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.pepper.core.Pager;
+import com.pepper.core.base.BaseDao;
 import com.pepper.core.base.BaseModel;
-import com.pepper.core.base.curd.DaoExImpl;
 import com.pepper.dao.emap.report.ReportDaoEx;
 
-public class ReportDaoImpl extends DaoExImpl<BaseModel> implements ReportDaoEx {
+public class ReportDaoImpl implements ReportDaoEx {
 
+	@Autowired
+	private BaseDao<BaseModel> baseDao;
+	
 	@Override
 	public Pager<Map<String,Object>> findNodeTypeAndMap(Pager<Map<String,Object>> pager, String nodeTypeId, String mapId) {
 		StringBuffer jpql = new StringBuffer();
@@ -28,7 +31,7 @@ public class ReportDaoImpl extends DaoExImpl<BaseModel> implements ReportDaoEx {
 			searchParameter.put("mapId", mapId);
 		}
 		
-		return this.getPepperSimpleJpaRepository(this.getClass()).findNavigatorToMap(pager, jpql.toString(),searchParameter);
+		return baseDao.findNavigatorToMap(pager, jpql.toString(),searchParameter);
 	}
 	
 	public Integer findNodeCout(String nodeTypeId, String mapId) {
@@ -45,7 +48,7 @@ public class ReportDaoImpl extends DaoExImpl<BaseModel> implements ReportDaoEx {
 			searchParameter.put("mapId", mapId);
 		}
 		
-		Map<String, Object> map =this.getPepperSimpleJpaRepository(this.getClass()).findOneToMap(jpql.toString(), searchParameter);
+		Map<String, Object> map =baseDao.findOneToMap(jpql.toString(), searchParameter);
 		if(map!=null && map.containsKey("nodeCount")) {
 			return Integer.valueOf(map.get("nodeCount").toString());
 		}
