@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -47,6 +49,8 @@ import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventMessage;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.report.Report;
+import com.pepper.model.emap.report.ReportParameter;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
@@ -73,10 +77,12 @@ import com.pepper.service.emap.map.MapService;
 import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.emap.node.NodeTypeService;
+import com.pepper.service.emap.report.ReportParameterService;
 import com.pepper.service.emap.report.ReportService;
 import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
+import com.pepper.util.MapToBeanUtil;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
@@ -158,6 +164,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	
 	@Reference
 	private ReportService reportService;
+	
+	@Reference
+	private ReportParameterService reportParameterService;
 	
 	@Resource
 	private DataSource dataSource;
@@ -420,6 +429,27 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		servletOutputStream.flush();
 		servletOutputStream.close();
 		return null;
+	}
+	
+	@RequestMapping(value = "/add")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object add(@RequestBody Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		Report report = new Report();
+		MapToBeanUtil.convert(report, map);
+		report = this.reportService.save(report);
+		if(map.containsKey("parameter")) {
+			@SuppressWarnings("unchecked")
+			List<LinkedHashMap<String, Object>> parameter=(List<LinkedHashMap<String, Object>>) map.get("parameter");
+			for(LinkedHashMap<String, Object> obj : parameter) {
+				ReportParameter entity = new ReportParameter();
+				MapToBeanUtil.convert(entity, obj);
+				entity.setReportId(report.getId());
+				this.reportParameterService.save(entity);
+			}
+		}
+		return resultData;
 	}
 	
 	@RequestMapping(value = "/test")

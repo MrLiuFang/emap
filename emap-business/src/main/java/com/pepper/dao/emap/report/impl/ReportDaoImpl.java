@@ -8,13 +8,13 @@ import org.springframework.util.StringUtils;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseDao;
-import com.pepper.core.base.BaseModel;
 import com.pepper.dao.emap.report.ReportDaoEx;
+import com.pepper.model.emap.report.Report;
 
 public class ReportDaoImpl implements ReportDaoEx {
 
 	@Autowired
-	private BaseDao<BaseModel> baseDao;
+	private BaseDao<Report> baseDao;
 	
 	@Override
 	public Pager<Map<String,Object>> findNodeTypeAndMap(Pager<Map<String,Object>> pager, String nodeTypeId, String mapId) {

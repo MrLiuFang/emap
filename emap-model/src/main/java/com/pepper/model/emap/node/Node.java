@@ -56,6 +56,12 @@ public class Node extends BaseModel {
 	@Column(name = "y")
 	private String y;
 	
+	@Column(name = "longitude")
+	private String longitude;
+	
+	@Column(name = "latitude")
+	private String latitude;
+	
 	@Column(name = "ip")
 	private String ip;
 		
@@ -295,4 +301,21 @@ public class Node extends BaseModel {
 		this.sourceType = sourceType;
 	}
 
+	public String getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+	
 }
