@@ -1,5 +1,7 @@
 package com.pepper.service.emap.report;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import com.pepper.core.base.impl.BaseServiceImpl;
@@ -11,4 +13,9 @@ public class ReportParameterServiceImpl extends BaseServiceImpl<ReportParameter>
 
 	@Resource
 	private ReportParameterDao reportParameterDao;
+
+	@Override
+	public List<ReportParameter> findReportParameter(String reportId) {
+		return reportParameterDao.findByReportId(reportId);
+	}
 }

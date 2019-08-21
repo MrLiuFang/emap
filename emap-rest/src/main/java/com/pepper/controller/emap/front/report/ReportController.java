@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.connection.ReactiveSetCommands.SRemCommand;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -43,6 +44,7 @@ import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
+import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.event.EventList;
@@ -59,6 +61,7 @@ import com.pepper.model.emap.vo.EventListVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
+import com.pepper.model.emap.vo.ReportVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.building.BuildingInfoService;
@@ -450,6 +453,37 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			}
 		}
 		return resultData;
+	}
+	
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(String name) {
+		Pager<Report> pager = new Pager<Report>();
+		if(StringUtils.hasText(name)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name", name);
+		}
+		pager = this.reportService.findNavigator(pager);
+		List<Report>  list = pager.getResults();
+		List<ReportVo> retuenList = new ArrayList<ReportVo>();
+		for(Report report : list) {
+			ReportVo reportVo = new ReportVo();
+			BeanUtils.copyProperties(report, reportVo);
+			List<ReportParameter> reportParameter = this.reportParameterService.findReportParameter(report.getId());
+			reportVo.setReportParameters(reportParameter);
+			retuenList.add(reportVo);
+		}
+		pager.setResults(null);
+		pager.setData("report", retuenList);
+		return pager;
+	}
+	
+	@RequestMapping(value = "/export")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object export() {
+		
+		return null;
 	}
 	
 	@RequestMapping(value = "/test")
