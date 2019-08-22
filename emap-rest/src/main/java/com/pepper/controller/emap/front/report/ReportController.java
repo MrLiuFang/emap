@@ -6,8 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
@@ -455,6 +461,39 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		return resultData;
 	}
 	
+	@RequestMapping(value = "/update")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object update(@RequestBody Map<String,Object> map) {
+		this.reportService.deleteById(map.get("id").toString());
+		return add(map);
+	}
+	
+	@RequestMapping(value = "/delete")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object delete(@RequestBody String str) throws IOException {
+		ResultData resultData = new ResultData();
+		if(!StringUtils.hasText(str)){
+			return resultData;
+		}
+		JsonNode jsonNode = new ObjectMapper().readTree(str);
+		if(!jsonNode.has("id")) {
+			return resultData;
+		}
+		ArrayNode arrayNode = (ArrayNode)jsonNode.get("id");
+		for(int i = 0; i <arrayNode.size(); i++) {
+			String id = arrayNode.get(i).asText();
+			try {
+				this.reportService.deleteById(id);
+			}catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+		systemLogService.log("node delete", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -481,8 +520,38 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	@RequestMapping(value = "/export")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object export() {
+	public Object export(String id) throws JRException, SQLException, IOException, ParseException {
+		Report report = this.reportService.findById(id);
+		String fileId = report.getFile();
+		com.pepper.model.file.File file = this.fileService.getFile(fileId);
+		File reportFile = new File(this.environment.getProperty("file.local.storage.path")+file.getUrl());
+		Map<String,Object> parameters = new HashMap<String,Object>();
+		List<ReportParameter> list = this.reportParameterService.findReportParameter(report.getId());
+		for(ReportParameter reportParameter : list) {
+			String key = reportParameter.getParameter();
+			String value = this.request.getParameter(key);
+			if(reportParameter.getType()==1) {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				parameters.put(key,dateFormat.parse(value) );
+			}else if(reportParameter.getType()==2) {
+				parameters.put(key,value );
+			}else if(reportParameter.getType()==3) {
+				parameters.put(key, Integer.valueOf(value));
+			}
+		}
 		
+		JasperPrint jasperPrint = JasperFillManager.fillReport(reportFile.getPath(), parameters, this.dataSource.getConnection());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/pdf");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(report.getName()+".pdf", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		JRPdfExporter exporter = new JRPdfExporter();
+		SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+		exporter.setConfiguration(configuration);
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+        exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
+        exporter.exportReport();
+        outputStream.close();
 		return null;
 	}
 	
