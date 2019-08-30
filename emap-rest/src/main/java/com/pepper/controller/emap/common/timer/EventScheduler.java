@@ -6,11 +6,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.xmlbeans.impl.inst2xsd.VenetianBlindStrategy;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -38,6 +41,9 @@ import com.pepper.service.redis.string.serializer.ValueOperationsService;
 @Component
 @Order(value=Ordered.LOWEST_PRECEDENCE)
 public class EventScheduler {
+	
+	@Resource
+	private Environment environment;
 
 	@Reference
 	private EventListService  eventListService;
@@ -71,6 +77,9 @@ public class EventScheduler {
 
 	@Scheduled(fixedRate = 5000)
 	public void scheduled() {
+		if(!environment.getProperty("scheduler.enabled", "true").equals("true")) {
+			return;
+		}
 		List<EventList> list = eventListService.findByStatusOrStatus(null, "N");
 		for(EventList eventList : list) {
 			String sourceCode = eventList.getSourceCode();

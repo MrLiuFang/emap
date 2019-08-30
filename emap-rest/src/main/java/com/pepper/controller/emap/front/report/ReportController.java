@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -44,8 +45,10 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.PdfCell;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -189,19 +192,20 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			String status, String employeeId) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false);
+				siteName, operatorId, status, employeeId, false,null);
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/event/export")
 	@ResponseBody
 	public Object eventExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId) throws IOException, DocumentException {
+			String status, String employeeId,Boolean isGroupExport,String groupFilter) throws IOException, DocumentException {
 //		systemLogService.log("event export report ", this.request.getRequestURL().toString());
 		@SuppressWarnings("unchecked")
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, warningLevel,
-				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true);
+				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -224,50 +228,114 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		paragraph.setSpacingAfter(50);
 		paragraph.setIndentationLeft(350);
 		document.add(paragraph);
-		PdfPTable table = new PdfPTable(7);
+		PdfPTable table ;
+		if(isGroupExport!=null && isGroupExport) 
+		{
+			table = new PdfPTable(10);
+		}else {
+			table = new PdfPTable(11);
+		}
 		table.setWidthPercentage(100);
+		if(isGroupExport!=null && isGroupExport) 
+		{
+			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("nodeType")) {
+				table.addCell(new Paragraph("設備類型", FontChinese));
+			}else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("warningLevel")){
+				table.addCell(new Paragraph("警告級別", FontChinese));
+			}
+		}else {
+			table.addCell(new Paragraph("設備類型", FontChinese));
+			table.addCell(new Paragraph("警告級別", FontChinese));
+		}
+		
 		table.addCell(new Paragraph("發生時間", FontChinese));
 		table.addCell(new Paragraph("説明", FontChinese));
 		table.addCell(new Paragraph("設備名稱", FontChinese));
-		table.addCell(new Paragraph("警告級別", FontChinese));
 		table.addCell(new Paragraph("緊急", FontChinese));
 		table.addCell(new Paragraph("特急", FontChinese));
 		table.addCell(new Paragraph("操作員", FontChinese));
 		table.addCell(new Paragraph("處理人",FontChinese));
 		table.addCell(new Paragraph("狀態",FontChinese));
 		table.addCell(new Paragraph("地圖",FontChinese));
-		table.addCell(new Paragraph("設備類型", FontChinese));
-
-		for (EventListVo eventListVo : (List<EventListVo>) pager.getData().get("event")) {
-			table.addCell(new Paragraph(eventListVo.getEventDate(), FontChinese));
-			table.addCell(new Paragraph(eventListVo.getEventName(), FontChinese));			
-			table.addCell(new Paragraph(eventListVo.getNode()==null?"":eventListVo.getNode().getName(), FontChinese));
-			table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
-			table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",
-					FontChinese));
-			table.addCell(new Paragraph(
-					eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
-			table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
-			table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
-			if(eventListVo.getNode()!=null) {
-				if(eventListVo.getNode().getMap()!=null) {
-					table.addCell(new Paragraph(eventListVo.getNode().getMap().getName(),FontChinese));
-					table.addCell(new Paragraph(eventListVo.getNode().getMap().getBuild()==null?"":eventListVo.getNode().getMap().getBuild().getName(),FontChinese));
+		List<EventListVo> list = (List<EventListVo>) pager.getData().get("event");
+		Map<String ,List<EventListVo>> map = new HashMap<String, List<EventListVo>>();
+		if(isGroupExport!=null && isGroupExport) {
+			for (EventListVo eventListVo :list) {
+				if(StringUtils.hasText(groupFilter)&&groupFilter.equals("nodeType")) {
+					if(eventListVo.getNode()!=null && eventListVo.getNode().getNodeType()!=null) {
+						List<EventListVo> tempList ;
+						if(map.containsKey(eventListVo.getNode().getNodeType().getName())) {
+							tempList = map.get(eventListVo.getNode().getNodeType().getName());
+							tempList.add(eventListVo);
+						}else {
+							tempList = new ArrayList<EventListVo>();
+							tempList.add(eventListVo);
+							map.put(eventListVo.getNode().getNodeType().getName(), tempList);
+						}
+					}
+				}else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("warningLevel")) {
+					if(eventListVo.getWarningLevel()!=null) {
+						List<EventListVo> tempList ;
+						if(map.containsKey(eventListVo.getWarningLevel().toString())) {
+							tempList = map.get(eventListVo.getWarningLevel().toString());
+							tempList.add(eventListVo);
+						}else {
+							tempList = new ArrayList<EventListVo>();
+							tempList.add(eventListVo);
+							map.put(eventListVo.getWarningLevel().toString(), tempList);
+						}
+					}
+				}
+			}
+		}else {
+			map.put("1", list);
+		}
+		for(String key : map.keySet()){
+		
+			List<EventListVo> listTemp = map.get(key);
+			if(isGroupExport!=null && isGroupExport) 
+			{
+				PdfPCell cell =new PdfPCell(new Paragraph(key,FontChinese));
+				cell.setRowspan(listTemp.size());
+				table.addCell(cell);
+			}
+			for (EventListVo eventListVo :listTemp) {
+				if((isGroupExport!=null && !isGroupExport) ||isGroupExport==null) 
+				{
+					if(eventListVo.getNode()!=null) {
+						table.addCell(new Paragraph(eventListVo.getNode().getNodeType()==null?"":eventListVo.getNode().getName(),FontChinese));
+					}else {
+						table.addCell(new Paragraph("",FontChinese));
+					}
+					table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
+				}			
+				
+				table.addCell(new Paragraph(eventListVo.getEventDate(), FontChinese));
+				table.addCell(new Paragraph(eventListVo.getEventName(), FontChinese));			
+				table.addCell(new Paragraph(eventListVo.getNode()==null?"":eventListVo.getNode().getName(), FontChinese));
+				table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",
+						FontChinese));
+				table.addCell(new Paragraph(
+						eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
+				table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
+				table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
+				table.addCell(new Paragraph(eventListVo.getStatus(), FontChinese));
+				if(eventListVo.getNode()!=null) {
+					if(eventListVo.getNode().getMap()!=null) {
+						table.addCell(new Paragraph(eventListVo.getNode().getMap().getName(),FontChinese));
+						//table.addCell(new Paragraph(eventListVo.getNode().getMap().getBuild()==null?"":eventListVo.getNode().getMap().getBuild().getName(),FontChinese));
+					}else {
+						table.addCell(new Paragraph("",FontChinese));
+						//table.addCell(new Paragraph("",FontChinese));
+					}
 				}else {
 					table.addCell(new Paragraph("",FontChinese));
-					table.addCell(new Paragraph("",FontChinese));
+					//table.addCell(new Paragraph("",FontChinese));
 				}
-			}else {
-				table.addCell(new Paragraph("",FontChinese));
-				table.addCell(new Paragraph("",FontChinese));
+				
+				
+				
 			}
-			if(eventListVo.getNode()!=null) {
-				table.addCell(new Paragraph(eventListVo.getNode().getNodeType()==null?"":eventListVo.getNode().getName(),FontChinese));
-			}else {
-				table.addCell(new Paragraph("",FontChinese));
-			}
-			
-			
 		}
 		document.add(table);
 		document.close();
@@ -285,7 +353,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			String status, String employeeId) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, 0, node, "door", mapName, buildName,
-				siteName, operatorId, status, employeeId, false);
+				siteName, operatorId, status, employeeId, false,null);
 	}
 
 	@RequestMapping(value = "/openDoor/export")
@@ -293,9 +361,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public Object openDoorExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId) throws DocumentException, IOException {
+			String status, String employeeId,Boolean isGroupExport) throws DocumentException, IOException {
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, 0,
-				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, false);
+				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -354,7 +422,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			String status, String employeeId) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false);
+				siteName, operatorId, status, employeeId, false,null);
 	}
 
 	@RequestMapping(value = "/employeeHandleEvent")
@@ -366,19 +434,19 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			String status, String employeeId) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false);
+				siteName, operatorId, status, employeeId, false,null);
 	}
 
 	private Object findEvent(Date eventStartDate, Date eventEndDate, String event, Integer warningLevel, String node,
 			String nodeTypeId, String mapName, String buildName, String siteName, String operatorId, String status,
-			String employeeId, Boolean isExport) {
+			String employeeId, Boolean isExport,Boolean isOrder) {
 		Pager<EventList> pager = new Pager<EventList>();
 		if (isExport) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId,
-				mapName, buildName, siteName, operatorId, status, employeeId);
+				mapName, buildName, siteName, operatorId, status, employeeId,isOrder);
 		pager.setData("event", convertEventList(pager.getResults()));
 		pager.setResults(null);
 
@@ -469,6 +537,20 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		return add(map);
 	}
 	
+	@RequestMapping(value = "/info")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object info(String id) {
+		ResultData resultData = new ResultData();
+		Report report = this.reportService.findById(id);
+		ReportVo reportVo = new ReportVo();
+		BeanUtils.copyProperties(report, reportVo);
+		List<ReportParameter> reportParameter = this.reportParameterService.findReportParameter(report.getId());
+		reportVo.setReportParameters(reportParameter);
+		resultData.setData("report", reportVo);
+		return resultData;
+	}
+	
 	@RequestMapping(value = "/delete")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -524,7 +606,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		Report report = this.reportService.findById(id);
 		String fileId = report.getFile();
 		com.pepper.model.file.File file = this.fileService.getFile(fileId);
-		File reportFile = new File(this.environment.getProperty("file.local.storage.path")+file.getUrl());
+		File reportFile = new File("D:"+file.getUrl());
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		List<ReportParameter> list = this.reportParameterService.findReportParameter(report.getId());
 		for(ReportParameter reportParameter : list) {

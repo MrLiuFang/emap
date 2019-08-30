@@ -118,6 +118,11 @@
 		    <artifactId>jasperreports-custom-visualization</artifactId>
 		    <version>6.9.0</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.pepper</groupId>
+		    <artifactId>yahei</artifactId>
+		    <version>1</version>
+		</dependency>
 		<!-- <dependency>
 		    <groupId>com.itextpdf</groupId>
 		    <artifactId>itextpdf</artifactId>

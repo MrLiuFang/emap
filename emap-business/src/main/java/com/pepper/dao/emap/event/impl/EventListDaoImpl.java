@@ -114,7 +114,8 @@ public class EventListDaoImpl  implements EventListDaoEx {
 	}
 
 	@Override
-	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId) {
+	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId
+			,Boolean isOrder) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -227,6 +228,10 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		}
 		
 		jpql.append(" order by   el.createDate desc ");
+		
+//		if(isOrder!=null && isOrder) {
+//			jpql.append(" , nt.name desc , el.warningLevel desc");
+//		}
 		
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	} 

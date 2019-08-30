@@ -243,6 +243,19 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 //		return resultData;
 //	}
 	
+	@RequestMapping(value = "/export")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object exportExcel(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) {
+		Pager<Node> pager = new Pager<Node>();	
+		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY,keyWord);
+		pager.setPageSize(Integer.MAX_VALUE);
+		pager.setPageNo(1);
+		List<Node> list = pager.getResults();
+		
+		return null;
+	}
+	
 	@RequestMapping(value = "/import")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -538,6 +551,8 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		return true;
 	}
+	
+	
 	
 	@RequestMapping(value = "/forMap")
 	@Authorize(authorizeResources = false)

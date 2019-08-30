@@ -17,7 +17,7 @@ import com.pepper.model.emap.staff.Staff;
  * @author Mr.Liu
  *
  */
-public class EventListVo extends EventList {
+public class EventListVo extends EventList implements Comparable<EventListVo> {
 
 	/**
 	 * 
@@ -146,6 +146,31 @@ public class EventListVo extends EventList {
 
 	public void setEventMessage(List<EventMessage> eventMessage) {
 		this.eventMessage = eventMessage;
+	}
+
+	@Override
+	public int compareTo(EventListVo o) {
+		if(o.getNode()!=null) {
+			if(o.getNode().getNodeType()!=null) {
+				if(o.getNode().getNodeType().getName()!=null) {
+					if(this.getNode()!=null) {
+						if(this.getNode().getNodeType()!=null) {
+							if(this.getNode().getNodeType().getName()!=null) {
+								Integer thisSort =this.getNode().getNodeType().getName().hashCode()+this.getWarningLevel();
+								Integer sort =o.getNode().getNodeType().getName().hashCode()+o.getWarningLevel();
+								if (thisSort - sort > 0) {
+									return 1;
+								}else if (thisSort - sort < 0) {
+									return -1;
+								}
+								return 1;
+							}
+						}
+					}
+				}
+			}
+		}
+		return 1;
 	}
 	
 	
