@@ -603,20 +603,96 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return helpListVo;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping("/workbench/filed")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object filed(@RequestBody Map<String,String> map) {
+	public Object filed(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
+		if(map.containsKey("helpList")) {
+			Map<String,Object> helpList = (Map<String, Object>) map.get("helpList");
+			if(helpList.containsKey("update")) {
+				List<Map<String, Object>> updateList =(List<Map<String, Object>>) helpList.get("update");
+				for(Map<String, Object> updateMap : updateList ) {
+					if(updateMap.containsKey("id")) {
+						deleteHelpList(updateMap.get("id").toString());
+						updateHelpList(updateMap);
+					}
+				}
+			}
+			if(helpList.containsKey("delete")) {
+				List<String> deleteList = (List<String>) helpList.get("delete");
+				for(String id : deleteList) {
+					deleteHelpList(id);
+				}
+			}
+			if(helpList.containsKey("add")) {
+				List<Map<String, Object>> addList =(List<Map<String, Object>>) helpList.get("add");
+				String nodeTypeId = null;
+				if(map.containsKey("id")) {
+					EventList eventList = this.eventListService.findById(map.get("id").toString());
+					nodeTypeId = this.nodeService.findBySourceCode(eventList.getSourceCode()).getNodeTypeId();
+				}
+				for(Map<String, Object> addMap : addList ) {
+					addMap.put("nodeTypeId", nodeTypeId);
+					addHelpList(addMap);
+				}
+			}	
+		}
+		
+		
 		if(map.containsKey("id")) {
-			EventList eventList = this.eventListService.findById(map.get("id"));
+			EventList eventList = this.eventListService.findById(map.get("id").toString());
 			eventList.setStatus("P");
-			eventList.setFiledContent(map.get("filedContent"));
+			eventList.setFiledContent(map.containsKey("filedContent")?map.get("filedContent").toString():"");
 			eventListService.update(eventList);
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
 		
 		return resultData;
+	}
+	
+	@RequestMapping("/workbench/eventListHelpList")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object eventListHelpList(String id) throws IOException {
+		ResultData resultData = new ResultData();
+		EventList eventList = this.eventListService.findById(id);
+		ActionList actionList = this.actionListService.findActionList(eventList.getId());
+		ObjectMapper objectMapper = new ObjectMapper();
+		List<HelpList> returnList = new ArrayList<HelpList>();
+		if(actionList!=null) {
+			String helpList = actionList.getHelpId();
+			if(StringUtils.hasText(helpList)) {
+				ArrayNode arrayNode =  (ArrayNode) objectMapper.readTree(helpList);
+				for(JsonNode jsonNode : arrayNode) {
+					returnList.add(this.helpListService.findById(jsonNode.asText()));
+				}
+			}
+		}
+		resultData.setData("helpList", returnList);
+		return resultData;
+	}
+	
+	private void addHelpList(Map<String, Object> map) {
+		HelpList helpList = new HelpList();
+		MapToBeanUtil.convert(helpList, map);
+		
+//		helpList.setNodeTypeId(nodeTypeId);
+		helpListService.save(helpList);
+	}
+	
+	private void updateHelpList(Map<String, Object> map) {
+		HelpList helpList = new HelpList();
+		MapToBeanUtil.convert(helpList, map);
+		helpListService.update(helpList);
+	}
+	private void deleteHelpList(String id) {
+		HelpList helpList = this.helpListService.findById(id);
+		if(helpList!=null) {
+			helpList.setIsDelete(true);
+			this.helpListService.update(helpList);
+		}
 	}
 	
 	@RequestMapping("/workbench/toOperator")

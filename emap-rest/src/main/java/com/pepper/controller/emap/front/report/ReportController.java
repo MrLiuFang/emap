@@ -633,6 +633,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
         exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
         exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(outputStream));
         exporter.exportReport();
+        outputStream.flush();
         outputStream.close();
 		return null;
 	}
