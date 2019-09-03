@@ -1,9 +1,13 @@
 package com.pepper.controller.emap.front.building;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +21,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -33,60 +39,85 @@ import com.pepper.util.MapToBeanUtil;
 
 @Controller()
 @RequestMapping(value = "/front/build")
-public class BuildingController  extends BaseControllerImpl implements BaseController  {
-	
+public class BuildingController extends BaseControllerImpl implements BaseController {
+
 	@Reference
 	private BuildingInfoService buildingInfoService;
-	
+
 	@Reference
 	private SiteInfoService siteInfoService;
-	
+
 	@Reference
 	private SystemLogService systemLogService;
+
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public void export(String code, String name, String siteId, String keyWord) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("get build export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("build.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<BuildingInfo> pager = getPager(code, name, siteId, keyWord, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
+		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("城區", "site.name"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("build"), outputStream, excelColumn);
+	}
 
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String siteId,String keyWord) {
+	public Object list(String code, String name, String siteId, String keyWord) {
+		systemLogService.log("get build list", this.request.getRequestURL().toString());
+		return getPager(code, name, siteId, keyWord, false);
+	}
+
+	private Pager<BuildingInfo> getPager(String code, String name, String siteId, String keyWord, Boolean isExport) {
 		Pager<BuildingInfo> pager = new Pager<BuildingInfo>();
-		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
+		if (StringUtils.hasText(code)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE + "_code", code);
 		}
-		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
+		if (StringUtils.hasText(name)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE + "_name", name);
 		}
-		if(StringUtils.hasText(siteId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_siteInfoId",siteId );
+		if (StringUtils.hasText(siteId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE + "_siteInfoId", siteId);
 		}
-		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_siteInfoId&code&name",keyWord );
+		if (StringUtils.hasText(keyWord)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE + "_siteInfoId&code&name", keyWord);
+		}
+		if (isExport) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = buildingInfoService.findNavigator(pager);
-		
+
 		List<BuildingInfo> list = pager.getResults();
 		List<BuildingInfoVo> returnList = new ArrayList<BuildingInfoVo>();
-		for(BuildingInfo buildingInfo : list) {
-			BuildingInfoVo  buildingInfoVo = new BuildingInfoVo();
+		for (BuildingInfo buildingInfo : list) {
+			BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
 			BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
 			SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
 			buildingInfoVo.setSite(siteInfo);
 			returnList.add(buildingInfoVo);
 		}
-		pager.setData("build",returnList);
+		pager.setData("build", returnList);
 		pager.setResults(null);
-		
-		systemLogService.log("get build list", this.request.getRequestURL().toString());
 		return pager;
 	}
-	
+
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody Map<String, Object> map) {
 		ResultData resultData = new ResultData();
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
-		if(buildingInfoService.findByCode(buildingInfo.getCode())!=null) {
+		if (buildingInfoService.findByCode(buildingInfo.getCode()) != null) {
 			resultData.setCode(2000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 			return resultData;
@@ -95,66 +126,67 @@ public class BuildingController  extends BaseControllerImpl implements BaseContr
 		systemLogService.log("build add", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
+
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody Map<String, Object> map) {
 		ResultData resultData = new ResultData();
 		BuildingInfo buildingInfo = new BuildingInfo();
 		MapToBeanUtil.convert(buildingInfo, map);
-		
+
 		BuildingInfo oldBuildingInfo = buildingInfoService.findByCode(buildingInfo.getCode());
-		if(oldBuildingInfo!=null && oldBuildingInfo.getCode()!=null&&buildingInfo.getCode()!=null) {
-			if(!buildingInfo.getId().equals(oldBuildingInfo.getId())){
+		if (oldBuildingInfo != null && oldBuildingInfo.getCode() != null && buildingInfo.getCode() != null) {
+			if (!buildingInfo.getId().equals(oldBuildingInfo.getId())) {
 				resultData.setCode(2000001);
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
 			}
 		}
-		
+
 		buildingInfoService.update(buildingInfo);
 		systemLogService.log("build update", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
+
 	@RequestMapping(value = "/toEdit")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		BuildingInfo buildingInfo = buildingInfoService.findById(id);
-		BuildingInfoVo  buildingInfoVo = new BuildingInfoVo();
+		BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
 		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
 		buildingInfoVo.setSite(this.siteInfoService.findById(buildingInfo.getSiteInfoId()));
-		resultData.setData("build",buildingInfoVo);
-		
+		resultData.setData("build", buildingInfoVo);
+
 		systemLogService.log("get build info ", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
+
 	@RequestMapping(value = "/delete")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object delete(@RequestBody String str) throws IOException {
 		ResultData resultData = new ResultData();
-		if(!StringUtils.hasText(str)){
+		if (!StringUtils.hasText(str)) {
 			return resultData;
 		}
 		JsonNode jsonNode = new ObjectMapper().readTree(str);
-		if(!jsonNode.has("id")) {
+		if (!jsonNode.has("id")) {
 			return resultData;
 		}
-		ArrayNode arrayNode = (ArrayNode)jsonNode.get("id");
-		for(int i = 0; i < arrayNode.size(); i++) {
+		ArrayNode arrayNode = (ArrayNode) jsonNode.get("id");
+		for (int i = 0; i < arrayNode.size(); i++) {
 			String id = arrayNode.get(i).asText();
 			try {
 				buildingInfoService.deleteById(id);
-			}catch (Exception e) {
+			} catch (Exception e) {
 				// TODO: handle exception
 			}
 		}
 		systemLogService.log("delete build ", this.request.getRequestURL().toString());
 		return resultData;
 	}
+
 }

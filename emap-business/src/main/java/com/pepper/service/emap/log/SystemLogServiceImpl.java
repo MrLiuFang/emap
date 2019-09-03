@@ -21,6 +21,9 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 
 	public void log(String actionName,String url){
 		AdminUser user = (AdminUser) currentUser.getCurrentUser();
+		if(user==null) {
+			return;
+		}
 		SystemLog systemLog = new SystemLog();
 		systemLog.setUserId(user.getId());
 		systemLog.setUserName(user.getName());
