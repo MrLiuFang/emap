@@ -80,7 +80,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 	@RequestMapping(value = "/import")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+	public Object importBuild(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
 		ResultData resultData = new ResultData();
 		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
 		List<BuildingInfo> list = new ArrayList<BuildingInfo>();
