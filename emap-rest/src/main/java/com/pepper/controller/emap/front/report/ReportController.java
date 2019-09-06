@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -198,12 +199,16 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/event/export")
 	@ResponseBody
-	public Object eventExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
+	public void eventExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId,Boolean isGroupExport,String groupFilter) throws IOException, DocumentException {
+			String status, String employeeId,Boolean isGroupExport,String groupFilter,String sortFilter,String columnFilter) throws IOException, DocumentException {
 //		systemLogService.log("event export report ", this.request.getRequestURL().toString());
 		@SuppressWarnings("unchecked")
+		List<String> columnFilterList= new ArrayList<>(Arrays.asList(columnFilter.split(",")));
+		if(isGroupExport) {
+			columnFilterList.remove(groupFilter);
+		}
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, warningLevel,
 				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport);
 
@@ -229,34 +234,80 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		paragraph.setIndentationLeft(350);
 		document.add(paragraph);
 		PdfPTable table ;
-		if(isGroupExport!=null && isGroupExport) 
-		{
-			table = new PdfPTable(10);
-		}else {
-			table = new PdfPTable(11);
-		}
+//		if(isGroupExport!=null && isGroupExport) 
+//		{
+//			table = new PdfPTable(columnFilterList.size()>0?columnFilterList.size():11);
+//		}else {
+//			table = new PdfPTable(columnFilterList.size()>0?columnFilterList.size():11);
+//		}
+		table = new PdfPTable(columnFilterList.size()>0?columnFilterList.size()+(isGroupExport?1:0):11);
 		table.setWidthPercentage(100);
-		if(isGroupExport!=null && isGroupExport) 
-		{
+		if(isGroupExport) {
 			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("nodeType")) {
 				table.addCell(new Paragraph("設備類型", FontChinese));
-			}else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("warningLevel")){
+			}
+			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("warningLevel")) {
 				table.addCell(new Paragraph("警告級別", FontChinese));
 			}
+			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("operator")) {
+				table.addCell(new Paragraph("操作員", FontChinese));
+			}
+			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("currentHandleUser")) {
+				table.addCell(new Paragraph("處理人", FontChinese));
+			}
+			for(String str:new String[]{"nodeType","warningLevel","operator","currentHandleUser"}) {
+				if(columnFilterList.size()>0&&columnFilterList.contains(str)) {
+					if("nodeType".equals(str)) {
+						table.addCell(new Paragraph("設備類型", FontChinese));
+					}else if("warningLevel".equals(str)) {
+						table.addCell(new Paragraph("警告級別", FontChinese));
+					}else if("operator".equals(str)) {
+						table.addCell(new Paragraph("操作員", FontChinese));
+					}else if("currentHandleUser".equals(str)) {
+						table.addCell(new Paragraph("處理人", FontChinese));
+					}
+					
+				}
+				
+			}
+			
 		}else {
-			table.addCell(new Paragraph("設備類型", FontChinese));
-			table.addCell(new Paragraph("警告級別", FontChinese));
+			if(columnFilterList.size()>0&&columnFilterList.contains("nodeType")) {
+				table.addCell(new Paragraph("設備類型", FontChinese));
+			}
+			if(columnFilterList.size()>0&&columnFilterList.contains("warningLevel")) {
+				table.addCell(new Paragraph("警告級別", FontChinese));
+			}
+			if(columnFilterList.size()>0&&columnFilterList.contains("operator")) {
+				table.addCell(new Paragraph("操作員", FontChinese));
+			}
+			if(columnFilterList.size()>0&&columnFilterList.contains("currentHandleUser")) {
+				table.addCell(new Paragraph("處理人", FontChinese));
+			}
 		}
 		
-		table.addCell(new Paragraph("發生時間", FontChinese));
-		table.addCell(new Paragraph("説明", FontChinese));
-		table.addCell(new Paragraph("設備名稱", FontChinese));
-		table.addCell(new Paragraph("緊急", FontChinese));
-		table.addCell(new Paragraph("特急", FontChinese));
-		table.addCell(new Paragraph("操作員", FontChinese));
-		table.addCell(new Paragraph("處理人",FontChinese));
-		table.addCell(new Paragraph("狀態",FontChinese));
-		table.addCell(new Paragraph("地圖",FontChinese));
+		if(columnFilterList.size()>0&&columnFilterList.contains("eventDate")) {
+			table.addCell(new Paragraph("發生時間", FontChinese));
+		}
+		if(columnFilterList.size()>0&&columnFilterList.contains("eventName")) {
+			table.addCell(new Paragraph("説明", FontChinese));
+		}
+		if(columnFilterList.size()>0&&columnFilterList.contains("nodeName")) {
+			table.addCell(new Paragraph("設備名稱", FontChinese));
+		}
+		if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
+			table.addCell(new Paragraph("緊急", FontChinese));
+		}
+		if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
+			table.addCell(new Paragraph("特急", FontChinese));
+		}
+		
+		if(columnFilterList.size()>0&&columnFilterList.contains("status")) {
+			table.addCell(new Paragraph("狀態",FontChinese));
+		}
+		if(columnFilterList.size()>0&&columnFilterList.contains("mapName")) {
+			table.addCell(new Paragraph("地圖",FontChinese));
+		}
 		List<EventListVo> list = (List<EventListVo>) pager.getData().get("event");
 		Map<String ,List<EventListVo>> map = new HashMap<String, List<EventListVo>>();
 		if(isGroupExport!=null && isGroupExport) {
@@ -285,6 +336,30 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 							map.put(eventListVo.getWarningLevel().toString(), tempList);
 						}
 					}
+				}else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("operator")) {
+					if(eventListVo.getOperatorVo()!=null) {
+						List<EventListVo> tempList ;
+						if(map.containsKey(eventListVo.getOperatorVo().getName())) {
+							tempList = map.get(eventListVo.getOperatorVo().getName());
+							tempList.add(eventListVo);
+						}else {
+							tempList = new ArrayList<EventListVo>();
+							tempList.add(eventListVo);
+							map.put(eventListVo.getOperatorVo().getName(), tempList);
+						}
+					}
+				}else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("currentHandleUser")) {
+					if(eventListVo.getCurrentHandleUserVo()!=null) {
+						List<EventListVo> tempList ;
+						if(map.containsKey(eventListVo.getCurrentHandleUserVo().getName())) {
+							tempList = map.get(eventListVo.getCurrentHandleUserVo().getName());
+							tempList.add(eventListVo);
+						}else {
+							tempList = new ArrayList<EventListVo>();
+							tempList.add(eventListVo);
+							map.put(eventListVo.getCurrentHandleUserVo().getName(), tempList);
+						}
+					}
 				}
 			}
 		}else {
@@ -300,37 +375,77 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 				table.addCell(cell);
 			}
 			for (EventListVo eventListVo :listTemp) {
-				if((isGroupExport!=null && !isGroupExport) ||isGroupExport==null) 
-				{
-					if(eventListVo.getNode()!=null) {
-						table.addCell(new Paragraph(eventListVo.getNode().getNodeType()==null?"":eventListVo.getNode().getName(),FontChinese));
-					}else {
-						table.addCell(new Paragraph("",FontChinese));
+				if(isGroupExport) {
+					for(String str:new String[]{"nodeType","warningLevel","operator","currentHandleUser"}) {
+						if(columnFilterList.size()>0&&columnFilterList.contains(str)) {
+							if("nodeType".equals(str)) {
+								if(eventListVo.getNode()!=null) {
+									table.addCell(new Paragraph(eventListVo.getNode().getNodeType()==null?"":eventListVo.getNode().getNodeType().getName(),FontChinese));
+								}else {
+									table.addCell(new Paragraph("",FontChinese));
+								}
+							}else if("warningLevel".equals(str)) {
+								table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
+							}else if("operator".equals(str)) {
+								table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
+							}else if("currentHandleUser".equals(str)) {
+								table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
+							}
+						}
 					}
-					table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
-				}			
+				}else {
+					if(columnFilterList.size()>0&&columnFilterList.contains("nodeType")) {
+						if(eventListVo.getNode()!=null) {
+							table.addCell(new Paragraph(eventListVo.getNode().getNodeType()==null?"":eventListVo.getNode().getNodeType().getName(),FontChinese));
+						}else {
+							table.addCell(new Paragraph("",FontChinese));
+						}
+					}
+					if(columnFilterList.size()>0&&columnFilterList.contains("warningLevel")) {
+						table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
+					}
+					if(columnFilterList.size()>0&&columnFilterList.contains("operator")) {
+						table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
+					}
+					if(columnFilterList.size()>0&&columnFilterList.contains("currentHandleUser")) {
+						table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
+					}
+				}
 				
-				table.addCell(new Paragraph(eventListVo.getEventDate(), FontChinese));
-				table.addCell(new Paragraph(eventListVo.getEventName(), FontChinese));			
-				table.addCell(new Paragraph(eventListVo.getNode()==null?"":eventListVo.getNode().getName(), FontChinese));
-				table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",
+				if(columnFilterList.size()>0&&columnFilterList.contains("eventDate")) {
+					table.addCell(new Paragraph(eventListVo.getEventDate(), FontChinese));
+				}
+				if(columnFilterList.size()>0&&columnFilterList.contains("eventName")) {
+					table.addCell(new Paragraph(eventListVo.getEventName(), FontChinese));	
+				}
+				if(columnFilterList.size()>0&&columnFilterList.contains("nodeName")) {
+					table.addCell(new Paragraph(eventListVo.getNode()==null?"":eventListVo.getNode().getName(), FontChinese));
+				}
+				if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
+					table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",
 						FontChinese));
-				table.addCell(new Paragraph(
+				}
+				if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
+					table.addCell(new Paragraph(
 						eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
-				table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
-				table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
-				table.addCell(new Paragraph(eventListVo.getStatus(), FontChinese));
-				if(eventListVo.getNode()!=null) {
-					if(eventListVo.getNode().getMap()!=null) {
-						table.addCell(new Paragraph(eventListVo.getNode().getMap().getName(),FontChinese));
-						//table.addCell(new Paragraph(eventListVo.getNode().getMap().getBuild()==null?"":eventListVo.getNode().getMap().getBuild().getName(),FontChinese));
+				}
+				
+				if(columnFilterList.size()>0&&columnFilterList.contains("status")) {
+					table.addCell(new Paragraph(eventListVo.getStatus(), FontChinese));
+				}
+				if(columnFilterList.size()>0&&columnFilterList.contains("mapName")) {
+					if(eventListVo.getNode()!=null) {
+						if(eventListVo.getNode().getMap()!=null) {
+							table.addCell(new Paragraph(eventListVo.getNode().getMap().getName(),FontChinese));
+							//table.addCell(new Paragraph(eventListVo.getNode().getMap().getBuild()==null?"":eventListVo.getNode().getMap().getBuild().getName(),FontChinese));
+						}else {
+							table.addCell(new Paragraph("",FontChinese));
+							//table.addCell(new Paragraph("",FontChinese));
+						}
 					}else {
 						table.addCell(new Paragraph("",FontChinese));
 						//table.addCell(new Paragraph("",FontChinese));
 					}
-				}else {
-					table.addCell(new Paragraph("",FontChinese));
-					//table.addCell(new Paragraph("",FontChinese));
 				}
 				
 				
@@ -341,7 +456,6 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		document.close();
 		servletOutputStream.flush();
 		servletOutputStream.close();
-		return null;
 	}
 
 	@RequestMapping(value = "/openDoor")

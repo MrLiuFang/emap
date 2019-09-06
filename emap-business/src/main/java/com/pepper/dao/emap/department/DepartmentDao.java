@@ -20,4 +20,6 @@ public interface DepartmentDao extends BaseDao<Department> {
 	public Department findByCode(String code);
 	
 	public List<Department> findByName(String name);
+	
+	public Department findOneByName(String name);
 }

@@ -20,4 +20,6 @@ public interface SiteInfoService extends BaseService<SiteInfo> {
 	public SiteInfo findByCode(String code);
 	
 	public List<SiteInfo> findByName(String name);
+	
+	public SiteInfo findSiteInfo(String name);
 }

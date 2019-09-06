@@ -49,6 +49,9 @@ public class ExportExcelUtil {
 	
 	
 	private String getCellValue(Object data,String key) throws IllegalArgumentException, IllegalAccessException {
+		if(data==null) {
+			return "";
+		}
 		if(data instanceof Map||data instanceof HashMap) {
 			return ((Map)data).get(key).toString();
 		}

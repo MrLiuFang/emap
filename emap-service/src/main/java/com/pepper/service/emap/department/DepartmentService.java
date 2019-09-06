@@ -18,6 +18,8 @@ public interface DepartmentService extends BaseService<Department> {
 	 */
 	public Department findByCode(String code);
 	
+	public Department findDepartment(String name);
+	
 	public List<Department> findByName(String name);
 
 }

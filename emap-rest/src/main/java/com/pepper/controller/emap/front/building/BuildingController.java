@@ -10,12 +10,20 @@ import java.util.Map;
 import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +38,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.site.SiteInfo;
+import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.BuildingInfoVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
@@ -66,6 +75,103 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
 		excelColumn.add(ExcelColumn.build("城區", "site.name"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("build"), outputStream, excelColumn);
+	}
+	
+	@RequestMapping(value = "/import")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<BuildingInfo> list = new ArrayList<BuildingInfo>();
+		for (String fileName : files.keySet()) {
+			System.out.println(fileName);
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
+	        
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setMessage("数据错误！");
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				BuildingInfo buildingInfo = new BuildingInfo();
+				buildingInfo.setCode(getCellValue(row.getCell(0)).toString());
+				buildingInfo.setName(getCellValue(row.getCell(1)).toString());
+				String site = getCellValue(row.getCell(2)).toString();
+				SiteInfo siteInfo = this.siteInfoService.findSiteInfo(site);
+				if(siteInfo!=null) {
+					buildingInfo.setSiteInfoId(siteInfo.getId());
+				}
+				if (StringUtils.hasText(buildingInfo.getCode())&&buildingInfoService.findByCode(buildingInfo.getCode()) == null) {
+					list.add(buildingInfo);
+				}
+	        }
+			
+			this.buildingInfoService.saveAll(list);
+		}
+		systemLogService.log("import buildingInfo", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("site")) {
+			return false;
+		}
+//		if(!getCellValue(row.getCell(3)).toString().equals("longitude")) {
+//			return false;
+//		}
+//		if(!getCellValue(row.getCell(4)).toString().equals("latitude")) {
+//			return false;
+//		}
+		
+		return true;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = "";
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
 	}
 
 	@RequestMapping(value = "/list")
@@ -126,7 +232,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		systemLogService.log("build add", this.request.getRequestURL().toString());
 		return resultData;
 	}
-
+	
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
