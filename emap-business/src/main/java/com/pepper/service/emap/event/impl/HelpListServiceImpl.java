@@ -49,4 +49,9 @@ public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements He
 		pager.setTotalRow(Long.valueOf(page.getTotalElements()));
 		return pager;
 	}
+
+	@Override
+	public HelpList findByCode(String code) {
+		return helpListDao.findOneByCode(code);
+	}
 }

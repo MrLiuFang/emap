@@ -1,10 +1,14 @@
 package com.pepper.controller.emap.front.staff;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -26,13 +30,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
+import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentService;
@@ -60,11 +68,26 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	
 	@Reference
 	private SystemLogService systemLogService;
-	
-	@RequestMapping(value = "/list")
-	@Authorize(authorizeResources = false)
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String name,String email,String siteId,String idCard,String keyWord) {
+	public void export(String name,String email,String siteId,String idCard,String keyWord) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("staff export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("staff.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<Staff> pager = getPager(name, email, siteId, idCard, keyWord, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("編碼", "name"));
+		excelColumn.add(ExcelColumn.build("ID卡", "idCard"));
+		excelColumn.add(ExcelColumn.build("邮箱", "email"));
+		excelColumn.add(ExcelColumn.build("城区", "site.name"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("staff"), outputStream, excelColumn);
+	}
+	
+	private Pager<Staff> getPager(String name,String email,String siteId,String idCard,String keyWord, Boolean isExport) {
 		Pager<Staff> pager = new Pager<Staff>();
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
@@ -90,8 +113,18 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		
 		pager.setData("staff",returnList);
 		pager.setResults(null);
-		systemLogService.log("get staff list", this.request.getRequestURL().toString());
 		return pager;
+	}
+	
+	
+	
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(String name,String email,String siteId,String idCard,String keyWord) {
+		
+		systemLogService.log("get staff list", this.request.getRequestURL().toString());
+		return getPager(name, email, siteId, idCard, keyWord, false);
 	}
 
 	@RequestMapping(value = "/add")

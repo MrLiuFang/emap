@@ -1,14 +1,23 @@
 package com.pepper.controller.emap.front.screen;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.naming.directory.SearchControls;
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -16,21 +25,28 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.screen.Screen;
 import com.pepper.model.emap.screen.ScreenMap;
 import com.pepper.model.emap.site.SiteInfo;
+import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.ScreenVo;
+import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
 import com.pepper.service.emap.log.SystemLogService;
@@ -48,49 +64,161 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 
 	@Reference
 	private ScreenService screenService;
-	
+
 	@Reference
 	private BuildingInfoService buildingInfoService;
-	
+
 	@Reference
 	private SiteInfoService siteInfoService;
-	
+
 	@Reference
 	private MapService mapService;
-	
+
 	@Reference
 	private MapImageUrlService mapImageUrlService;
-	
+
 	@Reference
 	private ScreenMapService screenMapService;
-	
+
 	@Reference
 	private SystemLogService systemLogService;
-	
-	@RequestMapping(value = "/list")
-	@Authorize(authorizeResources = false)
+
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String buildingId,String siteId) {
-		Pager<Screen> pager = new Pager<Screen>();	
+	public void export(String buildingId, String siteId) throws IOException, IllegalArgumentException,
+			IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("screen export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("screen.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<Screen> pager = getPager(buildingId, siteId, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("城區", "site.name"));
+		excelColumn.add(ExcelColumn.build("建築", "build.name"));
+		excelColumn.add(ExcelColumn.build("刷新頻率", "refreshFrequency"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("screen"), outputStream, excelColumn);
+	}
+
+	private Pager<Screen> getPager(String buildingId, String siteId, Boolean isExport) {
+		Pager<Screen> pager = new Pager<Screen>();
 		pager = screenService.findNavigator(pager);
-		if(StringUtils.hasText(buildingId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildingId", buildingId);
+		if (StringUtils.hasText(buildingId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_buildingId", buildingId);
 		}
-		if(StringUtils.hasText(siteId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_siteId", siteId);
+		if (StringUtils.hasText(siteId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_siteId", siteId);
 		}
-		
+
 		List<Screen> list = pager.getResults();
 		List<ScreenVo> returnList = new ArrayList<ScreenVo>();
-		for(Screen screen : list) {
+		for (Screen screen : list) {
 			returnList.add(convertScreenVo(screen));
 		}
-		pager.setData("screen",returnList);
+		pager.setData("screen", returnList);
 		pager.setResults(null);
-		systemLogService.log("get screen list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
+	@RequestMapping(value = "/import")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<Screen> list = new ArrayList<Screen>();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
+	        
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setMessage("数据错误！");
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				Screen screen= new Screen();
+				String building = getCellValue(row.getCell(0)).toString();
+				String site = getCellValue(row.getCell(1)).toString();
+				String refreshFrequency = getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", "");
+				BuildingInfo buildingInfo = this.buildingInfoService.findByName(building);
+				SiteInfo siteInfo = this.siteInfoService.findSiteInfo(site);
+				if (buildingInfo!=null && siteInfo!=null) {
+					screen.setBuildingId(buildingInfo.getId());
+					screen.setSiteId(siteInfo.getId());
+					screen.setRefreshFrequency(Integer.valueOf(refreshFrequency));
+					list.add(screen);
+				}
+	        }
+			this.screenService.saveAll(list);
+		}
+		systemLogService.log("import screen", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("build")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("site")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("refreshFrequency")) {
+			return false;
+		}
+		return true;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = "";
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
+
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(String buildingId, String siteId) {
+
+		systemLogService.log("get screen list", this.request.getRequestURL().toString());
+		return getPager(buildingId, siteId, false);
+	}
+
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -103,9 +231,9 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		screen.setSiteId(jsonNode.get("siteId").asText(""));
 		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
 		screen = screenService.save(screen);
-		
+
 		Iterator<JsonNode> map = jsonNode.get("map").iterator();
-		while(map.hasNext()) {
+		while (map.hasNext()) {
 			JsonNode node = map.next();
 			ScreenMap screenMap = new ScreenMap();
 			screenMap.setScreenId(screen.getId());
@@ -115,8 +243,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		systemLogService.log("screen add", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
-	
+
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -129,11 +256,11 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		screen.setSiteId(jsonNode.get("siteId").asText(""));
 		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
 		screenService.update(screen);
-		
-		if(jsonNode.has("map")) {
+
+		if (jsonNode.has("map")) {
 			screenMapService.deleteByScreenId(screen.getId());
 			Iterator<JsonNode> map = jsonNode.get("map").iterator();
-			while(map.hasNext()) {
+			while (map.hasNext()) {
 				JsonNode node = map.next();
 				ScreenMap screenMap = new ScreenMap();
 				screenMap.setScreenId(screen.getId());
@@ -144,66 +271,65 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		systemLogService.log("screen update", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
+
 	@RequestMapping(value = "/toEdit")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		Screen screen = screenService.findById(id);
-		resultData.setData("screen",convertScreenVo(screen));
+		resultData.setData("screen", convertScreenVo(screen));
 		systemLogService.log("get screen info", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
-	
+
 	@RequestMapping(value = "/delete")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object delete(@RequestBody String str) throws IOException {
 		ResultData resultData = new ResultData();
-		if(!StringUtils.hasText(str)){
+		if (!StringUtils.hasText(str)) {
 			return resultData;
 		}
 		JsonNode jsonNode = new ObjectMapper().readTree(str);
-		if(!jsonNode.has("id")) {
+		if (!jsonNode.has("id")) {
 			return resultData;
 		}
-		ArrayNode arrayNode = (ArrayNode)jsonNode.get("id");
-		for(int i = 0; i <arrayNode.size(); i++) {
+		ArrayNode arrayNode = (ArrayNode) jsonNode.get("id");
+		for (int i = 0; i < arrayNode.size(); i++) {
 			String id = arrayNode.get(i).asText();
 			try {
 				screenService.deleteById(id);
 				screenMapService.deleteByScreenId(id);
-			}catch (Exception e) {
+			} catch (Exception e) {
 			}
 		}
 		systemLogService.log("screen delete", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
+
 	private ScreenVo convertScreenVo(Screen screen) {
 		ScreenVo screenVo = new ScreenVo();
 		BeanUtils.copyProperties(screen, screenVo);
-		
+
 		BuildingInfo build = buildingInfoService.findById(screen.getBuildingId());
 		screenVo.setBuild(build);
-		
+
 		SiteInfo site = siteInfoService.findById(screen.getSiteId());
 		screenVo.setSite(site);
-		
-		List<ScreenMap> listScreenMap=  screenMapService.findByScreenId(screen.getId());
+
+		List<ScreenMap> listScreenMap = screenMapService.findByScreenId(screen.getId());
 		List<MapVo> listMapVo = new ArrayList<MapVo>();
-		for(ScreenMap screenMap :listScreenMap  ) {
+		for (ScreenMap screenMap : listScreenMap) {
 			com.pepper.model.emap.map.Map map = mapService.findById(screenMap.getMapId());
 			MapVo mapVo = new MapVo();
-			if(map!=null) {
+			if (map != null) {
 				BeanUtils.copyProperties(map, mapVo);
 				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
 				listMapVo.add(mapVo);
 			}
 		}
 		screenVo.setMap(listMapVo);
-		return  screenVo;
+		return screenVo;
 	}
 }

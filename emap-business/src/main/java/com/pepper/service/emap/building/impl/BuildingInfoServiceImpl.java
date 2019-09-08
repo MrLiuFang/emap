@@ -17,7 +17,12 @@ public class BuildingInfoServiceImpl extends BaseServiceImpl<BuildingInfo> imple
 
 	@Override
 	public BuildingInfo findByCode(String code) {
-		return buildIngInfoDao.findByCode(code);
+		return buildIngInfoDao.findOneByCode(code);
+	}
+
+	@Override
+	public BuildingInfo findByName(String name) {
+		return buildIngInfoDao.findOneByName(name);
 	}
 
 }

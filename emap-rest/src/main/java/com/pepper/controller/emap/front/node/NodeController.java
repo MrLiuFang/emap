@@ -2,12 +2,15 @@ package com.pepper.controller.emap.front.node;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -31,10 +34,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
+import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
@@ -91,10 +97,30 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	@Reference
 	private SystemLogService systemLogService;
 	
-	@RequestMapping(value = "/list")
-	@Authorize(authorizeResources = false)
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) {
+	public void export(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("node export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("node.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<Node> pager = getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
+		excelColumn.add(ExcelColumn.build("來源名稱", "source"));
+		excelColumn.add(ExcelColumn.build("來源編碼", "sourceCode"));
+		excelColumn.add(ExcelColumn.build("地圖", "map.name"));
+		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.name"));
+		excelColumn.add(ExcelColumn.build("外部鏈接", "externalLink"));
+		excelColumn.add(ExcelColumn.build("告警級別", "warningLevel"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("node"), outputStream, excelColumn);
+	}
+	
+	private Pager<Node> getPager(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord, Boolean isExport) {
 		Pager<Node> pager = new Pager<Node>();	
 		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY,keyWord);
 		List<Node> list = pager.getResults();
@@ -104,8 +130,16 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		}
 		pager.setData("node",returnList);
 		pager.setResults(null);
-		systemLogService.log("get node list", this.request.getRequestURL().toString());
 		return pager;
+	}
+	
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) {
+		
+		systemLogService.log("get node list", this.request.getRequestURL().toString());
+		return getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord, false);
 	}
 	
 	
@@ -242,19 +276,6 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 //		systemLogService.log("node import door", this.request.getRequestURL().toString());
 //		return resultData;
 //	}
-	
-	@RequestMapping(value = "/export")
-	@Authorize(authorizeResources = false)
-	@ResponseBody
-	public Object exportExcel(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) {
-		Pager<Node> pager = new Pager<Node>();	
-		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY,keyWord);
-		pager.setPageSize(Integer.MAX_VALUE);
-		pager.setPageNo(1);
-		List<Node> list = pager.getResults();
-		
-		return null;
-	}
 	
 	@RequestMapping(value = "/import")
 	@Authorize(authorizeResources = false)
@@ -440,13 +461,13 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 //					return resultData;
 //				}
 			}else {
-				List<NodeType> listNodeType = this.nodeTypeService.findByName(node.getNodeTypeId());
-				if(listNodeType.size()!=1) {
+				NodeType nodeType = this.nodeTypeService.findByName(node.getNodeTypeId());
+				if(nodeType == null) {
 					resultData.setCode(1100008);
 					resultData.setMessage(Internationalization.getMessageInternationalization(1100008).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}else {
-					node.setNodeTypeId(listNodeType.get(0).getId());
+					node.setNodeTypeId(nodeType.getId());
 				}
 				
 				if(!StringUtils.hasText(node.getNodeTypeId())) {

@@ -16,5 +16,7 @@ public interface BuildingInfoService extends BaseService<BuildingInfo>{
 	 * @return
 	 */
 	public BuildingInfo findByCode(String code);
+	
+	public BuildingInfo findByName(String name);
 
 }

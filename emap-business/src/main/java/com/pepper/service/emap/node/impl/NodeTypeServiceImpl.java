@@ -27,8 +27,8 @@ public class NodeTypeServiceImpl extends BaseServiceImpl<NodeType> implements No
 	}
 
 	@Override
-	public List<NodeType> findByName(String name) {
-		return nodeTypeDao.findByName(name);
+	public NodeType findByName(String name) {
+		return nodeTypeDao.findOneByName(name);
 	}
 
 }

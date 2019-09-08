@@ -1,11 +1,15 @@
 package com.pepper.controller.emap.front.user;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -25,17 +29,22 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 
 import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
+import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.screen.Screen;
 import com.pepper.model.emap.vo.AdminUserVo;
+import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.role.RoleService;
@@ -108,10 +117,30 @@ public class UserController extends BaseControllerImpl implements BaseController
 		return resultData;
 	}
 	
-	@RequestMapping(value = "/list")
-	@Authorize(authorizeResources = false)
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord) {
+	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord) throws IOException, IllegalArgumentException,
+			IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("user export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("user.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, keyWord, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("賬號", "account"));
+		excelColumn.add(ExcelColumn.build("姓名", "name"));
+		excelColumn.add(ExcelColumn.build("昵稱", "nickName"));
+		excelColumn.add(ExcelColumn.build("部門", "department.name"));
+		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.name"));
+		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
+		excelColumn.add(ExcelColumn.build("郵箱", "email"));
+		excelColumn.add(ExcelColumn.build("角色", "role.name"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
+	}
+
+	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord, Boolean isExport) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		
 		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork, keyWord);
@@ -143,8 +172,16 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		pager.setData("user",returnList);
 		pager.setResults(null);
-		systemLogService.log("get user list", this.request.getRequestURL().toString());
 		return pager;
+	}
+	
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord) {
+		
+		systemLogService.log("get user list", this.request.getRequestURL().toString());
+		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, keyWord, false);
 	}
 	
 	@RequestMapping(value = "/add")

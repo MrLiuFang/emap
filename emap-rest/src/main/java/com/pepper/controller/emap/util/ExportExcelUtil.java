@@ -23,6 +23,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class ExportExcelUtil {	
 	
 	public void export( Collection<?> dataSet, OutputStream outputStream,List<ExcelColumn> excelColumn) throws IOException, IllegalArgumentException, IllegalAccessException {
+		if(dataSet == null) {
+			return;
+		}
 		// 声明一个工作薄
 		@SuppressWarnings("resource")
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -69,7 +72,7 @@ public class ExportExcelUtil {
 					return getCellValue(field.get(data),key.substring(key.indexOf(".")+1));
 				 }
 				 Object value = field.get(data);
-				 return value.toString();
+				 return value ==null?"":value.toString();
 			}
 		}
 		
