@@ -1,5 +1,8 @@
 package com.pepper.controller.emap.app.login;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -145,6 +148,28 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000007);
 			return resultData;
+		}
+		
+		if(userReal.getIsNeverExpire()!=null && userReal.getIsNeverExpire()) {
+			if(userReal.getUpdatePasswordDate()!=null) {
+				if((LocalDate.now().toEpochDay() - userReal.getUpdatePasswordDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())>=30) {
+					resultData.setMessage(Internationalization.getMessageInternationalization(1000009));
+					resultData.setStatus(Status.LOGIN_FAIL.getKey());
+					resultData.setCode(1000009);
+					return resultData;
+				}
+			}
+		}
+		
+		if(userReal.getAutomaticLogOutDate()!=null) {
+			if(userReal.getUpdatePasswordDate()!=null) {
+				if((LocalDate.now().toEpochDay() - userReal.getAutomaticLogOutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())>=0) {
+					resultData.setMessage(Internationalization.getMessageInternationalization(1000010));
+					resultData.setStatus(Status.LOGIN_FAIL.getKey());
+					resultData.setCode(1000010);
+					return resultData;
+				}
+			}
 		}
 
 		// 更新用户的最后登录时间

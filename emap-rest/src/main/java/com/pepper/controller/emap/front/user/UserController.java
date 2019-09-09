@@ -2,6 +2,8 @@ package com.pepper.controller.emap.front.user;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -187,7 +189,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody Map<String,Object> map) throws ParseException {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
@@ -203,16 +205,22 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setCode(3000002);
 			return resultData;
 		}
-				
-		adminUser.setStatus(Status.NORMAL);
+		
+		if(map.containsKey("status")) {
+			adminUser.setStatus(Status.valueOf(map.get("status").toString()));
+		}
+		if(map.containsKey("automaticLogOutDate")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			adminUser.setAutomaticLogOutDate(sdf.parse(map.get("automaticLogOutDate").toString()));
+		}
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setCreateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setCreateUser(user.getId());
 		adminUser.setPassword(Md5Util.encryptPassword(adminUser.getPassword().toUpperCase(),adminUser.getAccount()));
-		adminUser.setStatus(Status.NORMAL);
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setIsWork(false);
+		adminUser.setUpdatePasswordDate(new Date());
 		adminUserService.saveUser(adminUser, map.get("roleId").toString());
 		systemLogService.log("get user add", this.request.getRequestURL().toString());
 		return resultData;
@@ -221,12 +229,19 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody Map<String,Object> map) throws ParseException {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
 		if(map.get("departmentGroupId")==null) {
 			adminUser.setDepartmentGroupId("");
+		}
+		if(map.containsKey("status")) {
+			adminUser.setStatus(Status.valueOf(map.get("status").toString()));
+		}
+		if(map.containsKey("automaticLogOutDate")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			adminUser.setAutomaticLogOutDate(sdf.parse(map.get("automaticLogOutDate").toString()));
 		}
 		adminUser.setUpdateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();

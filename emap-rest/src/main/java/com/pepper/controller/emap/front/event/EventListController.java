@@ -355,6 +355,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object retransmission(@RequestBody String str) throws JsonParseException, JsonMappingException, IOException {
 		
 		systemLogService.log("event  retransmission", this.request.getRequestURL().toString());
+		ObjectMapper objectMapper = new ObjectMapper();
+		Map<String,Object> map = objectMapper.readValue(str, Map.class);
+		EventList eventList = this.eventListService.findById(map.get("eventId").toString());
+		sendEmail(eventList);
 		return toEmployeeEx(str);
 	}
 
@@ -646,6 +650,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setStatus("P");
 			eventList.setFiledContent(map.containsKey("filedContent")?map.get("filedContent").toString():"");
 			eventListService.update(eventList);
+			sendEmail(eventList);
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
 		
@@ -807,6 +812,14 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return resultData;
 	}
 	
+	@RequestMapping("/workbench/cout")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object count() {
+		ResultData resultData = new ResultData();
+		resultData.setData("count", actionListService.count());
+		return resultData;
+	}
 	
 	
 		
@@ -868,8 +881,22 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				}
 				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
 			}
-			
 			eventListVo.setNode(nodeVo);
+		}
+	}
+	
+	private void sendEmail(EventList eventList) {
+		AdminUser admiUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
+		List<AdminUser> listManagerUser= adminUserService.findByDepartmentIdAndIsManagerAndDepartmentGroupIdIsNullOrDepartmentGroupId(admiUser.getDepartmentId(),true);
+		ActionList actionList = this.actionListService.findActionList(eventList.getId());
+		for(AdminUser adminUser : listManagerUser) {
+			if(StringUtils.hasText(adminUser.getEmail())) {
+				EventMessage eventMessage = new EventMessage();
+				eventMessage.setTitle(eventList.getEventName()+"處理情況");
+				eventMessage.setEmail(adminUser.getEmail());
+				eventMessage.setMessage(eventList.getEventName()+"處理情況："+(actionList==null?"":actionList.getContent()));
+				this.eventMessageService.save(eventMessage);
+			}
 		}
 	}
 	

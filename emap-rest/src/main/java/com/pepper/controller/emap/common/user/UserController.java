@@ -1,5 +1,7 @@
 package com.pepper.controller.emap.common.user;
 
+import java.util.Date;
+
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -91,8 +93,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 			adminUser = adminUserService.findById(id);
 			if(adminUser!=null && StringUtils.hasText(password)) {
 				adminUser.setPassword(Md5Util.encryptPassword(password.toUpperCase(),adminUser.getAccount()));
+				adminUser.setUpdatePasswordDate(new Date());
 				adminUserService.update(adminUser);
-			}
+			}	
 		}else {
 			resultData.setCode(300001);
 			resultData.setMessage("获取要修改的用户数据错误！");
