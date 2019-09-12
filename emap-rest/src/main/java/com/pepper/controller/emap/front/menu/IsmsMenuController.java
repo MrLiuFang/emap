@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.base.BaseController;
@@ -42,30 +43,8 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public Object list() {
 		ResultData resultData = new ResultData();
-		List<MenuVo> listMenu = new ArrayList<MenuVo>();
-		List<Menu> listRootMenu = menuService.queryMenu("0",true);
-		for (Menu rootMenu : listRootMenu) {
-			MenuVo menuVo = new MenuVo();
-			BeanUtils.copyProperties(rootMenu, menuVo);
-			listMenu.add(menuVo);
-			List<Menu> listChildMenu = menuService.findByParentId(rootMenu.getId());
-			List<MenuVo> listChileMenu = new ArrayList<MenuVo>();
-			for (Menu childMennu : listChildMenu) {
-				MenuVo childMenuVo = new MenuVo();
-				BeanUtils.copyProperties(childMennu, childMenuVo);
-				List<Menu> listChildMenu1 = menuService.findByParentId(childMennu.getId());
-				List<MenuVo> listChileMenu1 = new ArrayList<MenuVo>();
-				for(Menu menu : listChildMenu1) {
-					MenuVo childMenuVo1 = new MenuVo();
-					BeanUtils.copyProperties(menu, childMenuVo1);
-					listChileMenu1.add(childMenuVo1);
-				}
-				childMenuVo.setChild(listChileMenu1);
-				listChileMenu.add(childMenuVo);
-			}
-			menuVo.setChild(listChileMenu);
-		}
-		resultData.setData("menu", listMenu);
+		
+		resultData.setData("menu", this.menuService.queryMenu("0", true));
 		systemLogService.log("get menu list", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -77,6 +56,7 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		Menu menu = new Menu();
 		MapToBeanUtil.convert(menu, map);
+		menu.setStatus(Status.NORMAL);
 		menu.setIsIsms(true);
 		if(menuService.findByUrl(menu.getUrl())!=null) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1300001));

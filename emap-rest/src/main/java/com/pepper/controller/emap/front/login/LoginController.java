@@ -3,6 +3,7 @@ package com.pepper.controller.emap.front.login;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
@@ -27,6 +29,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.GlobalConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.role.Role;
+import com.pepper.model.console.role.RoleVo;
 import com.pepper.model.emap.map.Map;
 import com.pepper.service.authentication.FrontAuthorize;
 import com.pepper.service.authentication.aop.Authorize;
@@ -116,25 +119,25 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1000004);
 			return resultData;
 		}
-		Role role = roleService.findByUserId(userReal.getId());
-		if (role == null) {
+		List<Role> roleList = roleService.findByUserId1(userReal.getId());
+		if (roleList == null || roleList.size()<=0) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
 			resultData.setStatus(Status.LOGIN_FAIL.getKey());
 			resultData.setCode(1000005);
 			return resultData;
 		}
-		
-		if(role.getCode().equals("EMPLOYEE_ROLE")) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
-			resultData.setCode(1000007);
-			return resultData;
-		}
-		
-		if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000006);
-			return resultData;
+		for(Role role : roleList) {
+			if(role.getCode().equals("EMPLOYEE_ROLE")) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
+				resultData.setCode(1000007);
+				return resultData;
+			}
+//			if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
+//				resultData.setStatus(Status.LOGIN_FAIL.getKey());
+//				resultData.setCode(1000006);
+//				return resultData;
+//			}
 		}
 		
 		if(userReal.getIsNeverExpire()!=null && userReal.getIsNeverExpire()) {
@@ -165,10 +168,17 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		adminUserService.updateLoginTime(userReal.getId());
 
 		// 获取用户所有资源，并让其处于登录状态。
-		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
-		String token = setLoginInfo(userReal, resourceList);
+//		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
+		String token = setLoginInfo(userReal, new ArrayList<String>());
 		resultData.setData("token", token);
-		resultData.setData("role", role);
+		List<RoleVo> returnListRole = new ArrayList<RoleVo>();
+		for(Role role : roleList) {
+			RoleVo roleVo = new RoleVo();
+			BeanUtils.copyProperties(role, roleVo);
+			roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
+			returnListRole.add(roleVo);
+		}
+		resultData.setData("role", returnListRole);
 		if(map.containsKey("language")) {
 			stringValueOperationsService.set(userReal.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
 		}else if(this.request.getParameter("language")!=null) {

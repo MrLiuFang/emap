@@ -2,6 +2,7 @@ package com.pepper.controller.emap.front.role;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import com.pepper.model.console.role.RoleMenu;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
+import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.role.RoleMenuService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
@@ -54,6 +56,9 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@Reference
 	private RoleMenuService roleMenuService;
 	
+	@Reference
+	private MenuService menuService;
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -63,8 +68,10 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 //		pager.setPageNo(1);
 //		pager.setPageSize(Integer.MAX_VALUE);
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_TRUE+"_isIsms",true);
-		if(isDefault) {
+		if(isDefault!=null && isDefault) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_TRUE+"_isDefault",true);
+		}else if(isDefault!=null && !isDefault){
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_FALSE+"_isDefault",false);
 		}
 		pager =  roleService.findNavigator(pager);
 		resultData.setData("role", pager.getResults());
@@ -85,7 +92,13 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1400001);
 			return resultData;
 		}
-		roleService.save(role);
+		role = roleService.save(role);
+		if(map.containsKey("menuIds")) {
+			Map<String,Object> roleMenuMap= new HashMap<String, Object>();
+			roleMenuMap.put("roleId", role.getId());
+			roleMenuMap.put("menuIds", map.get("menuIds"));
+			this.roleMenu(roleMenuMap);
+		}
 		systemLogService.log("add role ", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -106,7 +119,25 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 			return resultData;
 		}
 		roleService.update(role);
+		if(map.containsKey("menuIds")) {
+			Map<String,Object> roleMenuMap= new HashMap<String, Object>();
+			roleMenuMap.put("roleId", role.getId());
+			roleMenuMap.put("menuIds", map.get("menuIds"));
+			this.roleMenu(roleMenuMap);
+		}
 		systemLogService.log("update role ", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/toEdit")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object toEdit(String id) {
+		ResultData resultData = new ResultData();
+		Role role = this.roleService.findById(id);
+		resultData.setData("role", role);
+		resultData.setData("menu", this.menuService.queryMenu("0", true));
+		resultData.setData("roleMenuId", roleMenuService.findMenuIdsByRoleId(id));
 		return resultData;
 	}
 	
@@ -209,12 +240,12 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@RequestMapping(value = "/menu")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object roleMenu(String roleId,String menuIds) {
+	public Object roleMenu(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
-		this.roleMenuService.deleteByRoleId(roleId);
-		for(String menuId : menuIds.split(",")) {
+		this.roleMenuService.deleteByRoleId(map.get("roleId").toString());
+		for(String menuId : (List<String>)map.get("menuIds")) {
 			RoleMenu roleMenu = new RoleMenu();
-			roleMenu.setRoleId(roleId);
+			roleMenu.setRoleId(map.get("roleId").toString());
 			roleMenu.setMenuId(menuId);
 			roleMenuService.save(roleMenu);
 		}
@@ -227,7 +258,8 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	public Object roleMenuList(String roleId) {
 		ResultData resultData = new ResultData();
 		List<String> list = this.roleMenuService.findMenuIdsByRoleId(roleId);
-		resultData.setData("list", list);
+		resultData.setData("menu", this.menuService.queryMenu("0", true));
+		resultData.setData("roleMenuId", list);
 		return resultData;
 	}
 }

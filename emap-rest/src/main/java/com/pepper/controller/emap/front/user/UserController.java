@@ -42,6 +42,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.console.role.RoleVo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.screen.Screen;
@@ -49,6 +50,7 @@ import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
+import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
@@ -93,6 +95,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private SystemLogService systemLogService;
 	
+	@Reference
+	private MenuService menuService;
+	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -108,13 +113,21 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUserVo  adminUserVo = new AdminUserVo();
 		BeanUtils.copyProperties(adminUser, adminUserVo);
 		adminUserVo.setPassword("");
-		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
-		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+//		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
+//		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
 		if(StringUtils.hasText(adminUser.getDepartmentId())) {
 			adminUserVo.setDepartment(departmentService.findById(adminUser.getDepartmentId()));
 		}
 		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
 		resultData.setData("user", adminUserVo);
+		List<Role> roleList = roleService.findByUserId1(adminUser.getId());
+		List<RoleVo> returnListRole = new ArrayList<RoleVo>();
+		for(Role role : roleList) {
+			RoleVo roleVo = new RoleVo();
+			roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
+			returnListRole.add(roleVo);
+		}
+		resultData.setData("role", returnListRole);
 		systemLogService.log("get user info", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -221,9 +234,22 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setIsWork(false);
 		adminUser.setUpdatePasswordDate(new Date());
-		adminUserService.saveUser(adminUser, map.get("roleId").toString());
+		adminUserService.saveUser(adminUser, null);
+		if(map.containsKey("roleId")) {
+			saveUserRole((List<String>)map.get("roleId"),adminUser.getId());
+		}
 		systemLogService.log("get user add", this.request.getRequestURL().toString());
 		return resultData;
+	}
+	
+	private void saveUserRole(List<String> role,String userId) {
+		this.roleUserService.deleteRoleUserByUserId(userId);
+		for(String roleId : role) {
+			RoleUser roleUser = new RoleUser();
+			roleUser.setRoleId(roleId);
+			roleUser.setUserId(userId);
+			this.roleUserService.save(roleUser);
+		}
 	}
 	
 	@RequestMapping(value = "/update")
@@ -255,7 +281,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setCode(3000002);
 			return resultData;
 		}
-		adminUserService.updateUser(adminUser, map.get("roleId").toString());
+		adminUserService.updateUser(adminUser, null);
+		if(map.containsKey("roleId")) {
+			saveUserRole((List<String>)map.get("roleId"),adminUser.getId());
+		}
 		systemLogService.log("get user update", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -273,7 +302,16 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
 			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
 			resultData.setData("departmentGroup",departmentGroupService.findById(adminUser.getDepartmentGroupId()));
+			List<Role> roleList = roleService.findByUserId1(adminUser.getId());
+			List<RoleVo> returnListRole = new ArrayList<RoleVo>();
+			for(Role role : roleList) {
+				RoleVo roleVo = new RoleVo();
+				roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
+				returnListRole.add(roleVo);
+			}
+			resultData.setData("role", returnListRole);
 		}
+		
 		systemLogService.log("get user to edit", this.request.getRequestURL().toString());
 		return resultData;
 	}
