@@ -88,8 +88,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUserVo  adminUserVo = new AdminUserVo();
 		BeanUtils.copyProperties(adminUser, adminUserVo);
 		adminUserVo.setPassword("");
-		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
-		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+		adminUserVo.setRole(roleService.findByUserId1(adminUser.getId()));
 		if(StringUtils.hasText(adminUser.getDepartmentId())) {
 			adminUserVo.setDepartment(departmentService.findById(adminUser.getDepartmentId()));
 		}

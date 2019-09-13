@@ -87,6 +87,7 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 		Role role = new Role();
 		MapToBeanUtil.convert(role, map);
 		role.setIsIsms(true);
+		role.setIsDefault(false);
 		if(this.roleService.findByCode(role.getCode())!=null) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1400001));
 			resultData.setCode(1400001);

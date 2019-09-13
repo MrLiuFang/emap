@@ -212,12 +212,12 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		/**
 		 * 将用户资源放到redis中，用于jsp的鉴权标签
 		 */
-		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
-		if (authMenuCode != null && authMenuCode.size() > 0) {
-			String[] authMenuCodeArr = new String[authMenuCode.size()];
-			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
-					authMenuCode.toArray(authMenuCodeArr));
-		}
+//		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
+//		if (authMenuCode != null && authMenuCode.size() > 0) {
+//			String[] authMenuCodeArr = new String[authMenuCode.size()];
+//			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
+//					authMenuCode.toArray(authMenuCodeArr));
+//		}
 
 		return token;
 	}

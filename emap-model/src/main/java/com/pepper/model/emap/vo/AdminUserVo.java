@@ -1,5 +1,7 @@
 package com.pepper.model.emap.vo;
 
+import java.util.List;
+
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.emap.department.Department;
@@ -15,7 +17,8 @@ public class AdminUserVo extends AdminUser {
 	 * 
 	 */
 	private static final long serialVersionUID = -7298384054166818609L;
-	private Role role;
+	
+	private List<Role> role;
 	
 	private String headPortraitUrl;
 	private Boolean isRequestAssist = false;
@@ -54,13 +57,14 @@ public class AdminUserVo extends AdminUser {
 	public void setHeadPortraitUrl(String headPortraitUrl) {
 		this.headPortraitUrl = headPortraitUrl;
 	}
+	
 
-
-	public Role getRole() {
+	public List<Role> getRole() {
 		return role;
 	}
 
-	public void setRole(Role role) {
+
+	public void setRole(List<Role> role) {
 		this.role = role;
 	}
 

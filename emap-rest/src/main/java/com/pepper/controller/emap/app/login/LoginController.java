@@ -122,33 +122,22 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1000004);
 			return resultData;
 		}
-		Role role = roleService.findByUserId(userReal.getId());
-		if (role == null) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000005);
-			return resultData;
+		List<Role> roleList = roleService.findByUserId1(userReal.getId());
+		for(Role role : roleList  ){
+//			if (role == null) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
+//				resultData.setStatus(Status.LOGIN_FAIL.getKey());
+//				resultData.setCode(1000005);
+//				return resultData;
+//			}
+			
+//			if(!role.getCode().equals("EMPLOYEE_ROLE")) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
+//				resultData.setCode(1000008);
+//				return resultData;
+//			}
 		}
 		
-		if(!role.getCode().equals("EMPLOYEE_ROLE")) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
-			resultData.setCode(1000008);
-			return resultData;
-		}
-		
-		
-		if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000006);
-			return resultData;
-		}
-		if(!role.getCode().equals("EMPLOYEE_ROLE")) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000007);
-			return resultData;
-		}
 		
 		if(userReal.getIsNeverExpire()!=null && userReal.getIsNeverExpire()) {
 			if(userReal.getUpdatePasswordDate()!=null) {
@@ -181,7 +170,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
 		String token = setLoginInfo(userReal, resourceList);
 		resultData.setData("token", token);
-		resultData.setData("role", role);
+		resultData.setData("role", roleList);
 		resultData.setData("department", departmentService.findById(userReal.getDepartmentId()));
 		resultData.setData("departmentGroup", departmentGroupService.findById(userReal.getDepartmentGroupId()));
 		if(map.containsKey("language")) {

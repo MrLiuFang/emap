@@ -124,6 +124,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		List<RoleVo> returnListRole = new ArrayList<RoleVo>();
 		for(Role role : roleList) {
 			RoleVo roleVo = new RoleVo();
+			BeanUtils.copyProperties(role, roleVo);
 			roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
 			returnListRole.add(roleVo);
 		}
@@ -159,23 +160,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		
 		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork, keyWord);
-		Role role = null;
-		for (AdminUser u : pager.getResults()) {
-			role = roleService.findByUserId(u.getId());
-			if (role!=null) {
-				u.setCreateUser(role.getName());
-			}
-		}
+		
 		List<AdminUser> list = pager.getResults();
 		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
 		for(AdminUser user : list) {
 			AdminUserVo  adminUserVo = new AdminUserVo();
 			BeanUtils.copyProperties(user, adminUserVo);
 			adminUserVo.setPassword("");
-			RoleUser roleUser = roleUserService.findByUserId(user.getId());
-			if(roleUser!=null) {
-				adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
-			}
+			
 			if(StringUtils.hasText(user.getDepartmentId())) {
 				adminUserVo.setDepartment(departmentService.findById(user.getDepartmentId()));
 			}
@@ -183,6 +175,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 				adminUserVo.setDepartmentGroup(departmentGroupService.findById(user.getDepartmentGroupId()));
 			}
 			adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
+			
+			List<Role> roleList = roleService.findByUserId1(user.getId());
+			adminUserVo.setRole(roleList);
 			returnList.add(adminUserVo);
 		}
 		pager.setData("user",returnList);
