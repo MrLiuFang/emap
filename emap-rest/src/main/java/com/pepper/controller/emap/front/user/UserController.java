@@ -289,18 +289,18 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object toEdit( String userId) {
 		ResultData resultData = new ResultData();
-		RoleUser roleUser = roleUserService.findByUserId(userId);
 		AdminUser adminUser = adminUserService.findById(userId);
 		if(adminUser!=null) {
 			adminUser.setPassword("");
 			resultData.setData("user",adminUser);
-			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
+//			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
 			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
 			resultData.setData("departmentGroup",departmentGroupService.findById(adminUser.getDepartmentGroupId()));
 			List<Role> roleList = roleService.findByUserId1(adminUser.getId());
 			List<RoleVo> returnListRole = new ArrayList<RoleVo>();
 			for(Role role : roleList) {
 				RoleVo roleVo = new RoleVo();
+				BeanUtils.copyProperties(role, roleVo);
 				roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
 				returnListRole.add(roleVo);
 			}
