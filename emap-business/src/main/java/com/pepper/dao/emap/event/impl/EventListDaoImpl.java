@@ -23,6 +23,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 	@Autowired
 	private BaseDao<EventList> baseDao;
+	
 	@Override
 	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
 		StringBuffer jpql = new StringBuffer();
@@ -115,68 +116,82 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 	@Override
 	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId
-			,Boolean isOrder) {
+			,Boolean isOrder,String sortBy) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		jpql.append(" select distinct el from EventList el ");
-		if(StringUtils.hasText(node)) {
-			joinKey.put("node", "");
-			jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
-		}
-		if(StringUtils.hasText(nodeType)) {
-			joinKey.put("nodeType", "");
-			if(!joinKey.containsKey("node")) {
-				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
-			}
-			jpql.append(" join NodeType nt on n.nodeTypeId = nt.id ");
-		}
-		if(StringUtils.hasText(mapName)) {
-			joinKey.put("map", "");
-			if(!joinKey.containsKey("node")) {
-				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
-			}
-			jpql.append(" join Map m on n.mapId = m.id ");
-		}
+		jpql.append(" left join Node n on el.sourceCode = n.sourceCode ");
+		jpql.append(" left join NodeType nt on n.nodeTypeId = nt.id ");
+		jpql.append(" left join Map m on n.mapId = m.id ");
+		jpql.append(" left join BuildingInfo bi on m.buildId = bi.id ");
+		jpql.append(" left join SiteInfo si on si.id = bi.siteInfoId ");
+		jpql.append(" left join AdminUser au on au.id = el.operator ");
+		jpql.append(" left join ActionList al on el.id = al.eventListId ");
 		
-		if(StringUtils.hasText(buildName)) {
-			joinKey.put("build", "");
-			if(!joinKey.containsKey("node")) {
-				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
-			}
-			if(!joinKey.containsKey("map")) {
-				jpql.append(" join Map m on n.mapId = m.id ");
-			}
-			jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
-		}
-		
-		if(StringUtils.hasText(siteName)) {
-			if(!joinKey.containsKey("node")) {
-				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
-			}
-			if(!joinKey.containsKey("map")) {
-				jpql.append(" join Map m on n.mapId = m.id ");
-			}
-			if(!joinKey.containsKey("build")) {
-				jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
-			}
-			jpql.append(" join SiteInfo si on si.id = bi.siteInfoId ");
-		}
-		
-		if(StringUtils.hasText(operatorId)) {
-			jpql.append(" join AdminUser au on au.id = el.operator ");
-		}
-		
-		if(StringUtils.hasText(employeeId)) {
-			jpql.append(" join ActionList al on el.id = al.eventListId ");
-		}
+//		if(StringUtils.hasText(node)) {
+//			joinKey.put("node", "");
+//			jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+//		}
+//		if(StringUtils.hasText(nodeType)) {
+//			joinKey.put("nodeType", "");
+//			if(!joinKey.containsKey("node")) {
+//				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+//			}
+//			jpql.append(" join NodeType nt on n.nodeTypeId = nt.id ");
+//		}
+//		if(StringUtils.hasText(mapName)) {
+//			joinKey.put("map", "");
+//			if(!joinKey.containsKey("node")) {
+//				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+//			}
+//			jpql.append(" join Map m on n.mapId = m.id ");
+//		}
+//		
+//		if(StringUtils.hasText(buildName)) {
+//			joinKey.put("build", "");
+//			if(!joinKey.containsKey("node")) {
+//				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+//			}
+//			if(!joinKey.containsKey("map")) {
+//				jpql.append(" join Map m on n.mapId = m.id ");
+//			}
+//			jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
+//		}
+//		
+//		if(StringUtils.hasText(siteName)) {
+//			if(!joinKey.containsKey("node")) {
+//				jpql.append(" join Node n on el.sourceCode = n.sourceCode ");
+//			}
+//			if(!joinKey.containsKey("map")) {
+//				jpql.append(" join Map m on n.mapId = m.id ");
+//			}
+//			if(!joinKey.containsKey("build")) {
+//				jpql.append(" join BuildingInfo bi on m.buildId = bi.id ");
+//			}
+//			jpql.append(" join SiteInfo si on si.id = bi.siteInfoId ");
+//		}
+//		
+//		if(StringUtils.hasText(operatorId)) {
+//			jpql.append(" join AdminUser au on au.id = el.operator ");
+//		}
+//		
+//		if(StringUtils.hasText(employeeId)) {
+//			jpql.append(" join ActionList al on el.id = al.eventListId ");
+//		}
 		
 		jpql.append(" where 1=1 ");
 		
 		
 		if(StringUtils.hasText(status)) {
-			jpql.append(" and el.status = :status  ");
-			searchParameter.put("status", status);
+			if(status.split(",").length==2) {
+				jpql.append(" and (el.status = :status1 or el.status = :status2) ");
+				searchParameter.put("status1", status.split(",")[0]);
+				searchParameter.put("status2", status.split(",")[1]);
+			}else {
+				jpql.append(" and el.status = :status  ");
+				searchParameter.put("status", status);
+			}
 		}
 		if(StringUtils.hasText(event)) {
 			jpql.append(" and ( el.id like :event or  el.eventName like :event ) ");
@@ -227,11 +242,44 @@ public class EventListDaoImpl  implements EventListDaoEx {
 			searchParameter.put("eventEndDate", dateFormat.format(eventEndDate));
 		}
 		
-		jpql.append(" order by   el.createDate desc ");
 		
-//		if(isOrder!=null && isOrder) {
-//			jpql.append(" , nt.name desc , el.warningLevel desc");
-//		}
+		
+		if(StringUtils.hasText(sortBy)) {
+			if(sortBy.equals("nodeType")) {
+				jpql.append(" order by  nt.name desc ");
+			}
+			if(sortBy.equals("warningLevel")) {
+				jpql.append(" order by  el.warningLevel desc ");
+			}
+			if(sortBy.equals("eventDate")) {
+				jpql.append(" order by  el.eventDate desc ");
+			}
+			if(sortBy.equals("eventName")) {
+				jpql.append(" order by  el.eventName desc ");
+			}
+			if(sortBy.equals("nodeName")) {
+				jpql.append(" order by  n.name desc ");
+			}
+			if(sortBy.equals("isSpecial")) {
+				jpql.append(" order by  el.isSpecial desc ");
+			}
+			if(sortBy.equals("operator")) {
+				jpql.append(" order by  el.operator desc ");
+			}
+			if(sortBy.equals("currentHandleUser")) {
+				jpql.append(" order by  el.currentHandleUser desc ");
+			}
+			if(sortBy.equals("status")) {
+				jpql.append(" order by  el.status desc ");
+			}
+			if(sortBy.equals("mapName")) {
+				jpql.append(" order by  m.name desc ");
+			}
+		}else {
+			jpql.append(" order by   el.createDate desc ");
+		}
+		
+		
 		
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	} 

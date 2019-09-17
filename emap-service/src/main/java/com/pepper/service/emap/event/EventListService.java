@@ -74,5 +74,5 @@ public interface EventListService extends BaseService<EventList> {
 	
 	public Pager<EventList>  historyEventList(Pager<EventList> pager,String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String stieName,String operator,String status );
 	
-	public Pager<EventList>  report(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ,String employeeId,Boolean isOrder );
+	public Pager<EventList>  report(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ,String employeeId,Boolean isOrder,String sortBy );
 }

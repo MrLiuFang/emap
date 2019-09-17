@@ -185,7 +185,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			stringValueOperationsService.set(userReal.getId()+"_language", request.getParameter("language")==null?"zh":request.getParameter("language") );
 		}
 		
-		systemLogService.log("user login", this.request.getRequestURI(),userReal);
+		systemLogService.log("user login", this.request.getRequestURI());
 		return resultData;
 	}
 

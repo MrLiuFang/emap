@@ -59,6 +59,7 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventMessage;
+import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.report.Report;
@@ -190,10 +191,10 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public Object event(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId) {
+			String status, String employeeId,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -202,7 +203,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public void eventExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId,Boolean isGroupExport,String groupFilter,String sortFilter,String columnFilter) throws IOException, DocumentException {
+			String status, String employeeId,Boolean isGroupExport,String groupFilter,String sortFilter,String columnFilter,Boolean isUrgent,Boolean isSpecial
+			,String sortBy) throws IOException, DocumentException {
+		
 //		systemLogService.log("event export report ", this.request.getRequestURL().toString());
 		@SuppressWarnings("unchecked")
 		List<String> columnFilterList= new ArrayList<>(Arrays.asList(columnFilter.split(",")));
@@ -210,7 +213,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			columnFilterList.remove(groupFilter);
 		}
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, warningLevel,
-				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport);
+				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,sortBy);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -464,10 +467,10 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public Object openDoor(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId) {
+			String status, String employeeId,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, 0, node, "door", mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
 	}
 
 	@RequestMapping(value = "/openDoor/export")
@@ -475,9 +478,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public Object openDoorExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId,Boolean isGroupExport) throws DocumentException, IOException {
+			String status, String employeeId,Boolean isGroupExport,Boolean isUrgent,Boolean isSpecial,String sortBy) throws DocumentException, IOException {
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, 0,
-				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport);
+				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,sortBy);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -533,10 +536,10 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public Object nodeEvent(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId) {
+			String status, String employeeId ,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
 	}
 
 	@RequestMapping(value = "/employeeHandleEvent")
@@ -545,23 +548,23 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	public Object employeeHandleEvent(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId) {
+			String status, String employeeId,Boolean  isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
 	}
 
 	private Object findEvent(Date eventStartDate, Date eventEndDate, String event, Integer warningLevel, String node,
 			String nodeTypeId, String mapName, String buildName, String siteName, String operatorId, String status,
-			String employeeId, Boolean isExport,Boolean isOrder) {
+			String employeeId, Boolean isExport,Boolean isOrder,Boolean  isUrgent,Boolean isSpecial,String sortBy) {
 		Pager<EventList> pager = new Pager<EventList>();
 		if (isExport) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId,
-				mapName, buildName, siteName, operatorId, status, employeeId,isOrder);
-		pager.setData("event", convertEventList(pager.getResults()));
+				mapName, buildName, siteName, operatorId, status, employeeId,isOrder,sortBy);
+		pager.setData("event", convertEventList(pager.getResults(),isUrgent,isSpecial));
 		pager.setResults(null);
 
 		return pager;
@@ -790,11 +793,12 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		return pager;
 	}
 
-	private List<EventListVo> convertEventList(List<EventList> list) {
+	private List<EventListVo> convertEventList(List<EventList> list,Boolean  isUrgent,Boolean isSpecial) {
 		List<EventListVo> returnList = new ArrayList<EventListVo>();
 		for (EventList obj : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(obj, eventListVo);
+			eventListVo.setIsUrgent(obj.getWarningLevel()>=getUrgentWarningLevel(obj));
 			setNode(obj, eventListVo);
 			if (StringUtils.hasText(obj.getOperator())) {
 				AdminUser operatorUser = this.adminUserService.findById(obj.getOperator());
@@ -822,19 +826,38 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 					eventListVo.setStaff(staff);
 				}
 			}
-
-			returnList.add(eventListVo);
+			
+			Boolean b = true;
+			if(isUrgent!=null && (isUrgent!= eventListVo.getIsUrgent())) {
+				b = false;
+			}
+			if(isSpecial!=null &&(isSpecial!= eventListVo.getIsSpecial())) {
+				b = false;
+			}
+			if(b) {
+				returnList.add(eventListVo);
+			}
 		}
-		setEventMessage(returnList);
+//		setEventMessage(returnList);
+		
 		return returnList;
 	}
-
-	private void setEventMessage(List<EventListVo> list) {
-		for (EventListVo eventListVo : list) {
-			List<EventMessage> listEventMessage = this.eventMessageService.findEventMessage(eventListVo.getId());
-			eventListVo.setEventMessage(listEventMessage);
+	
+	private Integer getUrgentWarningLevel(EventList eventList) {
+		Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+		EventRule eventRule = this.eventRuleService.findByNodeId(node==null?"0":node.getId());
+		if(eventRule == null) {
+			eventRule = eventRuleService.findByNodeTypeId(node==null?"0":node.getNodeTypeId());
 		}
+		return eventRule==null?0:eventRule.getWarningLevel();
 	}
+
+//	private void setEventMessage(List<EventListVo> list) {
+//		for (EventListVo eventListVo : list) {
+//			List<EventMessage> listEventMessage = this.eventMessageService.findEventMessage(eventListVo.getId());
+//			eventListVo.setEventMessage(listEventMessage);
+//		}
+//	}
 
 	private void setNode(EventList eventList, EventListVo eventListVo) {
 		Node node = nodeService.findBySourceCode(
