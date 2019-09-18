@@ -36,4 +36,6 @@ public interface NodeDao extends BaseDao<Node> , NodeDaoEx<Node> {
 	 * @return
 	 */
 	public Node findFirstByCode(String code);
+	
+	public Node findFirstByName(String name);
 }

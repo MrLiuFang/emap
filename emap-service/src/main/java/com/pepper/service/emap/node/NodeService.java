@@ -43,4 +43,6 @@ public interface NodeService extends BaseService<Node> {
 	 * @return
 	 */
 	public Node findByCode(String code);
+	
+	public Node findByName(String name);
 }

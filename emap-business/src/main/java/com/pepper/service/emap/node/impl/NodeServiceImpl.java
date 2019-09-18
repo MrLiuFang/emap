@@ -44,6 +44,12 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 		return nodeDao.findFirstByCode(code);
 	}
 
+
+	@Override
+	public Node findByName(String name) {
+		return nodeDao.findFirstByName(name);
+	}
+
 	
 
 }
