@@ -48,7 +48,7 @@ public interface EventListDaoEx {
 	 */
 	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish);
 	
-	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy);
+	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent);
 	
 
 }

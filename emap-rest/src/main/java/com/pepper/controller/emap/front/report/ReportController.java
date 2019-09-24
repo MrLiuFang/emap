@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -563,7 +564,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId,
-				mapName, buildName, siteName, operatorId, status, employeeId,isOrder,sortBy);
+				mapName, buildName, siteName, operatorId, status, employeeId,isOrder,sortBy,isUrgent,isSpecial);
 		pager.setData("event", convertEventList(pager.getResults(),isUrgent,isSpecial));
 		pager.setResults(null);
 
@@ -827,16 +828,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 				}
 			}
 			
-			Boolean b = true;
-			if(isUrgent!=null && (isUrgent!= eventListVo.getIsUrgent())) {
-				b = false;
-			}
-			if(isSpecial!=null &&(isSpecial!= eventListVo.getIsSpecial())) {
-				b = false;
-			}
-			if(b) {
-				returnList.add(eventListVo);
-			}
+			returnList.add(eventListVo);
 		}
 //		setEventMessage(returnList);
 		

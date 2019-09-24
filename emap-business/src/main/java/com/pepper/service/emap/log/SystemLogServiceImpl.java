@@ -29,14 +29,15 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 	private SystemLogDao systemLogDao;
 
 	public void log(String actionName,String url){
+		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+	    HttpServletRequest request = servletRequestAttributes.getRequest();
 		AdminUser user = (AdminUser) currentUser.getCurrentUser();
 		SystemLog systemLog = new SystemLog();
 		systemLog.setUserId(user==null?"":user.getId());
 		systemLog.setUserName(user==null?"":user.getName());
 		systemLog.setLogContent(actionName);
-		systemLog.setUrl(url);
-		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
-	    HttpServletRequest request = servletRequestAttributes.getRequest();
+		systemLog.setUrl(request.getRequestURL().toString());
+		
 	    if(request.getParameterMap().size()>0) {
 	    	ObjectMapper objectMapper = new ObjectMapper();
 	    	try {
@@ -68,22 +69,26 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 	}
 	
 	public void log(String actionName,String url,String data){
+		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+	    HttpServletRequest request = servletRequestAttributes.getRequest();
 		AdminUser user = (AdminUser) currentUser.getCurrentUser();
 		SystemLog systemLog = new SystemLog();
 		systemLog.setUserId(user==null?"":user.getId());
 		systemLog.setUserName(user==null?"":user.getName());
 		systemLog.setLogContent(actionName);
 		systemLog.setData(data);
-		systemLog.setUrl(url);
+		systemLog.setUrl(request.getRequestURL().toString());
 		this.save(systemLog);
 	}
 	
 	public void log(String actionName,String url,AdminUser adminUser){
+		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+	    HttpServletRequest request = servletRequestAttributes.getRequest();
 		SystemLog systemLog = new SystemLog();
 		systemLog.setUserId(adminUser==null?"":adminUser.getId());
 		systemLog.setUserName(adminUser==null?"":adminUser.getName());
 		systemLog.setLogContent(actionName);
-		systemLog.setUrl(url);
+		systemLog.setUrl(request.getRequestURL().toString());
 		this.save(systemLog);
 	}
 	

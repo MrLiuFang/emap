@@ -82,6 +82,7 @@ public class EventScheduler {
 		}
 		List<EventList> list = eventListService.findByStatusOrStatus(null, "N");
 		for(EventList eventList : list) {
+			eventList.setIsUrgent(eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
 			String sourceCode = eventList.getSourceCode();
 			if(!StringUtils.hasText(eventList.getStatus())) {
 				eventList.setStatus("N");
@@ -113,6 +114,14 @@ public class EventScheduler {
 				}
 			}
 		}
+	}
+	private Integer getUrgentWarningLevel(EventList eventList) {
+		Node node = this.nodeService.findBySourceCode(eventList.getSourceCode());
+		EventRule eventRule = this.eventRuleService.findByNodeId(node==null?"0":node.getId());
+		if(eventRule == null) {
+			eventRule = eventRuleService.findByNodeTypeId(node==null?"0":node.getNodeTypeId());
+		}
+		return eventRule==null?0:eventRule.getWarningLevel();
 	}
 	
 	private void eventRule(EventList eventList,EventRule eventRule) {		

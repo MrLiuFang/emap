@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Objects;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseDao;
 import com.pepper.dao.emap.event.EventListDaoEx;
@@ -116,7 +117,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 	@Override
 	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId
-			,Boolean isOrder,String sortBy) {
+			,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -240,6 +241,16 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		if(eventEndDate!=null) {
 			jpql.append(" and  el.eventDate <= :eventEndDate ");
 			searchParameter.put("eventEndDate", dateFormat.format(eventEndDate));
+		}
+		
+		if(java.util.Objects.nonNull(isSpecial)) {
+			jpql.append(" and  el.isSpecial = :isSpecial ");
+			searchParameter.put("isSpecial", isSpecial);
+		}
+		
+		if(java.util.Objects.nonNull(isUrgent)) {
+			jpql.append(" and  el.isUrgent = :isUrgent ");
+			searchParameter.put("isUrgent", isUrgent);
 		}
 		
 		

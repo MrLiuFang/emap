@@ -1,6 +1,5 @@
 package com.pepper.controller.emap.app.login;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -131,11 +130,11 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 //				return resultData;
 //			}
 			
-//			if(!role.getCode().equals("EMPLOYEE_ROLE")) {
-//				resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
-//				resultData.setCode(1000008);
-//				return resultData;
-//			}
+			if(!role.getCode().equals("EMPLOYEE_ROLE")) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
+				resultData.setCode(1000008);
+				return resultData;
+			}
 		}
 		
 		
@@ -167,8 +166,8 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		adminUserService.updateLoginTime(userReal.getId());
 		
 		// 获取用户所有资源，并让其处于登录状态。
-		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
-		String token = setLoginInfo(userReal, resourceList);
+		//List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
+		String token = setLoginInfo(userReal, null);
 		resultData.setData("token", token);
 		resultData.setData("role", roleList);
 		resultData.setData("department", departmentService.findById(userReal.getDepartmentId()));
@@ -188,9 +187,9 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		// 记录用户登录状态
 		appAuthorize.setAuthorizeInfo(user.getId(), token);
 		// 先删除以前的权限资源
-		appAuthorize.deleteUserResources(user.getId());
+//		appAuthorize.deleteUserResources(user.getId());
 		// 设置权限资源
-		appAuthorize.setUserResources(resourceList, user.getId());
+		//appAuthorize.setUserResources(resourceList, user.getId());
 		// 将当前用户信息保存到redis
 		appAuthorize.setCurrentUser(user.getId(), user);
 
@@ -205,12 +204,12 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		/**
 		 * 将用户资源放到redis中，用于jsp的鉴权标签
 		 */
-		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
-		if (authMenuCode != null && authMenuCode.size() > 0) {
-			String[] authMenuCodeArr = new String[authMenuCode.size()];
-			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
-					authMenuCode.toArray(authMenuCodeArr));
-		}
+//		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
+//		if (authMenuCode != null && authMenuCode.size() > 0) {
+//			String[] authMenuCodeArr = new String[authMenuCode.size()];
+//			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
+//					authMenuCode.toArray(authMenuCodeArr));
+//		}
 
 		return token;
 	}

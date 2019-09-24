@@ -72,6 +72,9 @@ public class EventList extends BaseModel  {
 	@Column(name ="is_special")
 	private Boolean isSpecial;
 	
+	@Column(name ="is_urgent")
+	private Boolean isUrgent;
+	
 	@Column(name ="is_not_found_employee")
 	private Boolean isNotFoundEmployee;
 	
@@ -250,6 +253,14 @@ public class EventList extends BaseModel  {
 
 	public void setIsUnableFinish(Boolean isUnableFinish) {
 		this.isUnableFinish = isUnableFinish;
+	}
+
+	public Boolean getIsUrgent() {
+		return isUrgent;
+	}
+
+	public void setIsUrgent(Boolean isUrgent) {
+		this.isUrgent = isUrgent;
 	}
 	
 	

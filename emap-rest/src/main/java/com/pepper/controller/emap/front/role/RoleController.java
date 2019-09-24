@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.stereotype.Controller;
@@ -243,6 +244,12 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object roleMenu(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
+		Role role = this.roleService.findById(map.get("roleId").toString());
+		if(Objects.equals(role.getCode(), "SUPER_ROLE")) {
+			resultData.setCode(1500003);
+			resultData.setMessage(Internationalization.getMessageInternationalization(1500003));
+			return resultData;
+		}
 		this.roleMenuService.deleteByRoleId(map.get("roleId").toString());
 		for(String menuId : (List<String>)map.get("menuIds")) {
 			RoleMenu roleMenu = new RoleMenu();
