@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -122,7 +123,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 			
 			this.buildingInfoService.saveAll(list);
 		}
-		systemLogService.log("import buildingInfo", this.request.getRequestURL().toString());
+		systemLogService.log("import buildingInfo");
 		return resultData;
 	}
 	
@@ -196,7 +197,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		if (StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE + "_siteInfoId&code&name", keyWord);
 		}
-		if (isExport) {
+		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}

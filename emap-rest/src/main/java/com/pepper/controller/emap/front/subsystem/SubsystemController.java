@@ -1,19 +1,36 @@
 package com.pepper.controller.emap.front.subsystem;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -35,6 +52,114 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 
 	@Reference
 	private SystemLogService systemLogService;
+	
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public void export(String name,Boolean isOnLine) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("help export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition",
+				"attachment;filename=" + URLEncoder.encode("subsystem.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<Subsystem> pager = getPager( name, isOnLine, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("地址", "address"));
+		excelColumn.add(ExcelColumn.build("端口", "prot"));
+		excelColumn.add(ExcelColumn.build("是否關聯本系統", "isRelation"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("subsystem"), outputStream, excelColumn);
+	}
+
+	
+	@RequestMapping(value = "/import")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<Subsystem> list = new ArrayList<Subsystem>();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
+	        
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setMessage("数据错误！");
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				Subsystem subsystem= new Subsystem();
+				subsystem.setName(getCellValue(row.getCell(0)).toString());
+				subsystem.setAddress(getCellValue(row.getCell(1)).toString());
+				subsystem.setProt(Integer.valueOf( getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", "")));
+				subsystem.setIsRelation(Objects.equals(getCellValue(row.getCell(3)).toString(), "是"));
+				list.add(subsystem);
+	        }
+			this.subsystemService.saveAll(list);
+		}
+		systemLogService.log("import subsystem");
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("address")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("prot")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("isRelation")) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = "";
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
 	
 	private Pager< Subsystem> getPager(String name,Boolean isOnLine, Boolean isExport) {
 		Pager< Subsystem> pager = new Pager< Subsystem>();

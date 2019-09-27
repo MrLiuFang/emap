@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletInputStream;
@@ -119,6 +120,19 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 		}
 		return "";
 		
+	}
+
+	@Override
+	public void log(String actionName) {
+		ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+	    HttpServletRequest request = servletRequestAttributes.getRequest();
+		AdminUser user = (AdminUser) currentUser.getCurrentUser();
+		SystemLog systemLog = new SystemLog();
+		systemLog.setUserId(user==null?"":user.getId());
+		systemLog.setUserName(user==null?"":user.getName());
+		systemLog.setLogContent(actionName);
+		systemLog.setUrl(request.getRequestURL().toString());
+		this.save(systemLog);
 	}
 	
 }

@@ -1,11 +1,15 @@
 package com.pepper.controller.emap.front.role;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.stereotype.Controller;
@@ -19,6 +23,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -28,6 +34,8 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleMenu;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.emap.staff.Staff;
+import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.menu.MenuService;
@@ -60,14 +68,32 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@Reference
 	private MenuService menuService;
 	
-	@RequestMapping(value = "/list")
-	@Authorize(authorizeResources = false)
+	@Reference
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(Boolean isDefault) {
+	public void export(Boolean isDefault) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		systemLogService.log("staff export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("role.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<Role> pager = getPager(isDefault, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("角色名稱", "name"));
+		excelColumn.add(ExcelColumn.build("角色編碼", "code"));
+		excelColumn.add(ExcelColumn.build("是否主角色", "isDefault"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("role"), outputStream, excelColumn);
+	}
+	
+	private Pager<Role> getPager(Boolean isDefault,Boolean isExport) {
 		ResultData resultData = new ResultData();
 		Pager<Role> pager = new Pager<>();
-//		pager.setPageNo(1);
-//		pager.setPageSize(Integer.MAX_VALUE);
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_TRUE+"_isIsms",true);
 		if(isDefault!=null && isDefault) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_TRUE+"_isDefault",true);
@@ -76,8 +102,16 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 		}
 		pager =  roleService.findNavigator(pager);
 		resultData.setData("role", pager.getResults());
+		return pager;
+	}
+	
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(Boolean isDefault) {
+		
 		systemLogService.log("role list", this.request.getRequestURL().toString());
-		return resultData;
+		return getPager(isDefault,false);
 	}
 	
 	@RequestMapping(value = "add")

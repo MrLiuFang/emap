@@ -73,6 +73,10 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 
 	private Pager<SiteInfo> getPager(String code,String name,String keyWord, Boolean isExport) {
 		Pager<SiteInfo> pager = new Pager<SiteInfo>();
+		if (isExport) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
@@ -125,7 +129,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	        }
 			this.siteInfoService.saveAll(list);
 		}
-		systemLogService.log("import help", this.request.getRequestURL().toString());
+		systemLogService.log("import help");
 		return resultData;
 	}
 	

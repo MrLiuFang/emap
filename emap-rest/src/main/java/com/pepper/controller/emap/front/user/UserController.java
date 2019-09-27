@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -158,7 +159,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 
 	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord, Boolean isExport) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
-		
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork, keyWord);
 		
 		List<AdminUser> list = pager.getResults();
@@ -499,7 +503,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			}
 			
 		}
-		systemLogService.log("user import", this.request.getRequestURL().toString());
+		systemLogService.log("user import");
 		return resultData;
 	}
 	

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -105,6 +106,10 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 
 	private Pager<EventRule> getPager(String nodeId, Integer warningLevel, Boolean isExport) {
 		Pager<EventRule> pager = new Pager<EventRule>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if (StringUtils.hasText(nodeId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_nodeId", nodeId);
 		}
@@ -193,7 +198,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 			}
 			this.eventRuleService.saveAll(list);
 		}
-		systemLogService.log("import help", this.request.getRequestURL().toString());
+		systemLogService.log("import event rule");
 		return resultData;
 	}
 

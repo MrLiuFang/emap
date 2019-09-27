@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -79,6 +80,10 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	
 	private Pager<NodeType> getPager(String code,String name,String keyWord, Boolean isExport) {
 		Pager<NodeType> pager = new Pager<NodeType>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
@@ -138,7 +143,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	        }
 			this.nodeTypeService.saveAll(list);
 		}
-		systemLogService.log("import nodeType", this.request.getRequestURL().toString());
+		systemLogService.log("import nodeType");
 		return resultData;
 	}
 	

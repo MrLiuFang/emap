@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -138,7 +139,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	        }
 			this.mapService.saveAll(list);
 		}
-		systemLogService.log("import map", this.request.getRequestURL().toString());
+		systemLogService.log("import map");
 		return resultData;
 	}
 	
@@ -195,6 +196,10 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	
 	private Pager<com.pepper.model.emap.map.Map> getPager(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId, Boolean isExport) {
 		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}

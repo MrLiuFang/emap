@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -83,6 +84,10 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 	
 	private Pager<HelpList> getPager(String code,String name,String nodeTypeId,Integer warningLevel,String keyWord, Boolean isExport) {
 		Pager<HelpList> pager = new Pager<HelpList>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code);
 		}
@@ -154,7 +159,7 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 	        }
 			this.helpListService.saveAll(list);
 		}
-		systemLogService.log("import help", this.request.getRequestURL().toString());
+		systemLogService.log("import help list");
 		return resultData;
 	}
 	

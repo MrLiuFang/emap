@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -90,6 +91,10 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	
 	private Pager<Staff> getPager(String name,String email,String siteId,String idCard,String keyWord, Boolean isExport) {
 		Pager<Staff> pager = new Pager<Staff>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
 		}
@@ -315,7 +320,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 			
 			this.staffService.saveAll(list);
 		}
-		systemLogService.log("staff import", this.request.getRequestURL().toString());
+		systemLogService.log("staff import");
 		return resultData;
 	}
 	

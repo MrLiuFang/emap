@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.naming.directory.SearchControls;
 import javax.servlet.ServletOutputStream;
@@ -104,6 +105,10 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	private Pager<Screen> getPager(String buildingId, String siteId, Boolean isExport) {
 		Pager<Screen> pager = new Pager<Screen>();
 		pager = screenService.findNavigator(pager);
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if (StringUtils.hasText(buildingId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_buildingId", buildingId);
 		}

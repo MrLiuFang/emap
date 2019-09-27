@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -114,7 +115,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	        }
 			this.departmentService.saveAll(list);
 		}
-		systemLogService.log("import department", this.request.getRequestURL().toString());
+		systemLogService.log("import department");
 		return resultData;
 	}
 	
@@ -167,6 +168,10 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	
 	private Pager<Department> getPager(String name,String code,String keyWord, Boolean isExport) {
 		Pager<Department> pager = new Pager<Department>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}

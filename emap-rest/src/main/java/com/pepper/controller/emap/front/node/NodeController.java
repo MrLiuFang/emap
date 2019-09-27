@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -121,7 +122,11 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 	}
 	
 	private Pager<Node> getPager(String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord, Boolean isExport) {
-		Pager<Node> pager = new Pager<Node>();	
+		Pager<Node> pager = new Pager<Node>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY,keyWord);
 		List<Node> list = pager.getResults();
 		List<NodeVo> returnList = new ArrayList<NodeVo>();
