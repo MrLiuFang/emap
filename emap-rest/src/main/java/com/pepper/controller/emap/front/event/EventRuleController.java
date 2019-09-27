@@ -89,14 +89,17 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		excelColumn.add(ExcelColumn.build("設備", "node.name"));
 		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.name"));
 		excelColumn.add(ExcelColumn.build("告警級別", "warningLevel"));
-		excelColumn.add(ExcelColumn.build("部門", "department.name"));
 		excelColumn.add(ExcelColumn.build("超時時長", "timeOut"));
 		excelColumn.add(ExcelColumn.build("自動派單開始時間", "fromDateTime"));
 		excelColumn.add(ExcelColumn.build("自動派單結束時間", "toDateTime"));
+		excelColumn.add(ExcelColumn.build("部門", "department.name"));
 		excelColumn.add(ExcelColumn.build("特級告警級別", "specialWarningLevel"));
 		excelColumn.add(ExcelColumn.build("特級處理部門", "specialDepartment.name"));
 		excelColumn.add(ExcelColumn.build("接受短信號碼", "sMSReceiver"));
 		excelColumn.add(ExcelColumn.build("電郵地址", "emailAccount"));
+		excelColumn.add(ExcelColumn.build("短信内容", "sMSContent"));
+		excelColumn.add(ExcelColumn.build("電郵標題", "emailTitle"));
+		excelColumn.add(ExcelColumn.build("電郵内容", "emailContent"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("eventRule"), outputStream, excelColumn);
 	}
 
@@ -118,7 +121,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		pager.setResults(null);
 		return pager;
 	}
-	
+
 	@RequestMapping(value = "/import")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -129,123 +132,138 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
 			Workbook wookbook = null;
-	        try {
-	        	if(isExcel2003(fileName)){
-	        		wookbook = new HSSFWorkbook(file.getInputStream());
-	        	}else if(isExcel2007(fileName)){
-	        		wookbook = new XSSFWorkbook(file.getInputStream());
-	        	}
-	        } catch (IOException e) {
-	        }
-	        
-	        Sheet sheet = wookbook.getSheetAt(0);
-	        Row rowHead = sheet.getRow(0);
+			try {
+				if (isExcel2003(fileName)) {
+					wookbook = new HSSFWorkbook(file.getInputStream());
+				} else if (isExcel2007(fileName)) {
+					wookbook = new XSSFWorkbook(file.getInputStream());
+				}
+			} catch (IOException e) {
+			}
+
+			Sheet sheet = wookbook.getSheetAt(0);
+			Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();
-			if(!check(sheet.getRow(0))) {
+			if (!check(sheet.getRow(0))) {
 				resultData.setMessage("数据错误！");
 				return resultData;
 			}
-			for(int i = 1 ; i <= totalRowNum ; i++)
-	        {
+			for (int i = 1; i <= totalRowNum; i++) {
 				Row row = sheet.getRow(i);
-				EventRule eventRule= new EventRule();
+				EventRule eventRule = new EventRule();
 				String nodeName = getCellValue(row.getCell(0)).toString();
 				String nodeTypeName = getCellValue(row.getCell(1)).toString();
-				if(StringUtils.hasText(nodeName)) {
+				if (StringUtils.hasText(nodeName)) {
 					Node node = this.nodeService.findByName(nodeName);
-					if(node!=null) {
+					if (node != null) {
 						eventRule.setNodeId(node.getId());
 					}
-				}else {
+				} else {
 					NodeType nodeType = this.nodeTypeService.findByName(nodeTypeName);
-					if(nodeType!=null) {
+					if (nodeType != null) {
 						eventRule.setNodeTypeId(nodeType.getId());
 					}
 				}
-				eventRule.setWarningLevel(Integer.valueOf(getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", "")));
-				eventRule.setTimeOut(Integer.valueOf(getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", "")));
+				eventRule.setWarningLevel(
+						Integer.valueOf(getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", "")));
+				eventRule.setTimeOut(
+						Integer.valueOf(getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", "")));
 				eventRule.setFromDateTime(getCellValue(row.getCell(4)).toString());
 				eventRule.setToDateTime(getCellValue(row.getCell(5)).toString());
-				String  departmentName  = getCellValue(row.getCell(6)).toString();
-				List<Department> listDepartment =this.departmentService.findByName(departmentName);
-				Department department = listDepartment.size()>0?listDepartment.get(0):null;
-				if(department!=null) {
+				String departmentName = getCellValue(row.getCell(6)).toString();
+				List<Department> listDepartment = this.departmentService.findByName(departmentName);
+				Department department = listDepartment.size() > 0 ? listDepartment.get(0) : null;
+				if (department != null) {
 					eventRule.setDepartmentId(department.getId());
 				}
-				eventRule.setSpecialWarningLevel(Integer.valueOf(getCellValue(row.getCell(7)).toString().replaceAll("(\\.(\\d*))", "")));
-				String specialDepartmentName  = getCellValue(row.getCell(8)).toString();
-				List<Department> listSpecialDepartment =this.departmentService.findByName(specialDepartmentName);
-				Department specialDepartment = listSpecialDepartment.size()>0?listSpecialDepartment.get(0):null;
-				if(specialDepartment!=null) {
+				eventRule.setSpecialWarningLevel(
+						Integer.valueOf(getCellValue(row.getCell(7)).toString().replaceAll("(\\.(\\d*))", "")));
+				String specialDepartmentName = getCellValue(row.getCell(8)).toString();
+				List<Department> listSpecialDepartment = this.departmentService.findByName(specialDepartmentName);
+				Department specialDepartment = listSpecialDepartment.size() > 0 ? listSpecialDepartment.get(0) : null;
+				if (specialDepartment != null) {
 					eventRule.setSpecialDepartmentId(specialDepartment.getId());
 				}
 				eventRule.setsMSReceiver(getCellValue(row.getCell(9)).toString());
 				eventRule.setEmailAccount(getCellValue(row.getCell(10)).toString());
+				eventRule.setsMSContent(getCellValue(row.getCell(11)).toString());
+				eventRule.setEmailTitle(getCellValue(row.getCell(12)).toString());
+				eventRule.setEmailContent(getCellValue(row.getCell(13)).toString());
 				list.add(eventRule);
-	        }
+			}
 			this.eventRuleService.saveAll(list);
 		}
 		systemLogService.log("import help", this.request.getRequestURL().toString());
 		return resultData;
 	}
-	
-	private  boolean isExcel2003(String filePath){
-        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
-    }
-	private  boolean isExcel2007(String filePath){
-        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
-    }
-	
+
+	private boolean isExcel2003(String filePath) {
+		return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+	}
+
+	private boolean isExcel2007(String filePath) {
+		return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+	}
+
 	private Boolean check(Row row) {
-		if(!getCellValue(row.getCell(0)).toString().equals("node")) {
+		if (!getCellValue(row.getCell(0)).toString().equals("node")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(1)).toString().equals("nodeType")) {
+		if (!getCellValue(row.getCell(1)).toString().equals("nodeType")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("warningLevel")) {
+		if (!getCellValue(row.getCell(2)).toString().equals("warningLevel")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(3)).toString().equals("timeOut")) {
+		if (!getCellValue(row.getCell(3)).toString().equals("timeOut")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(4)).toString().equals("fromDateTime")) {
+		if (!getCellValue(row.getCell(4)).toString().equals("fromDateTime")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(5)).toString().equals("toDateTime")) {
+		if (!getCellValue(row.getCell(5)).toString().equals("toDateTime")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(6)).toString().equals("department")) {
+		if (!getCellValue(row.getCell(6)).toString().equals("department")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(7)).toString().equals("specialWarningLevel")) {
+		if (!getCellValue(row.getCell(7)).toString().equals("specialWarningLevel")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(8)).toString().equals("specialDepartment")) {
+		if (!getCellValue(row.getCell(8)).toString().equals("specialDepartment")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(9)).toString().equals("sMSReceiver")) {
+		if (!getCellValue(row.getCell(9)).toString().equals("sMSReceiver")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(10)).toString().equals("emailAccount")) {
+		if (!getCellValue(row.getCell(10)).toString().equals("emailAccount")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(11)).toString().equals("sMSContent")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(12)).toString().equals("emailTitle")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(13)).toString().equals("emailContent")) {
 			return false;
 		}
 		return true;
 	}
-	
+
 	private Object getCellValue(Cell cell) {
-		if(cell == null) {
+		if (cell == null) {
 			return "";
 		}
 		Object object = "";
 		switch (cell.getCellType()) {
-		case STRING :
+		case STRING:
 			object = cell.getStringCellValue();
 			break;
-		case NUMERIC :
+		case NUMERIC:
 			object = cell.getNumericCellValue();
 			break;
-		case BOOLEAN :
+		case BOOLEAN:
 			object = cell.getBooleanCellValue();
 			break;
 		default:

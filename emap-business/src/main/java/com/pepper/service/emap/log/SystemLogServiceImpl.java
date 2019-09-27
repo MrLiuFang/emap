@@ -2,10 +2,14 @@ package com.pepper.service.emap.log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -45,25 +49,11 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 			} catch (JsonProcessingException e) {
 			}
 	    }
-	    BufferedReader br = null;
-		try {
-			br = request.getReader();
-			String str, wholeStr = "";
-		    while((str = br.readLine()) != null){
-		    	wholeStr += str;
-		    }
-		    if(StringUtils.hasText(systemLog.getData())) {
-		    	systemLog.setData(systemLog.getData() + " "+ wholeStr);
-		    }
-		} catch (IOException e) {
-		}finally {
-			try {
-				if(br!=null) {
-					br.close();
-				}
-			} catch (IOException e) {
-			}
-		}
+	    if(StringUtils.hasText(systemLog.getData())) {
+	    	systemLog.setData(systemLog.getData() + " "+ binaryReader(request));
+	    }else {
+	    	systemLog.setData( binaryReader(request));
+	    }
 	    
 		this.save(systemLog);
 	}
@@ -76,7 +66,18 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 		systemLog.setUserId(user==null?"":user.getId());
 		systemLog.setUserName(user==null?"":user.getName());
 		systemLog.setLogContent(actionName);
-		systemLog.setData(data);
+		if(request.getParameterMap().size()>0) {
+	    	ObjectMapper objectMapper = new ObjectMapper();
+	    	try {
+				systemLog.setData(objectMapper.writeValueAsString(request.getParameterMap()));
+			} catch (JsonProcessingException e) {
+			}
+	    }
+		if(StringUtils.hasText(systemLog.getData())) {
+	    	systemLog.setData(systemLog.getData() + " "+ binaryReader(request));
+	    }else {
+	    	systemLog.setData( binaryReader(request));
+	    }
 		systemLog.setUrl(request.getRequestURL().toString());
 		this.save(systemLog);
 	}
@@ -89,8 +90,35 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 		systemLog.setUserName(adminUser==null?"":adminUser.getName());
 		systemLog.setLogContent(actionName);
 		systemLog.setUrl(request.getRequestURL().toString());
+		if(request.getParameterMap().size()>0) {
+	    	ObjectMapper objectMapper = new ObjectMapper();
+	    	try {
+				systemLog.setData(objectMapper.writeValueAsString(request.getParameterMap()));
+			} catch (JsonProcessingException e) {
+			}
+	    }
+		if(StringUtils.hasText(systemLog.getData())) {
+	    	systemLog.setData(systemLog.getData() + " "+ binaryReader(request));
+	    }else {
+	    	systemLog.setData( binaryReader(request));
+	    }
 		this.save(systemLog);
 	}
 	
+	
+
+	private String binaryReader(HttpServletRequest request) {
+		
+		try {
+			StringWriter writer = new StringWriter();
+			IOUtils.copy(request.getInputStream(), writer, StandardCharsets.UTF_8.name());
+			String str = writer.toString();
+			return str;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
+		
+	}
 	
 }

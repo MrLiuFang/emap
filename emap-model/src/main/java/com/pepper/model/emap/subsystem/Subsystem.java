@@ -29,6 +29,9 @@ public class Subsystem extends BaseModel{
 	
 	@Column(name = "is_online")
 	private Boolean isOnLine;
+	
+	@Column(name = "is_relation")
+	private Boolean isRelation;
 
 	public String getName() {
 		return name;
@@ -62,5 +65,14 @@ public class Subsystem extends BaseModel{
 		this.isOnLine = isOnLine;
 	}
 
+	public Boolean getIsRelation() {
+		return isRelation;
+	}
+
+	public void setIsRelation(Boolean isRelation) {
+		this.isRelation = isRelation;
+	}
+	
+	
 	
 }

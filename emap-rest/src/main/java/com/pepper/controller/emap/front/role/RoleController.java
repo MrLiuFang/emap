@@ -114,6 +114,12 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 		Role role = new Role();
 		MapToBeanUtil.convert(role, map);
 		role.setIsIsms(true);
+//		Role role1 = this.roleService.findById(role.getId());
+//		if(Objects.equals(role1.getCode(), "SUPER_ROLE")) {
+//			resultData.setCode(1500003);
+//			resultData.setMessage(Internationalization.getMessageInternationalization(1500003));
+//			return resultData;
+//		}
 		Role oldRole = roleService.findByCode(role.getCode());
 		if(oldRole!=null && !oldRole.getId().equals(oldRole.getId())) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1400001));
@@ -138,8 +144,17 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Role role = this.roleService.findById(id);
 		resultData.setData("role", role);
-		resultData.setData("menu", this.menuService.queryMenu("0", true));
+//		resultData.setData("menu", this.menuService.queryMenu("0", true));
 		resultData.setData("roleMenuId", roleMenuService.findMenuIdsByRoleId(id));
+		Map<String,Object> searchParameter = new HashMap<String, Object>();
+		searchParameter.put(SearchConstant.IS_TRUE+"_mustExist", true);
+		searchParameter.put(SearchConstant.EQUAL+"_roleId", id);
+		List<RoleMenu> list =  roleMenuService.findAll(searchParameter);
+		List<String> returnList = new ArrayList<String>();
+		for(RoleMenu roleMenu : list) {
+			returnList.add(roleMenu.getMenuId());
+		}
+		resultData.setData("mustExistMenuId", returnList);
 		return resultData;
 	}
 	
@@ -244,18 +259,24 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object roleMenu(@RequestBody Map<String,Object> map) {
 		ResultData resultData = new ResultData();
-		Role role = this.roleService.findById(map.get("roleId").toString());
-		if(Objects.equals(role.getCode(), "SUPER_ROLE")) {
-			resultData.setCode(1500003);
-			resultData.setMessage(Internationalization.getMessageInternationalization(1500003));
-			return resultData;
-		}
+//		Role role = this.roleService.findById(map.get("roleId").toString());
+//		if(Objects.equals(role.getCode(), "SUPER_ROLE")) {
+//			resultData.setCode(1500003);
+//			resultData.setMessage(Internationalization.getMessageInternationalization(1500003));
+//			return resultData;
+//		}
+		
+		List<RoleMenu> list = roleMenuService.findByRoleIdAndMustExistIsTrue(map.get("roleId").toString());
 		this.roleMenuService.deleteByRoleId(map.get("roleId").toString());
+		roleMenuService.saveAll(list);
 		for(String menuId : (List<String>)map.get("menuIds")) {
 			RoleMenu roleMenu = new RoleMenu();
 			roleMenu.setRoleId(map.get("roleId").toString());
 			roleMenu.setMenuId(menuId);
-			roleMenuService.save(roleMenu);
+			RoleMenu temp = roleMenuService.findByRoleAndMenu(map.get("roleId").toString(),menuId);
+			if(Objects.isNull(temp)) {
+				roleMenuService.save(roleMenu);
+			}
 		}
 		return resultData;
 	}

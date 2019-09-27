@@ -80,9 +80,10 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Staff> pager = getPager(name, email, siteId, idCard, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "name"));
-		excelColumn.add(ExcelColumn.build("ID卡", "idCard"));
+		excelColumn.add(ExcelColumn.build("姓名", "name"));
 		excelColumn.add(ExcelColumn.build("邮箱", "email"));
+		excelColumn.add(ExcelColumn.build("密码", "password"));
+		excelColumn.add(ExcelColumn.build("ID卡", "idCard"));
 		excelColumn.add(ExcelColumn.build("城区", "site.name"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("staff"), outputStream, excelColumn);
 	}

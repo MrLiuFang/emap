@@ -799,7 +799,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		for (EventList obj : list) {
 			EventListVo eventListVo = new EventListVo();
 			BeanUtils.copyProperties(obj, eventListVo);
-			eventListVo.setIsUrgent(obj.getWarningLevel()>=getUrgentWarningLevel(obj));
+//			eventListVo.setIsUrgent(obj.getWarningLevel()>=getUrgentWarningLevel(obj));
 			setNode(obj, eventListVo);
 			if (StringUtils.hasText(obj.getOperator())) {
 				AdminUser operatorUser = this.adminUserService.findById(obj.getOperator());

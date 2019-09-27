@@ -32,7 +32,7 @@ public class EventListVo extends EventList implements Comparable<EventListVo> {
 	
 	private AdminUserVo currentHandleUserVo;
 	
-	private Boolean isUrgent;
+//	private Boolean isUrgent;
 	
 	private String assignHeadPortrait;
 	
@@ -84,13 +84,13 @@ public class EventListVo extends EventList implements Comparable<EventListVo> {
 		this.currentHandleUserVo = currentHandleUserVo;
 	}
 
-	public Boolean getIsUrgent() {
-		return isUrgent;
-	}
-
-	public void setIsUrgent(Boolean isUrgent) {
-		this.isUrgent = isUrgent;
-	}
+//	public Boolean getIsUrgent() {
+//		return isUrgent;
+//	}
+//
+//	public void setIsUrgent(Boolean isUrgent) {
+//		this.isUrgent = isUrgent;
+//	}
 
 	public String getAssignHeadPortrait() {
 		return assignHeadPortrait;
