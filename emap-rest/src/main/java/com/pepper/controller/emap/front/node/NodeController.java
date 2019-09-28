@@ -128,6 +128,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = nodeService.findNavigator(pager,code,name,source,sourceCode,mapId,nodeTypeId,siteId,buildId,floor,hasXY,keyWord);
+		
 		List<Node> list = pager.getResults();
 		List<NodeVo> returnList = new ArrayList<NodeVo>();
 		for(Node node : list) {
@@ -296,6 +297,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 		return resultData;
 	}
 	
+	@SuppressWarnings("unlikely-arg-type")
 	private ResultData importNode(InputStream inputStream,String fileName) throws IOException {
 		ResultData resultData = new ResultData();
 		if (inputStream == null) {
@@ -329,17 +331,20 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 			node.setSource(getCellValue(row.getCell(2)).toString());
 			node.setSourceCode(getCellValue(row.getCell(3)).toString());
 			
-			List<com.pepper.model.emap.map.Map> listMap = this.mapService.findByName(getCellValue(row.getCell(4)).toString());
+			com.pepper.model.emap.map.Map map = this.mapService.findByCode(getCellValue(row.getCell(4)).toString());
 			
-			if(listMap.size()!=1) {
+			if(Objects.isNull(map)) {
 				resultData.setCode(1100002);
 				resultData.setMessage(Internationalization.getMessageInternationalization(1100002).replace("{1}", String.valueOf(i)));
 				return resultData;
 			}else {
-				node.setMapId(listMap.get(0).getId());
+				node.setMapId(map.getId());
 			}
-			
-			node.setNodeTypeId(getCellValue(row.getCell(5)).toString());
+			String nodeTypeCode = getCellValue(row.getCell(5)).toString();
+			NodeType nodeType = this.nodeTypeService.findByCode(nodeTypeCode);
+			if(Objects.nonNull(nodeType)) {
+				node.setNodeTypeId(nodeType.getId());
+			}
 			node.setX(getCellValue(row.getCell(6)).toString());
 			node.setY(getCellValue(row.getCell(7)).toString());
 			if(StringUtils.hasText(getCellValue(row.getCell(10)).toString())) {
@@ -375,7 +380,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				return resultData;
 			}
 			
-			if(node.getNodeTypeId().equals("camera")) {
+			if(nodeTypeCode.equals("camera")) {
 				node.setIp(getCellValue(row.getCell(8)).toString());
 				node.setExternalLink(getCellValue(row.getCell(9)).toString());
 				String hasPtz = getCellValue(row.getCell(11)).toString().toLowerCase();
@@ -438,7 +443,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 //					resultData.setMessage("数据错误！第"+i+"行domainName数据错误");
 //					return resultData;
 //				}
-			}else if(node.getNodeTypeId().equals("door")) {
+			}else if(nodeTypeCode.equals("door")) {
 				
 				node.setPaneId(getCellValue(row.getCell(18)).toString());
 				node.setPaneIp(getCellValue(row.getCell(19)).toString());
@@ -466,7 +471,7 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 //					return resultData;
 //				}
 			}else {
-				NodeType nodeType = this.nodeTypeService.findByName(node.getNodeTypeId());
+				
 				if(nodeType == null) {
 					resultData.setCode(1100008);
 					resultData.setMessage(Internationalization.getMessageInternationalization(1100008).replace("{1}", String.valueOf(i)));
@@ -482,10 +487,15 @@ public class NodeController extends BaseControllerImpl  implements BaseControlle
 				}
 			}
 			
-			if(nodeService.findByCode(node.getCode())!=null) {
-				resultData.setCode(1100010);
-				resultData.setMessage(Internationalization.getMessageInternationalization(1100010).replace("{1}", String.valueOf(i)).replace("{2}", node.getCode()));
-				return resultData;
+			Node oldNode = nodeService.findByCode(node.getCode());
+			if(Objects.nonNull(oldNode)) {
+				node.setId(oldNode.getId());
+				nodeService.update(node);
+				continue;
+//				resultData.setCode(1100010);
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1100010).replace("{1}", String.valueOf(i)).replace("{2}", node.getCode()));
+//				return resultData;
+				
 			}
 			
 			if(nodeService.findBySourceCode(node.getSourceCode())!=null) {

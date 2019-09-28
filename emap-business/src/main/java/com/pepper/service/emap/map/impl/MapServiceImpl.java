@@ -20,7 +20,7 @@ public class MapServiceImpl extends BaseServiceImpl<Map> implements MapService {
 
 	@Override
 	public Map findByCode(String code) {
-		return mapDao.findByCode(code);
+		return mapDao.findOneByCode(code);
 	}
 
 	@Override

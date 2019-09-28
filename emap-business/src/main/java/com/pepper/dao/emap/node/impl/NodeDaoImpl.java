@@ -82,7 +82,7 @@ public class NodeDaoImpl implements NodeDaoEx<Node> {
 			jpql.append(" and n.name like :keyWord ");
 			searchParameter.put("keyWord", "%"+keyWord+"%");
 		}
-		
+		jpql.append(" order by n.code ");
 //		jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
 		
 		return baseDao.findNavigator(pager, jpql.toString(),searchParameter );

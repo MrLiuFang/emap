@@ -68,7 +68,6 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@Reference
 	private MenuService menuService;
 	
-	@Reference
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
@@ -88,7 +87,6 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	}
 	
 	private Pager<Role> getPager(Boolean isDefault,Boolean isExport) {
-		ResultData resultData = new ResultData();
 		Pager<Role> pager = new Pager<>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
@@ -101,7 +99,8 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_FALSE+"_isDefault",false);
 		}
 		pager =  roleService.findNavigator(pager);
-		resultData.setData("role", pager.getResults());
+		pager.setData("role", pager.getResults());
+		pager.setResults(null);
 		return pager;
 	}
 	
