@@ -19,88 +19,91 @@ public class Node extends BaseModel {
 	 * 
 	 */
 	private static final long serialVersionUID = -2480337669147928582L;
-	
-	@Column(name = "code",unique = true,nullable=false)
+
+	@Column(name = "code", unique = true, nullable = false)
 	private String code;
-	
+
 	@Column(name = "name")
 	private String name;
-	
+
 	@Column(name = "source_type")
 	private String sourceType;
-	
+
 	@Column(name = "source")
 	private String source;
-	
-	@Column(name = "source_code",unique = true,nullable=false)
+
+	@Column(name = "source_code", unique = true, nullable = false)
 	private String sourceCode;
-	
+
 	@Column(name = "map_id")
 	private String mapId;
-	
-	@Column(name = "node_type_id",nullable=false)
+
+	@Column(name = "node_type_id", nullable = false)
 	private String nodeTypeId;
-	
+
 	@Column(name = "parent_node")
 	private String parentNode;
-	
+
 	@Column(name = "external_link")
 	private String externalLink;
-	
+
 	@Column(name = "warning_level")
 	private Integer warningLevel;
-	
+
 	@Column(name = "x")
 	private String x;
-	
+
 	@Column(name = "y")
 	private String y;
-	
+
 	@Column(name = "longitude")
 	private String longitude;
-	
+
 	@Column(name = "latitude")
 	private String latitude;
-	
+
 	@Column(name = "ip")
 	private String ip;
-		
+
 	@Column(name = "has_ptz")
 	private Boolean hasPtz;
-	
+
 	@Column(name = "user_name")
 	private String userName;
-	
+
 	@Column(name = "password")
 	private String password;
-	
+
 	@Column(name = "system_id")
 	private String systemID;
-	
+
 	@Column(name = "windows_user")
 	private String windowsUser;
-	
+
 	@Column(name = "windows_pass")
 	private String windowsPass;
-	
+
 	@Column(name = "domain_name")
 	private String domainName;
-	
+
 	@Column(name = "pane_id")
 	private String paneId;
-	
+
 	@Column(name = "pane_ip")
 	private String paneIp;
-	
+
 	@Column(name = "reader_id")
 	private String readerId;
-	
+
 	@Column(name = "reader_io")
 	private String readerIo;
-	
+
 	@Column(name = "status")
 	private Status status;
-	
+
+	@Column(name = "remark")
+	private String remark;
+
 	public String getCode() {
 		return code;
 	}
@@ -317,5 +320,12 @@ public class Node extends BaseModel {
 		this.latitude = latitude;
 	}
 
-	
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
 }
