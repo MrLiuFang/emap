@@ -20,6 +20,8 @@ public class ActionListVo extends ActionList {
 	
 	private String voiceUrl1;
 	
+	private String videoUrl;
+	
 	private List<HelpListVo> helpList;
 	
 	private AdminUserVo employee;
@@ -105,6 +107,16 @@ public class ActionListVo extends ActionList {
 
 	public void setAssist(List<Map<String, Object>> assist) {
 		this.assist = assist;
+	}
+
+
+	public String getVideoUrl() {
+		return videoUrl;
+	}
+
+
+	public void setVideoUrl(String videoUrl) {
+		this.videoUrl = videoUrl;
 	}
 
 	

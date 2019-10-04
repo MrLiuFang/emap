@@ -18,6 +18,9 @@ public class Subsystem extends BaseModel{
 	 */
 	private static final long serialVersionUID = -1624190962577307936L;
 	
+	@Column(name = "code")
+	private String code;
+	
 	@Column(name = "name")
 	private String name;
 	
@@ -71,6 +74,14 @@ public class Subsystem extends BaseModel{
 
 	public void setIsRelation(Boolean isRelation) {
 		this.isRelation = isRelation;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 	
 	

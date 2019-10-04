@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
@@ -125,7 +126,22 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 				SiteInfo siteInfo= new SiteInfo();
 				siteInfo.setCode(getCellValue(row.getCell(0)).toString());
 				siteInfo.setName(getCellValue(row.getCell(1)).toString());
-				list.add(siteInfo);
+				
+				if (StringUtils.hasText(siteInfo.getCode())) {
+					SiteInfo oldSiteInfo = siteInfoService.findByCode(siteInfo.getCode());
+					if(Objects.nonNull(oldSiteInfo)) {
+						String isDelete = getCellValue(row.getCell(2)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							siteInfoService.deleteById(oldSiteInfo.getId());
+							continue;
+						}else {
+							siteInfo.setId(oldSiteInfo.getId());
+							siteInfoService.update(siteInfo);
+							continue;
+						}
+					}
+					list.add(siteInfo);
+				}
 	        }
 			this.siteInfoService.saveAll(list);
 		}
@@ -145,6 +161,9 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 			return false;
 		}
 		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

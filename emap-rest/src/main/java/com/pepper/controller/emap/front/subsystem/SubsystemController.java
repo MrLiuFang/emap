@@ -104,11 +104,28 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	        {
 				Row row = sheet.getRow(i);
 				Subsystem subsystem= new Subsystem();
-				subsystem.setName(getCellValue(row.getCell(0)).toString());
-				subsystem.setAddress(getCellValue(row.getCell(1)).toString());
-				subsystem.setProt(Integer.valueOf( getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", "")));
-				subsystem.setIsRelation(Objects.equals(getCellValue(row.getCell(3)).toString(), "是"));
-				list.add(subsystem);
+				subsystem.setCode(getCellValue(row.getCell(0)).toString());
+				subsystem.setName(getCellValue(row.getCell(1)).toString());
+				subsystem.setAddress(getCellValue(row.getCell(2)).toString());
+				subsystem.setProt(Integer.valueOf( getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", "")));
+				subsystem.setIsRelation(Objects.equals(getCellValue(row.getCell(4)).toString(), "是"));
+				
+				if (StringUtils.hasText(subsystem.getCode())) {
+					Subsystem oldSubsystem = subsystemService.findByCode(subsystem.getCode());
+					if(Objects.nonNull(oldSubsystem)) {
+						String isDelete = getCellValue(row.getCell(5)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							subsystemService.deleteById(oldSubsystem.getId());
+							continue;
+						}else {
+							subsystem.setId(oldSubsystem.getId());
+							subsystemService.update(subsystem);
+							continue;
+						}
+					}
+					list.add(subsystem);
+				}
+				
 	        }
 			this.subsystemService.saveAll(list);
 		}
@@ -124,16 +141,22 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
     }
 	
 	private Boolean check(Row row) {
-		if(!getCellValue(row.getCell(0)).toString().equals("name")) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(1)).toString().equals("address")) {
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("prot")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("address")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(3)).toString().equals("isRelation")) {
+		if(!getCellValue(row.getCell(3)).toString().equals("prot")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(4)).toString().equals("isRelation")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("isDelete")) {
 			return false;
 		}
 		
@@ -193,6 +216,11 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		Subsystem subsystem = new Subsystem();
 		MapToBeanUtil.convert(subsystem, map);
+		if(subsystemService.findByCode(subsystem.getCode())!=null) {
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			return resultData;
+		}
 		subsystemService.save(subsystem);
 		systemLogService.log("site subsystem", this.request.getRequestURL().toString());
 		return resultData;
@@ -205,7 +233,14 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		Subsystem subsystem = new Subsystem();
 		MapToBeanUtil.convert(subsystem, map);
-		
+		Subsystem oldSubsystem = subsystemService.findByCode(subsystem.getCode());
+		if(oldSubsystem!=null && oldSubsystem.getCode()!=null&&subsystem.getCode()!=null) {
+			if(!subsystem.getId().equals(oldSubsystem.getId())){
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
 		subsystemService.update(subsystem);
 		systemLogService.log("site subsystem", this.request.getRequestURL().toString());
 		return resultData;

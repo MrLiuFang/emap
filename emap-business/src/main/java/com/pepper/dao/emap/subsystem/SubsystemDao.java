@@ -5,4 +5,5 @@ import com.pepper.model.emap.subsystem.Subsystem;
 
 public interface SubsystemDao  extends BaseDao<Subsystem> {
 
+	public Subsystem findOneByCode(String code);
 }

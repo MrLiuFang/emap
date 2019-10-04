@@ -332,6 +332,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionListVo.setImageUrl2(this.fileService.getUrl(actionListVo.getImage2()));
 		actionListVo.setImageUrl3(this.fileService.getUrl(actionListVo.getImage3()));
 		actionListVo.setVoiceUrl1(this.fileService.getUrl(actionListVo.getVoice1()));
+		actionListVo.setVideoUrl(this.fileService.getUrl(actionListVo.getVideo()));
 		if(node!=null&&StringUtils.hasText(node.getNodeTypeId())) {
 			actionListVo.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),actionList.getHelpId(),actionList.getOperatorHelpId()));
 			
@@ -403,6 +404,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		String image2 = jsonNode.get("image2").asText("");
 		String image3 = jsonNode.get("image3").asText("");
 		String voice1 = jsonNode.get("voice1").asText("");
+		String video = jsonNode.get("video").asText("");
 		Boolean isUnableFinish = jsonNode.get("isUnableFinish").asBoolean(true);
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);
@@ -429,6 +431,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setAssignDate(eventList.getAssignDate());
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
+		actionList.setVideo(video);
 		actionList.setContent(jsonNode.get("content").asText(""));
 //		actionList.setIsAssist(false);
 		actionList.setIsUnableFinish(isUnableFinish);
@@ -636,6 +639,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		String image2 = jsonNode.get("image2").asText("");
 		String image3 = jsonNode.get("image3").asText("");
 		String voice1 = jsonNode.get("voice1").asText("");
+		String video = jsonNode.get("video").asText("");
 		EventList eventList = this.eventListService.findById(id);
 		
 		AdminUser user  = (AdminUser) this.getCurrentUser();
@@ -652,6 +656,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		actionList.setAssignDate(eventList.getAssignDate());
 		actionList.setImage3(image3);
 		actionList.setVoice1(voice1);
+		actionList.setVideo(video);
 		actionList.setContent(jsonNode.get("content").asText(""));
 //		actionList.setIsAssist(true);
 		EventListAssist eventListAssist = this.eventListAssistService.findEventListAssist(id, user.getId(), false);

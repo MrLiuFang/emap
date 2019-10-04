@@ -74,7 +74,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("城區", "site.name"));
+		excelColumn.add(ExcelColumn.build("城區", "site.code"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("build"), outputStream, excelColumn);
 	}
 	
@@ -111,12 +111,26 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 				BuildingInfo buildingInfo = new BuildingInfo();
 				buildingInfo.setCode(getCellValue(row.getCell(0)).toString());
 				buildingInfo.setName(getCellValue(row.getCell(1)).toString());
+				
 				String site = getCellValue(row.getCell(2)).toString();
 				SiteInfo siteInfo = this.siteInfoService.findSiteInfo(site);
 				if(siteInfo!=null) {
 					buildingInfo.setSiteInfoId(siteInfo.getId());
 				}
-				if (StringUtils.hasText(buildingInfo.getCode())&&buildingInfoService.findByCode(buildingInfo.getCode()) == null) {
+				
+				if (StringUtils.hasText(buildingInfo.getCode())) {
+					BuildingInfo oldBuildingInfo = buildingInfoService.findByCode(buildingInfo.getCode());
+					if(Objects.nonNull(oldBuildingInfo)) {
+						String isDelete = getCellValue(row.getCell(3)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							buildingInfoService.deleteById(oldBuildingInfo.getId());
+							continue;
+						}else {
+							buildingInfo.setId(oldBuildingInfo.getId());
+							buildingInfoService.update(buildingInfo);
+							continue;
+						}
+					}
 					list.add(buildingInfo);
 				}
 	        }
@@ -142,6 +156,9 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 			return false;
 		}
 		if(!getCellValue(row.getCell(2)).toString().equals("site")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("isDelete")) {
 			return false;
 		}
 //		if(!getCellValue(row.getCell(3)).toString().equals("longitude")) {

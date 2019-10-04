@@ -137,9 +137,23 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 				NodeType nodeType= new NodeType();
 				nodeType.setCode(getCellValue(row.getCell(0)).toString());
 				nodeType.setName(getCellValue(row.getCell(1)).toString());
-				if (StringUtils.hasText(nodeType.getCode())&&nodeTypeService.findByCode(nodeType.getCode()) == null) {
+				
+				if (StringUtils.hasText(nodeType.getCode())) {
+					NodeType oldNodeType = nodeTypeService.findByCode(nodeType.getCode());
+					if(Objects.nonNull(oldNodeType)) {
+						String isDelete = getCellValue(row.getCell(2)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							nodeTypeService.deleteById(oldNodeType.getId());
+							continue;
+						}else {
+							nodeType.setId(oldNodeType.getId());
+							nodeTypeService.update(nodeType);
+							continue;
+						}
+					}
 					list.add(nodeType);
 				}
+				
 	        }
 			this.nodeTypeService.saveAll(list);
 		}
@@ -159,6 +173,9 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 			return false;
 		}
 		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

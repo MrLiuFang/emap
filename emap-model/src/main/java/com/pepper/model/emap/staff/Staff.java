@@ -59,6 +59,14 @@ public class Staff extends BaseModel {
 	
 	@Column(name = "id_card" ,unique= true)
 	private String idCard;
+	
+	private String status;
+	
+	private String staffType;
+	
+	private String userNo;
+	
+	private Gender sex;
 
 	public String getName() {
 		return name;
@@ -139,6 +147,39 @@ public class Staff extends BaseModel {
 	public void setIdCard(String idCard) {
 		this.idCard = idCard;
 	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getStaffType() {
+		return staffType;
+	}
+
+	public void setStaffType(String staffType) {
+		this.staffType = staffType;
+	}
+	
+	public Gender getSex() {
+		return sex;
+	}
+
+	public void setSex(Gender sex) {
+		this.sex = sex;
+	}
+
+	public String getUserNo() {
+		return userNo;
+	}
+
+	public void setUserNo(String userNo) {
+		this.userNo = userNo;
+	}
+
 	
 	
 }

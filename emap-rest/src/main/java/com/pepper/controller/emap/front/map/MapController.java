@@ -84,11 +84,11 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<com.pepper.model.emap.map.Map> pager = getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
 		excelColumn.add(ExcelColumn.build("編碼", "code"));
+		excelColumn.add(ExcelColumn.build("名稱", "name"));
 		excelColumn.add(ExcelColumn.build("區域編碼", "areaCode"));
 		excelColumn.add(ExcelColumn.build("區域名稱", "areaName"));
-		excelColumn.add(ExcelColumn.build("建築名稱", "build.name"));
+		excelColumn.add(ExcelColumn.build("建築名稱", "build.code"));
 		excelColumn.add(ExcelColumn.build("樓層", "floor"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("map"), outputStream, excelColumn);
 	}
@@ -130,11 +130,29 @@ public class MapController  extends BaseControllerImpl implements BaseController
 				map.setFloor(getCellValue(row.getCell(5)).toString());
 				String build = getCellValue(row.getCell(4)).toString();
 				if (StringUtils.hasText(map.getCode())&&mapService.findByCode(map.getCode()) == null) {
-					BuildingInfo buildingInfo = this.buildingInfoService.findByName(build);
+					BuildingInfo buildingInfo = this.buildingInfoService.findByCode(build);
 					if(buildingInfo!=null) {
 						map.setBuildId(buildingInfo.getId());
-						list.add(map);
+//						list.add(map);
+					}else {
+						continue;
 					}
+				}
+				
+				if (StringUtils.hasText(map.getCode())) {
+					com.pepper.model.emap.map.Map oldMap = mapService.findByCode(map.getCode());
+					if(Objects.nonNull(oldMap)) {
+						String isDelete = getCellValue(row.getCell(6)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							mapService.deleteById(oldMap.getId());
+							continue;
+						}else {
+							map.setId(oldMap.getId());
+							mapService.update(map);
+							continue;
+						}
+					}
+					list.add(map);
 				}
 	        }
 			this.mapService.saveAll(list);
@@ -167,6 +185,9 @@ public class MapController  extends BaseControllerImpl implements BaseController
 			return false;
 		}
 		if(!getCellValue(row.getCell(5)).toString().equals("floor")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("isDelete")) {
 			return false;
 		}
 		

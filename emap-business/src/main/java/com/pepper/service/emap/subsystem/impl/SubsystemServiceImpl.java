@@ -13,4 +13,9 @@ public class SubsystemServiceImpl  extends BaseServiceImpl<Subsystem> implements
 
 	@Autowired
 	private SubsystemDao subsystemDao;
+
+	@Override
+	public Subsystem findByCode(String code) {
+		return subsystemDao.findOneByCode(code);
+	}
 }

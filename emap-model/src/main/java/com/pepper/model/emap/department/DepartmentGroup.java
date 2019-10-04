@@ -19,6 +19,8 @@ public class DepartmentGroup  extends BaseModel {
 	
 	private String departmentId;
 	
+	private String code;
+	
 	private String name;
 	
 	private String startTime;
@@ -55,6 +57,14 @@ public class DepartmentGroup  extends BaseModel {
 
 	public void setEndTime(String endTime) {
 		this.endTime = endTime;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 	
 	

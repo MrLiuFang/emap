@@ -77,6 +77,9 @@ public class ActionList extends BaseModel {
 	@Column(name ="voice1")
 	private String voice1;
 	
+	@Column(name ="video")
+	private String video;
+	
 	@Column(name ="help_id")
 	private String helpId;
 	
@@ -297,6 +300,14 @@ public class ActionList extends BaseModel {
 
 	public void setIsUnableFinish(Boolean isUnableFinish) {
 		this.isUnableFinish = isUnableFinish;
+	}
+
+	public String getVideo() {
+		return video;
+	}
+
+	public void setVideo(String video) {
+		this.video = video;
 	}
 	
 	

@@ -5,4 +5,5 @@ import com.pepper.model.emap.screen.Screen;
 
 public interface ScreenDao extends BaseDao<Screen> {
 
+	public Screen findOneByCode(String code);
 }

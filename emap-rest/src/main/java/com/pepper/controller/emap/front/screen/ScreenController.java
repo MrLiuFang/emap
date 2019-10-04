@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
+import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
@@ -46,6 +47,7 @@ import com.pepper.model.emap.screen.ScreenMap;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.MapVo;
+import com.pepper.model.emap.vo.ScreenMapVo;
 import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -96,8 +98,9 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Screen> pager = getPager(buildingId, siteId, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("城區", "site.name"));
-		excelColumn.add(ExcelColumn.build("建築", "build.name"));
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
+		excelColumn.add(ExcelColumn.build("城區", "site.code"));
+		excelColumn.add(ExcelColumn.build("建築", "build.code"));
 		excelColumn.add(ExcelColumn.build("刷新頻率", "refreshFrequency"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("screen"), outputStream, excelColumn);
 	}
@@ -156,16 +159,34 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	        {
 				Row row = sheet.getRow(i);
 				Screen screen= new Screen();
-				String building = getCellValue(row.getCell(0)).toString();
-				String site = getCellValue(row.getCell(1)).toString();
-				String refreshFrequency = getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", "");
-				BuildingInfo buildingInfo = this.buildingInfoService.findByName(building);
-				SiteInfo siteInfo = this.siteInfoService.findSiteInfo(site);
+				screen.setCode(getCellValue(row.getCell(0)).toString());
+				String building = getCellValue(row.getCell(1)).toString();
+				String site = getCellValue(row.getCell(2)).toString();
+				String refreshFrequency = getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", "");
+				BuildingInfo buildingInfo = this.buildingInfoService.findByCode(building);
+				SiteInfo siteInfo = this.siteInfoService.findByCode(site);
+				
 				if (buildingInfo!=null && siteInfo!=null) {
 					screen.setBuildingId(buildingInfo.getId());
 					screen.setSiteId(siteInfo.getId());
 					screen.setRefreshFrequency(Integer.valueOf(refreshFrequency));
-					list.add(screen);
+					
+					if (StringUtils.hasText(screen.getCode())) {
+						Screen oldScreen = screenService.findByCode(screen.getCode());
+						if(Objects.nonNull(oldScreen)) {
+							String isDelete = getCellValue(row.getCell(4)).toString();
+							if(Objects.equals(isDelete.trim(), "是")) {
+								screenService.deleteById(oldScreen.getId());
+								continue;
+							}else {
+								screen.setId(oldScreen.getId());
+								
+								screenService.update(screen);
+								continue;
+							}
+						}
+						list.add(screen);
+					}
 				}
 	        }
 			this.screenService.saveAll(list);
@@ -182,13 +203,19 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
     }
 	
 	private Boolean check(Row row) {
-		if(!getCellValue(row.getCell(0)).toString().equals("build")) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(1)).toString().equals("site")) {
+		if(!getCellValue(row.getCell(1)).toString().equals("build")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("refreshFrequency")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("site")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("refreshFrequency")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(4)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;
@@ -235,6 +262,13 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		screen.setBuildingId(jsonNode.get("buildingId").asText(""));
 		screen.setSiteId(jsonNode.get("siteId").asText(""));
 		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
+		
+		if(screenService.findByCode(screen.getCode())!=null) {
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			return resultData;
+		}
+		
 		screen = screenService.save(screen);
 
 		Iterator<JsonNode> map = jsonNode.get("map").iterator();
@@ -242,7 +276,8 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 			JsonNode node = map.next();
 			ScreenMap screenMap = new ScreenMap();
 			screenMap.setScreenId(screen.getId());
-			screenMap.setMapId(node.asText());
+			screenMap.setMapId(node.get("mapId").asText(""));
+			screenMap.setRefreshFrequency(Integer.valueOf(node.get("refreshFrequency").asText("10")));
 			screenMapService.save(screenMap);
 		}
 		systemLogService.log("screen add", this.request.getRequestURL().toString());
@@ -260,6 +295,16 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		screen.setBuildingId(jsonNode.get("buildingId").asText(""));
 		screen.setSiteId(jsonNode.get("siteId").asText(""));
 		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
+		
+		Screen oldScreen = screenService.findByCode(screen.getCode());
+		if(oldScreen!=null && oldScreen.getCode()!=null&&screen.getCode()!=null) {
+			if(!oldScreen.getId().equals(oldScreen.getId())){
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
+		
 		screenService.update(screen);
 
 		if (jsonNode.has("map")) {
@@ -269,7 +314,8 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 				JsonNode node = map.next();
 				ScreenMap screenMap = new ScreenMap();
 				screenMap.setScreenId(screen.getId());
-				screenMap.setMapId(node.asText());
+				screenMap.setMapId(node.get("mapId").asText(""));
+				screenMap.setRefreshFrequency(Integer.valueOf(node.get("refreshFrequency").asText("10")));
 				screenMapService.save(screenMap);
 			}
 		}
@@ -324,14 +370,18 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		screenVo.setSite(site);
 
 		List<ScreenMap> listScreenMap = screenMapService.findByScreenId(screen.getId());
-		List<MapVo> listMapVo = new ArrayList<MapVo>();
+		List<ScreenMapVo> listMapVo = new ArrayList<ScreenMapVo>();
 		for (ScreenMap screenMap : listScreenMap) {
+			ScreenMapVo screenMapVo = new ScreenMapVo();
+			BeanUtils.copyProperties(screenMap, screenMapVo);
 			com.pepper.model.emap.map.Map map = mapService.findById(screenMap.getMapId());
-			MapVo mapVo = new MapVo();
+//			MapVo mapVo = new MapVo();
 			if (map != null) {
-				BeanUtils.copyProperties(map, mapVo);
-				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
-				listMapVo.add(mapVo);
+//				BeanUtils.copyProperties(map, mapVo);
+//				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+				screenMapVo.setMapId(map.getId());
+				screenMapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));
+				listMapVo.add(screenMapVo);
 			}
 		}
 		screenVo.setMap(listMapVo);

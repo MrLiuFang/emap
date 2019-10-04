@@ -30,6 +30,7 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.pepper.common.emuns.Gender;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
@@ -72,43 +73,62 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String name,String email,String siteId,String idCard,String keyWord) throws IOException,
+	public void export(String name,String email,String siteId,String idCard,String status,String staffType,String userNo,String sex,String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("staff export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("staff.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<Staff> pager = getPager(name, email, siteId, idCard, keyWord, true);
+		Pager<Staff> pager = getPager(name, email, siteId, idCard,status,staffType,userNo,sex, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("姓名", "name"));
-		excelColumn.add(ExcelColumn.build("邮箱", "email"));
-		excelColumn.add(ExcelColumn.build("密码", "password"));
+		excelColumn.add(ExcelColumn.build("郵箱", "email"));
 		excelColumn.add(ExcelColumn.build("ID卡", "idCard"));
-		excelColumn.add(ExcelColumn.build("城区", "site.name"));
+		excelColumn.add(ExcelColumn.build("城區", "site.code"));
+		excelColumn.add(ExcelColumn.build("狀態", "status"));
+		excelColumn.add(ExcelColumn.build("類型", "staffType"));
+		excelColumn.add(ExcelColumn.build("工號", "userNo"));
+		excelColumn.add(ExcelColumn.build("性別", "sex"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("staff"), outputStream, excelColumn);
 	}
 	
-	private Pager<Staff> getPager(String name,String email,String siteId,String idCard,String keyWord, Boolean isExport) {
+	private Pager<Staff> getPager(String name,String email,String siteId,String idCard,String status,String staffType,String userNo,String sex,String keyWord, Boolean isExport) {
 		Pager<Staff> pager = new Pager<Staff>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(siteId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_siteId",siteId );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_siteId",siteId );
 		}
 		if(StringUtils.hasText(email)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_email",email );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_email",email );
 		}
 		if(StringUtils.hasText(idCard)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_idCard",idCard );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_idCard",idCard );
+		}
+		if(StringUtils.hasText(status)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_status",status );
+		}
+		if(StringUtils.hasText(staffType)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_staffType",staffType );
+		}
+		if(StringUtils.hasText(userNo)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_userNo",userNo );
+		}
+		if(StringUtils.hasText(sex)) {
+			if(Objects.equals(sex, Gender.MALE.getName())) {
+				pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_sex",Gender.MALE.getKey() );
+			}else if(Objects.equals(sex, Gender.FEMALE.getName())) {
+				pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_sex",Gender.FEMALE.getKey() );
+			}
 		}
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&email&idCard",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&email&idCard&status&staffType&userNo",keyWord );
 		}
 		pager = staffService.findNavigator(pager);
 		List<Staff> list = pager.getResults();
@@ -127,10 +147,10 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String name,String email,String siteId,String idCard,String keyWord) {
+	public Object list(String name,String email,String siteId,String idCard,String status,String staffType,String userNo,String sex,String keyWord) {
 		
 		systemLogService.log("get staff list", this.request.getRequestURL().toString());
-		return getPager(name, email, siteId, idCard, keyWord, false);
+		return getPager(name, email, siteId, idCard,status,staffType,userNo,sex, keyWord, false);
 	}
 
 	@RequestMapping(value = "/add")
@@ -140,6 +160,13 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
+		if(map.containsKey("sex")) {
+			if(Objects.equals(map.get("sex").toString(), Gender.MALE.getName())) {
+				staff.setSex(Gender.MALE);
+			}else if(Objects.equals(map.get("sex").toString(), Gender.FEMALE.getName())) {
+				staff.setSex(Gender.FEMALE);
+			}
+		}
 		staff.setAvailableTime(new Date());
 		if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
 			resultData.setCode(1200002);
@@ -158,6 +185,13 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
+		if(map.containsKey("sex")) {
+			if(Objects.equals(map.get("sex").toString(), Gender.MALE.getName())) {
+				staff.setSex(Gender.MALE);
+			}else if(Objects.equals(map.get("sex").toString(), Gender.FEMALE.getName())) {
+				staff.setSex(Gender.FEMALE);
+			}
+		}
 		if(StringUtils.hasText(staff.getIdCard())){
 			List<Staff> list = staffService.findByIdCard(staff.getIdCard());
 			for(Staff obj : list) {
@@ -242,78 +276,57 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				Staff staff = new Staff();
 				staff.setName(getCellValue(row.getCell(0)).toString());
 				staff.setEmail(getCellValue(row.getCell(1)).toString());
-				staff.setPassword(getCellValue(row.getCell(2)).toString());
-				staff.setIdCard(getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", ""));
-				if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
-					resultData.setCode(1200002);
-					resultData.setMessage(Internationalization.getMessageInternationalization(1200002).replace("{1}", String.valueOf(i)).replace("{2}", staff.getIdCard()));
-					return resultData;
-				}
-//				String needChangePassword = getCellValue(row.getCell(4)).toString().toLowerCase();
-//				if(StringUtils.hasText(needChangePassword)&&(needChangePassword.equals("true")||needChangePassword.equals("false"))) {
-//					staff.setNeedChangePassword(Boolean.valueOf(needChangePassword));
-//				}else {
-//					resultData.setCode(4000003);
-//					resultData.setMessage("数据错误！第"+i+"行，needChangePassword数据错误");
-//					return resultData;
-//				}
-//				
-//				String passwordNeverExpire = getCellValue(row.getCell(5)).toString().toLowerCase();
-//				if(StringUtils.hasText(passwordNeverExpire)&&(passwordNeverExpire.equals("true")||needChangePassword.equals("false"))) {
-//					staff.setNeedChangePassword(Boolean.valueOf(passwordNeverExpire));
-//				}else {
-//					resultData.setCode(4000003);
-//					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
-//					return resultData;
-//				}
-//				
-//				String isAvailable = getCellValue(row.getCell(6)).toString().toLowerCase();
-//				if(StringUtils.hasText(isAvailable)&&(isAvailable.equals("true")||isAvailable.equals("false"))) {
-//					staff.setNeedChangePassword(Boolean.valueOf(isAvailable));
-//				}else {
-//					resultData.setCode(4000003);
-//					resultData.setMessage("数据错误！第"+i+"行，passwordNeverExpire数据错误");
+				staff.setIdCard(getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", ""));
+				
+//				if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
+//					resultData.setCode(1200002);
+//					resultData.setMessage(Internationalization.getMessageInternationalization(1200002).replace("{1}", String.valueOf(i)).replace("{2}", staff.getIdCard()));
 //					return resultData;
 //				}
 				
-				String site = getCellValue(row.getCell(4)).toString().toLowerCase();
+				String site = getCellValue(row.getCell(3)).toString().toLowerCase();
 				if(!StringUtils.hasText(site)) {
 					resultData.setCode(1200003);
 					resultData.setMessage(Internationalization.getMessageInternationalization(1200003).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}else {
-					List<SiteInfo> listSiteInfo = this.siteInfoService.findByName(site);
-					if(listSiteInfo.size()<=0) {
+					SiteInfo siteInfo = this.siteInfoService.findByCode(site);
+					if(Objects.isNull(siteInfo)) {
 						resultData.setCode(1200003);
 						resultData.setMessage(Internationalization.getMessageInternationalization(1200003).replace("{1}", String.valueOf(i)));
 						return resultData;
 					}
-					staff.setSiteId(listSiteInfo.get(0).getId());
+					staff.setSiteId(siteInfo.getId());
 				}
-				
 				if(!StringUtils.hasText(staff.getName())) {
 					resultData.setCode(1200004);
 					resultData.setMessage(Internationalization.getMessageInternationalization(1200004).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
-				
-//				if(!StringUtils.hasText(staff.getEmail())) {
-//					resultData.setCode(4000003);
-//					resultData.setMessage("数据错误！第"+i+"行，email不能为空");
-//					return resultData;
-//				}
-				
-				if(!StringUtils.hasText(staff.getPassword())) {
-					resultData.setCode(1200005);
-					resultData.setMessage(Internationalization.getMessageInternationalization(1200005).replace("{1}", String.valueOf(i)));
-					return resultData;
+				staff.setUserNo(getCellValue(row.getCell(4)).toString());
+				staff.setStatus(getCellValue(row.getCell(5)).toString());
+				staff.setStaffType(getCellValue(row.getCell(6)).toString());
+				if(Objects.equals(getCellValue(row.getCell(7)).toString(), Gender.MALE.getDesc())) {
+					staff.setSex(Gender.MALE);
+				}else {
+					staff.setSex(Gender.FEMALE);
 				}
-				
-//				if(!StringUtils.hasText(staff.getIdCard())) {
-//					resultData.setCode(4000003);
-//					resultData.setMessage("数据错误！第"+i+"行，idCard不能为空");
-//					return resultData;
-//				}
+				if (StringUtils.hasText(staff.getIdCard())) {
+					List<Staff> listStaff = staffService.findByIdCard(staff.getIdCard());
+					Staff oldStaff = listStaff.size()>0?listStaff.get(0):null;
+					if(Objects.nonNull(oldStaff)) {
+						String isDelete = getCellValue(row.getCell(8)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							staffService.deleteById(oldStaff.getId());
+							continue;
+						}else {
+							staff.setId(oldStaff.getId());
+							staffService.update(staff);
+							continue;
+						}
+					}
+					list.add(staff);
+				}
 				
 				list.add(staff);
 	        }
@@ -338,22 +351,25 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		if(!getCellValue(row.getCell(1)).toString().equals("email")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("password")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("idCard")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(3)).toString().equals("idCard")) {
+		if(!getCellValue(row.getCell(3)).toString().equals("site")) {
 			return false;
 		}
-//		if(!getCellValue(row.getCell(4)).toString().equals("needChangePassword")) {
-//			return false;
-//		}
-//		if(!getCellValue(row.getCell(5)).toString().equals("passwordNeverExpire")) {
-//			return false;
-//		}
-//		if(!getCellValue(row.getCell(6)).toString().equals("isAvailable")) {
-//			return false;
-//		}
-		if(!getCellValue(row.getCell(4)).toString().equals("site")) {
+		if(!getCellValue(row.getCell(4)).toString().equals("userNo")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("status")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("staffType")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(7)).toString().equals("sex")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(8)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

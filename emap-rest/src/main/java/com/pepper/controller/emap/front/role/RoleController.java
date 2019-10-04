@@ -12,12 +12,20 @@ import java.util.Objects;
 import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +42,9 @@ import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleMenu;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.screen.Screen;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.StaffVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -103,6 +114,106 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 		pager.setResults(null);
 		return pager;
 	}
+	
+	@RequestMapping(value = "/import")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<Role> list = new ArrayList<Role>();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
+	        
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setMessage("数据错误！");
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				Role role= new Role();
+				role.setCode(getCellValue(row.getCell(0)).toString());
+				role.setName(getCellValue(row.getCell(1)).toString());
+				role.setIsDefault(Objects.equals(getCellValue(row.getCell(2)).toString(), "是"));
+				if (StringUtils.hasText(role.getCode())) {
+					Role oldRole = roleService.findByCode(role.getCode());
+					if(Objects.nonNull(oldRole)) {
+						String isDelete = getCellValue(row.getCell(3)).toString();
+						if(Objects.equals(isDelete.trim(), "是") && !oldRole.getIsDefault()) {
+							roleService.deleteById(oldRole.getId());
+							continue;
+						}else {
+							role.setId(oldRole.getId());
+							roleService.update(role);
+							continue;
+						}
+					}
+					list.add(role);
+				}
+	        }
+			this.roleService.saveAll(list);
+		}
+		systemLogService.log("import screen", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("isDefault")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("isDelete")) {
+			return false;
+		}
+		return true;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = "";
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
+
 	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)

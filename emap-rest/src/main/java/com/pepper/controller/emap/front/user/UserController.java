@@ -47,6 +47,7 @@ import com.pepper.model.console.role.RoleVo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.screen.Screen;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -137,27 +138,28 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord) throws IOException, IllegalArgumentException,
+	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord) throws IOException, IllegalArgumentException,
 			IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("user export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("user.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, keyWord, true);
+		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("賬號", "account"));
 		excelColumn.add(ExcelColumn.build("姓名", "name"));
 		excelColumn.add(ExcelColumn.build("昵稱", "nickName"));
-		excelColumn.add(ExcelColumn.build("部門", "department.name"));
-		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.name"));
+		excelColumn.add(ExcelColumn.build("部門", "department.code"));
+		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.code"));
 		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
 		excelColumn.add(ExcelColumn.build("郵箱", "email"));
-		excelColumn.add(ExcelColumn.build("角色", "role.name"));
+		excelColumn.add(ExcelColumn.build("角色", "role.code"));
+		excelColumn.add(ExcelColumn.build("工號", "userNo"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
 	}
 
-	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord, Boolean isExport) {
+	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord, Boolean isExport) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
@@ -192,10 +194,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String keyWord) {
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord) {
 		
 		systemLogService.log("get user list", this.request.getRequestURL().toString());
-		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, keyWord, false);
+		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, false);
 	}
 	
 	@RequestMapping(value = "/add")
@@ -225,7 +227,6 @@ public class UserController extends BaseControllerImpl implements BaseController
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			adminUser.setAutomaticLogOutDate(sdf.parse(map.get("automaticLogOutDate").toString()));
 		}
-		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setCreateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setCreateUser(user.getId());
@@ -233,11 +234,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setIsWork(false);
 		adminUser.setUpdatePasswordDate(new Date());
-		adminUserService.saveUser(adminUser, null);
+		adminUser = adminUserService.saveUser(adminUser, null);
 		if(map.containsKey("roleId")) {
 			saveUserRole((List<String>)map.get("roleId"),adminUser.getId());
 		}
-		systemLogService.log("get user add", this.request.getRequestURL().toString());
+		systemLogService.log("user add", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -440,15 +441,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 					return resultData;
 				}
 				
-				if(this.adminUserService.findByAccount(adminUser.getAccount())!=null) {
-					resultData.setCode(4000007);
-					resultData.setMessage(Internationalization.getMessageInternationalization(4000007).replace("{1}", String.valueOf(i)).replace("{2}",adminUser.getAccount()));
-					return resultData;
-				}
+//				if(this.adminUserService.findByAccount(adminUser.getAccount())!=null) {
+//					resultData.setCode(4000007);
+//					resultData.setMessage(Internationalization.getMessageInternationalization(4000007).replace("{1}", String.valueOf(i)).replace("{2}",adminUser.getAccount()));
+//					return resultData;
+//				}
 				
 				
 				String roleName = getCellValue(row.getCell(5)).toString();
-				Role role = this.roleService.findByName(roleName);
+				Role role = this.roleService.findByCode(roleName);
 				if(role==null) {
 					resultData.setCode(4000008);
 					resultData.setMessage(Internationalization.getMessageInternationalization(4000008).replace("{1}", String.valueOf(i)));
@@ -469,14 +470,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 						resultData.setMessage(Internationalization.getMessageInternationalization(4000010).replace("{1}", String.valueOf(i)));
 						return resultData;
 					}else {
-						List<Department> listDepartment = this.departmentService.findByName(departmentName);
-						if(listDepartment.size()!=1) {
+						Department department = this.departmentService.findByCode(departmentName);
+						if(Objects.isNull(department)) {
 							resultData.setCode(4000011);
 							resultData.setMessage(Internationalization.getMessageInternationalization(4000011).replace("{1}", String.valueOf(i)));
 							return resultData;
 						}else {
-							Department department = listDepartment.get(0);
-							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndName(department.getId(), departmentGroupName);
+							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndCode(department.getId(), departmentGroupName);
 							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
 								resultData.setCode(4000012);
 								resultData.setMessage(Internationalization.getMessageInternationalization(4000012).replace("{1}", String.valueOf(i)));
@@ -489,14 +489,41 @@ public class UserController extends BaseControllerImpl implements BaseController
 						}
 					}
 				}
+				adminUser.setUserNo(getCellValue(row.getCell(9)).toString());
+				if (StringUtils.hasText(adminUser.getAccount())) {
+					AdminUser oldAdminUser = adminUserService.findByAccount(adminUser.getAccount());
+					if(Objects.nonNull(oldAdminUser)) {
+						String isDelete = getCellValue(row.getCell(10)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							adminUserService.deleteById(oldAdminUser.getId());
+							continue;
+						}else {
+							adminUser.setId(oldAdminUser.getId());
+							RoleUser roleUsers = roleUserService.findRoleUserByUserId(adminUser.getId());
+							if(Objects.nonNull(roleUsers)) {
+								roleUserService.delete(roleUsers);
+							}
+							RoleUser roleUser = new RoleUser();
+							roleUser.setCreateDate(new Date());
+							roleUser.setCreateUser(adminUser.getCreateUser());
+							roleUser.setRoleId( role.getId());
+							roleUser.setUserId(adminUser.getId());
+							roleUserService.save(roleUser);
+							adminUserService.update(adminUser);
+							continue;
+						}
+					}
+					String roleId = role.getId();
+					Map<String,AdminUser> map = new HashMap<String, AdminUser>();
+					map.put(roleId, adminUser);
+					list.add(map);
+				}
 				
-				String roleId = role.getId();
-				Map<String,AdminUser> map = new HashMap<String, AdminUser>();
-				map.put(roleId, adminUser);
-				list.add(map);
+				
 	        }
 			for(Map<String,AdminUser> map : list) {
 				for (String key : map.keySet()) {
+					
 					adminUserService.saveUser(map.get(key), key);
 				}
 				
@@ -540,6 +567,12 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return false;
 		}
 		if(!getCellValue(row.getCell(8)).toString().equals("isManager")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(9)).toString().equals("userNo")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(10)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

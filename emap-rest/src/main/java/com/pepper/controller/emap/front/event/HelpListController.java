@@ -40,6 +40,7 @@ import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
+import com.pepper.model.emap.screen.Screen;
 import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.NodeVo;
@@ -77,8 +78,10 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.name"));
+		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.code"));
 		excelColumn.add(ExcelColumn.build("緊急級別", "warningLevel"));
+		excelColumn.add(ExcelColumn.build("幫助内容", "helpMessage"));
+		
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("help"), outputStream, excelColumn);
 	}
 	
@@ -149,10 +152,25 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 				helpList.setName(getCellValue(row.getCell(1)).toString());
 				helpList.setWarningLevel(Integer.valueOf(row.getCell(3).toString().replaceAll("(\\.(\\d*))", "")));
 				helpList.setHelpMessage(getCellValue(row.getCell(4)).toString());
-				if (StringUtils.hasText(helpList.getCode())&&helpListService.findByCode(helpList.getCode()) == null) {
-					NodeType nodeType = this.nodeTypeService.findByName(getCellValue(row.getCell(2)).toString());
-					if(nodeType!=null) {
-						helpList.setNodeTypeId(nodeType.getId());
+				NodeType nodeType = this.nodeTypeService.findByCode(getCellValue(row.getCell(2)).toString());
+				if(nodeType!=null) {
+					helpList.setNodeTypeId(nodeType.getId());
+				}else {
+					continue;
+				}
+				if (StringUtils.hasText(helpList.getCode())) {
+					HelpList oldHelpList = helpListService.findByCode(helpList.getCode());
+					if(Objects.nonNull(oldHelpList)) {
+						String isDelete = getCellValue(row.getCell(5)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							helpListService.deleteById(oldHelpList.getId());
+							continue;
+						}else {
+							helpList.setId(oldHelpList.getId());
+							
+							helpListService.update(helpList);
+							continue;
+						}
 					}
 					list.add(helpList);
 				}
@@ -184,6 +202,9 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 			return false;
 		}
 		if(!getCellValue(row.getCell(4)).toString().equals("helpMessage")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

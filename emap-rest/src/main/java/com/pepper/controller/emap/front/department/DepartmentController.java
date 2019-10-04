@@ -109,9 +109,22 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 				department.setCode(getCellValue(row.getCell(0)).toString());
 				department.setName(getCellValue(row.getCell(1)).toString());
 				
-				if (StringUtils.hasText(department.getCode())&&departmentService.findByCode(department.getCode()) == null) {
+				if (StringUtils.hasText(department.getCode())) {
+					Department oldDepartment = departmentService.findByCode(department.getCode());
+					if(Objects.nonNull(oldDepartment)) {
+						String isDelete = getCellValue(row.getCell(2)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							departmentService.deleteById(oldDepartment.getId());
+							continue;
+						}else {
+							department.setId(oldDepartment.getId());
+							departmentService.update(department);
+							continue;
+						}
+					}
 					list.add(department);
 				}
+				
 	        }
 			this.departmentService.saveAll(list);
 		}
@@ -131,6 +144,9 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 			return false;
 		}
 		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

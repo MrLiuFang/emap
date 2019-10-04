@@ -531,6 +531,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			tmp.setImageUrl2(this.fileService.getUrl(tmp.getImage2()));
 			tmp.setImageUrl3(this.fileService.getUrl(tmp.getImage3()));
 			tmp.setVoiceUrl1(this.fileService.getUrl(tmp.getVoice1()));
+			tmp.setVideoUrl(this.fileService.getUrl(tmp.getVideo()));
 			Node node = nodeService.findBySourceCode(eventList.getSourceCode());
 			if(node!=null && StringUtils.hasText(node.getNodeTypeId())) {
 				tmp.setHelpList(convertHelpList(helpListService.findByNodeTypeId(node.getNodeTypeId()),obj1.getHelpId(),obj1.getOperatorHelpId()));

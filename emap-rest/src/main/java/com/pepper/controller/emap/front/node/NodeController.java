@@ -116,8 +116,8 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
 		excelColumn.add(ExcelColumn.build("來源名稱", "source"));
 		excelColumn.add(ExcelColumn.build("來源編碼", "sourceCode"));
-		excelColumn.add(ExcelColumn.build("地圖", "map.name"));
-		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.name"));
+		excelColumn.add(ExcelColumn.build("地圖", "map.code"));
+		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.code"));
 		excelColumn.add(ExcelColumn.build("坐標x", "x"));
 		excelColumn.add(ExcelColumn.build("坐標y", "y"));
 		excelColumn.add(ExcelColumn.build("外部鏈接", "externalLink"));
@@ -403,7 +403,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 				return resultData;
 			}
 
-			if (nodeTypeCode.equals("camera")) {
+//			if (nodeTypeCode.equals("camera")) {
 				node.setIp(getCellValue(row.getCell(8)).toString());
 				node.setExternalLink(getCellValue(row.getCell(9)).toString());
 				String hasPtz = getCellValue(row.getCell(11)).toString().toLowerCase();
@@ -466,7 +466,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 //					resultData.setMessage("数据错误！第"+i+"行domainName数据错误");
 //					return resultData;
 //				}
-			} else if (nodeTypeCode.equals("door")) {
+//			} else if (nodeTypeCode.equals("door")) {
 
 				node.setPaneId(getCellValue(row.getCell(18)).toString());
 				node.setPaneIp(getCellValue(row.getCell(19)).toString());
@@ -493,7 +493,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 //					resultData.setMessage("数据错误！第"+i+"行readerIo数据错误");
 //					return resultData;
 //				}
-			} else {
+//			} else {
 
 				if (nodeType == null) {
 					resultData.setCode(1100008);
@@ -510,11 +510,25 @@ public class NodeController extends BaseControllerImpl implements BaseController
 							String.valueOf(i)));
 					return resultData;
 				}
-			}
+//			}
 			node.setRemark(getCellValue(row.getCell(22)).toString());
 			Node oldNode = nodeService.findByCode(node.getCode());
 			if (Objects.nonNull(oldNode)) {
 				node.setId(oldNode.getId());
+				String isDelete = getCellValue(row.getCell(23)).toString();
+				if(Objects.equals(isDelete.trim(), "是")) {
+					nodeService.deleteById(oldNode.getId());
+					continue;
+				}
+				
+				Node oldNode1 = nodeService.findBySourceCode(node.getSourceCode());
+				if (!oldNode1.getId().equals(oldNode.getId())) {
+					resultData.setCode(1100011);
+					resultData.setMessage(Internationalization.getMessageInternationalization(1100011)
+							.replace("{1}", String.valueOf(i)).replace("{2}", node.getSourceCode()));
+					return resultData;
+				}
+				
 				nodeService.update(node);
 				continue;
 //				resultData.setCode(1100010);
@@ -614,6 +628,9 @@ public class NodeController extends BaseControllerImpl implements BaseController
 			return false;
 		}
 		if (!getCellValue(row.getCell(22)).toString().equals("remark")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(23)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;
