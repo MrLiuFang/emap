@@ -145,6 +145,7 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	        {
 				Row row = sheet.getRow(i);
 				Role role= new Role();
+				role.setIsIsms(true);
 				role.setCode(getCellValue(row.getCell(0)).toString());
 				role.setName(getCellValue(row.getCell(1)).toString());
 				role.setIsDefault(Objects.equals(getCellValue(row.getCell(2)).toString(), "是"));

@@ -19,6 +19,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -97,7 +98,7 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 		if(StringUtils.hasText(code)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
-		
+		pager.getJpqlParameter().setSortParameter("departmentId", Direction.ASC);
 		pager = departmentGroupService.findNavigator(pager);
 		List<DepartmentGroup> list = pager.getResults();
 		List<DepartmentGroupVo> returnList = new ArrayList<DepartmentGroupVo>();

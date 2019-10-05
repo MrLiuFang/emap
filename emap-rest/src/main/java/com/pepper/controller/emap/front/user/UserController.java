@@ -233,6 +233,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUser.setPassword(Md5Util.encryptPassword(adminUser.getPassword().toUpperCase(),adminUser.getAccount()));
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setIsWork(false);
+		adminUser.setStatus(Status.NORMAL);
 		adminUser.setUpdatePasswordDate(new Date());
 		adminUser = adminUserService.saveUser(adminUser, null);
 		if(map.containsKey("roleId")) {
