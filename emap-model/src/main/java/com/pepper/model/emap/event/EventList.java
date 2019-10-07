@@ -87,6 +87,9 @@ public class EventList extends BaseModel  {
 	@Column(name ="is_unable_finish")
 	private Boolean isUnableFinish;
 	
+	@Column(name ="video")
+	private String video;
+	
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -261,6 +264,14 @@ public class EventList extends BaseModel  {
 
 	public void setIsUrgent(Boolean isUrgent) {
 		this.isUrgent = isUrgent;
+	}
+
+	public String getVideo() {
+		return video;
+	}
+
+	public void setVideo(String video) {
+		this.video = video;
 	}
 	
 	

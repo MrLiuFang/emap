@@ -68,6 +68,16 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		return resultData;
 	}
 	
+	@RequestMapping(value = "/toEdit")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object toEdit(String id) {
+		ResultData resultData = new ResultData();
+		resultData.setData("menu",menuService.findById(id));
+		systemLogService.log("get menu info", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
 	@RequestMapping(value = "update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 
@@ -489,6 +490,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				if(operatorUser!=null) {
 					AdminUserVo adminUserVo = new AdminUserVo();
 					BeanUtils.copyProperties(operatorUser, adminUserVo);
+					eventListVo.setVideoUrl(this.fileService.getUrl(eventListVo.getVideoUrl()));
 					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
 					eventListVo.setOperatorVo(adminUserVo);
 				}
@@ -649,7 +651,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(map.containsKey("id")) {
 			EventList eventList = this.eventListService.findById(map.get("id").toString());
 			eventList.setStatus("P");
-			eventList.setFiledContent(map.containsKey("filedContent")?map.get("filedContent").toString():"");
+			if(map.containsKey("video")) {
+				eventList.setVideo(Objects.isNull(map.get("video"))?"":map.get("video").toString());
+			}
+			eventList.setFiledContent(map.containsKey("filedContent")?Objects.isNull(map.get("filedContent"))?"":map.get("filedContent").toString():"");
 			eventListService.update(eventList);
 			sendEmail(eventList);
 		}
@@ -835,6 +840,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				if(currentHandleUser!=null) {
 					AdminUserVo adminUserVo = new AdminUserVo();
 					BeanUtils.copyProperties(currentHandleUser, adminUserVo);
+					eventListVo.setVideoUrl(this.fileService.getUrl(eventListVo.getVideoUrl()));
 					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(currentHandleUser.getHeadPortrait()));
 					eventListVo.setCurrentHandleUserVo(adminUserVo);
 				}
@@ -887,9 +893,18 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	}
 	
 	private void sendEmail(EventList eventList) {
+		if(Objects.isNull(eventList.getCurrentHandleUser())) {
+			return ;
+		}
 		AdminUser admiUser = this.adminUserService.findById(eventList.getCurrentHandleUser());
+		if(Objects.isNull(admiUser)) {
+			return ;
+		}
 		List<AdminUser> listManagerUser= adminUserService.findByDepartmentIdAndIsManagerAndDepartmentGroupIdIsNullOrDepartmentGroupId(admiUser.getDepartmentId(),true);
 		ActionList actionList = this.actionListService.findActionList(eventList.getId());
+		if(Objects.isNull(actionList)) {
+			return ;
+		}
 		for(AdminUser adminUser : listManagerUser) {
 			if(StringUtils.hasText(adminUser.getEmail())) {
 				EventMessage eventMessage = new EventMessage();

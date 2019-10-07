@@ -48,9 +48,19 @@ public class EventListVo extends EventList implements Comparable<EventListVo> {
 	
 	private List<EventMessage> eventMessage;
 	
+	private String videoUrl;
+	
 	
 //	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
 	
+	public String getVideoUrl() {
+		return videoUrl;
+	}
+
+	public void setVideoUrl(String videoUrl) {
+		this.videoUrl = videoUrl;
+	}
+
 	public String getNodeName() {
 		return nodeName;
 	}
