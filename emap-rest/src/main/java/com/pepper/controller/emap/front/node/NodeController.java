@@ -576,7 +576,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		if (!getCellValue(row.getCell(4)).toString().equals("map")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(5)).toString().equals("nodeType")) {
+		if (!getCellValue(row.getCell(5)).toString().equals("nodeTypeCode")) {
 			return false;
 		}
 		if (!getCellValue(row.getCell(6)).toString().equals("x")) {
@@ -734,6 +734,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		NodeTypeVo nodeTypeVo = new NodeTypeVo();
 		BeanUtils.copyProperties(nodeType, nodeTypeVo);
 		nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+		nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
 		nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
 		nodeVo.setNodeType(nodeTypeVo);
 

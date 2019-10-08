@@ -552,6 +552,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 					BeanUtils.copyProperties(nodeType, nodeTypeVo);
 					nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
 					nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+					nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
 					nodeVo.setNodeType(nodeTypeVo);
 				}
 				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));

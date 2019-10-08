@@ -75,8 +75,8 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<DepartmentGroup> pager = getPager(code,departmentId, name, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("部門", "department.code"));
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
 		excelColumn.add(ExcelColumn.build("開始時間", "startTime"));
 		excelColumn.add(ExcelColumn.build("結束時間", "endTime"));
@@ -151,6 +151,8 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 				departmentGroup.setEndTime(getCellValue(row.getCell(4)).toString());
 				if (StringUtils.hasText(department)&&departmentService.findByCode(department) != null) {
 					departmentGroup.setDepartmentId(departmentService.findByCode(department).getId());
+				}else {
+					continue;
 				}
 				
 				if (StringUtils.hasText(departmentGroup.getCode())) {
@@ -183,7 +185,7 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
     }
 	
 	private Boolean check(Row row) {
-		if(!getCellValue(row.getCell(0)).toString().equals("department")) {
+		if(!getCellValue(row.getCell(0)).toString().equals("departmentCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(1)).toString().equals("code")) {

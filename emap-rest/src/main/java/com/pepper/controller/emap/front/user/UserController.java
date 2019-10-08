@@ -149,12 +149,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("賬號", "account"));
 		excelColumn.add(ExcelColumn.build("姓名", "name"));
+		excelColumn.add(ExcelColumn.build("郵箱", "email"));
+		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
 		excelColumn.add(ExcelColumn.build("昵稱", "nickName"));
+		excelColumn.add(ExcelColumn.build("角色", "role.code"));
 		excelColumn.add(ExcelColumn.build("部門", "department.code"));
 		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.code"));
-		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
-		excelColumn.add(ExcelColumn.build("郵箱", "email"));
-		excelColumn.add(ExcelColumn.build("角色", "role.code"));
+		excelColumn.add(ExcelColumn.build("是否管理员", "isManager"));
 		excelColumn.add(ExcelColumn.build("工號", "userNo"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
 	}
@@ -558,13 +559,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 		if(!getCellValue(row.getCell(4)).toString().equals("nickName")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(5)).toString().equals("role")) {
+		if(!getCellValue(row.getCell(5)).toString().equals("roleCode")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(6)).toString().equals("department")) {
+		if(!getCellValue(row.getCell(6)).toString().equals("departmentCode")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(7)).toString().equals("departmentGroup")) {
+		if(!getCellValue(row.getCell(7)).toString().equals("departmentGroupCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(8)).toString().equals("isManager")) {

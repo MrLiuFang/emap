@@ -86,9 +86,9 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		excelColumn.add(ExcelColumn.build("郵箱", "email"));
 		excelColumn.add(ExcelColumn.build("ID卡", "idCard"));
 		excelColumn.add(ExcelColumn.build("城區", "site.code"));
+		excelColumn.add(ExcelColumn.build("工號", "userNo"));
 		excelColumn.add(ExcelColumn.build("狀態", "status"));
 		excelColumn.add(ExcelColumn.build("類型", "staffType"));
-		excelColumn.add(ExcelColumn.build("工號", "userNo"));
 		excelColumn.add(ExcelColumn.build("性別", "sex"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("staff"), outputStream, excelColumn);
 	}
@@ -354,7 +354,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		if(!getCellValue(row.getCell(2)).toString().equals("idCard")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(3)).toString().equals("site")) {
+		if(!getCellValue(row.getCell(3)).toString().equals("siteCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(4)).toString().equals("userNo")) {

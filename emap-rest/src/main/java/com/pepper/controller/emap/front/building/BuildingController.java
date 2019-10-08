@@ -155,7 +155,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("site")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("siteCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(3)).toString().equals("isDelete")) {

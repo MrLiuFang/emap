@@ -23,6 +23,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.model.console.menu.Menu;
 import com.pepper.model.console.menu.MenuVo;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.emap.log.SystemLogService;
@@ -56,11 +57,12 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		Menu menu = new Menu();
 		MapToBeanUtil.convert(menu, map);
+		menu.setParentId("0");
 		menu.setStatus(Status.NORMAL);
 		menu.setIsIsms(true);
-		if(menuService.findByUrl(menu.getUrl())!=null) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1300001));
-			resultData.setCode(1300001);
+		if(menuService.findByCode(menu.getCode())!=null) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			resultData.setCode(2000001);
 			return resultData;
 		}
 		this.menuService.save(menu);
@@ -86,11 +88,20 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		Menu menu = new Menu();
 		MapToBeanUtil.convert(menu, map);
 		menu.setIsIsms(true);
-		if(!menu.getParentId().equals("0")) {
-			Menu menu1 = menuService.findByUrl(menu.getUrl());
-			if(menu1!=null && !menu1.getId().equals(menu.getId()) && !menu1.getParentId().equals("0")) {
-				resultData.setMessage(Internationalization.getMessageInternationalization(1300001));
-				resultData.setCode(1300001);
+//		if(!menu.getParentId().equals("0")) {
+//			Menu menu1 = menuService.findByUrl(menu.getUrl());
+//			if(menu1!=null && !menu1.getId().equals(menu.getId()) && !menu1.getParentId().equals("0")) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1300001));
+//				resultData.setCode(1300001);
+//				return resultData;
+//			}
+//		}
+		
+		Menu oldMenu = menuService.findByCode(menu.getCode());
+		if(oldMenu!=null && oldMenu.getCode()!=null&&menu.getCode()!=null) {
+			if(!menu.getId().equals(oldMenu.getId())){
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
 			}
 		}

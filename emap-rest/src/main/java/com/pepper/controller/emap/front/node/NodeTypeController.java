@@ -298,6 +298,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		NodeTypeVo  nodeTypeVo = new NodeTypeVo();
 		BeanUtils.copyProperties(nodeType, nodeTypeVo);
 		nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+		nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
 		nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
 		return nodeTypeVo;
 	}

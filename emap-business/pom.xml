@@ -17,6 +17,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.pepper</groupId>
+			<artifactId>console-service</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pepper</groupId>
 			<artifactId>console-model</artifactId>
 			<version>${console.version}</version>
 			<scope>provided</scope>

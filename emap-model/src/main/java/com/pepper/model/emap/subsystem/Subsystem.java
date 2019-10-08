@@ -27,6 +27,9 @@ public class Subsystem extends BaseModel{
 	@Column(name = "address")
 	private String address;
 	
+	@Column(name = "node_code")
+	private String nodeCode;
+	
 	@Column(name = "prot")
 	private Integer prot;
 	
@@ -84,6 +87,12 @@ public class Subsystem extends BaseModel{
 		this.code = code;
 	}
 	
-	
+	public String getNodeCode() {
+		return nodeCode;
+	}
+
+	public void setNodeCode(String nodeCode) {
+		this.nodeCode = nodeCode;
+	}
 	
 }

@@ -181,7 +181,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		if(!getCellValue(row.getCell(3)).toString().equals("areaName")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(4)).toString().equals("build")) {
+		if(!getCellValue(row.getCell(4)).toString().equals("buildCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(5)).toString().equals("floor")) {

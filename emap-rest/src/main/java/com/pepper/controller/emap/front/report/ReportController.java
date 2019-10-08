@@ -869,6 +869,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 				NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
 				if (nodeType != null) {
 					BeanUtils.copyProperties(nodeType, nodeTypeVo);
+					nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
 					nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
 					nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
 					nodeVo.setNodeType(nodeTypeVo);

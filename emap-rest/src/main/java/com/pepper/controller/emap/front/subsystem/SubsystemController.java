@@ -56,7 +56,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String name,Boolean isOnLine) throws IOException,
+	public void export(String name,String nodeCode,Boolean isOnLine) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
@@ -64,12 +64,14 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		response.setHeader("Content-Disposition",
 				"attachment;filename=" + URLEncoder.encode("subsystem.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<Subsystem> pager = getPager( name, isOnLine, true);
+		Pager<Subsystem> pager = getPager( name,nodeCode,isOnLine, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
 		excelColumn.add(ExcelColumn.build("地址", "address"));
 		excelColumn.add(ExcelColumn.build("端口", "prot"));
 		excelColumn.add(ExcelColumn.build("是否關聯本系統", "isRelation"));
+		excelColumn.add(ExcelColumn.build("设备編碼", "nodeCode"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("subsystem"), outputStream, excelColumn);
 	}
 
@@ -109,11 +111,11 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 				subsystem.setAddress(getCellValue(row.getCell(2)).toString());
 				subsystem.setProt(Integer.valueOf( getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", "")));
 				subsystem.setIsRelation(Objects.equals(getCellValue(row.getCell(4)).toString(), "是"));
-				
+				subsystem.setNodeCode(getCellValue(row.getCell(5)).toString());
 				if (StringUtils.hasText(subsystem.getCode())) {
 					Subsystem oldSubsystem = subsystemService.findByCode(subsystem.getCode());
 					if(Objects.nonNull(oldSubsystem)) {
-						String isDelete = getCellValue(row.getCell(5)).toString();
+						String isDelete = getCellValue(row.getCell(6)).toString();
 						if(Objects.equals(isDelete.trim(), "是")) {
 							subsystemService.deleteById(oldSubsystem.getId());
 							continue;
@@ -156,7 +158,10 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		if(!getCellValue(row.getCell(4)).toString().equals("isRelation")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(5)).toString().equals("isDelete")) {
+		if(!getCellValue(row.getCell(5)).toString().equals("nodeCode")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("isDelete")) {
 			return false;
 		}
 		
@@ -184,10 +189,13 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		return object;
 	}
 	
-	private Pager< Subsystem> getPager(String name,Boolean isOnLine, Boolean isExport) {
+	private Pager< Subsystem> getPager(String name,String nodeCode,Boolean isOnLine, Boolean isExport) {
 		Pager< Subsystem> pager = new Pager< Subsystem>();
 		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_name",name );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
+		}
+		if(StringUtils.hasText(nodeCode)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_nodeCode",nodeCode );
 		}
 		if(isOnLine!=null&&isOnLine) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_TRUE+"_isOnLine",isOnLine );
@@ -204,9 +212,9 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String name,Boolean isOnLine) {
+	public Object list(String name,String nodeCode,Boolean isOnLine) {
 		systemLogService.log("get subsystem list", this.request.getRequestURL().toString());
-		return getPager(name, isOnLine, false);
+		return getPager(name, nodeCode,isOnLine, false);
 	}
 	
 	@RequestMapping(value = "/add")

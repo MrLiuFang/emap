@@ -206,10 +206,10 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(1)).toString().equals("build")) {
+		if(!getCellValue(row.getCell(1)).toString().equals("buildCode")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("site")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("siteCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(3)).toString().equals("refreshFrequency")) {

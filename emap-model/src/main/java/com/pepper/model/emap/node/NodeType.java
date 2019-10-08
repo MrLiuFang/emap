@@ -30,6 +30,9 @@ public class NodeType extends BaseModel {
 	@Column(name = "stop_icon")
 	private String stopIcon;
 	
+	@Column(name = "processing_icon")
+	private String processingIcon;
+	
 	@Column(name = "is_lock")
 	private Boolean isLock;
 	
@@ -72,4 +75,14 @@ public class NodeType extends BaseModel {
 	public void setStopIcon(String stopIcon) {
 		this.stopIcon = stopIcon;
 	}
+
+	public String getProcessingIcon() {
+		return processingIcon;
+	}
+
+	public void setProcessingIcon(String processingIcon) {
+		this.processingIcon = processingIcon;
+	}
+	
+	
 }
