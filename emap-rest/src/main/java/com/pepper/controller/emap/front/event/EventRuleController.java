@@ -77,7 +77,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String nodeId, Integer warningLevel, String keyWord) throws IOException,
+	public void export(String nodeId,String nodeTypeId, Integer warningLevel, String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
@@ -85,7 +85,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		response.setHeader("Content-Disposition",
 				"attachment;filename=" + URLEncoder.encode("eventRule.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<EventRule> pager = getPager(nodeId, warningLevel, true);
+		Pager<EventRule> pager = getPager(nodeId, nodeTypeId,warningLevel, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("設備", "node.name"));
 		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.name"));
@@ -104,7 +104,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("eventRule"), outputStream, excelColumn);
 	}
 
-	private Pager<EventRule> getPager(String nodeId, Integer warningLevel, Boolean isExport) {
+	private Pager<EventRule> getPager(String nodeId,String nodeTypeId, Integer warningLevel, Boolean isExport) {
 		Pager<EventRule> pager = new Pager<EventRule>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
@@ -112,6 +112,9 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		}
 		if (StringUtils.hasText(nodeId)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_nodeId", nodeId);
+		}
+		if (StringUtils.hasText(nodeTypeId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_nodeTypeId", nodeTypeId);
 		}
 		if (warningLevel != null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_warningLevel", warningLevel);
@@ -280,10 +283,10 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String nodeId, Integer warningLevel) {
+	public Object list(String nodeId,String nodeTypeId, Integer warningLevel) {
 
 		systemLogService.log("get event rule list", this.request.getRequestURL().toString());
-		return getPager(nodeId, warningLevel, false);
+		return getPager(nodeId,nodeTypeId, warningLevel, false);
 	}
 
 	@RequestMapping(value = "/add")

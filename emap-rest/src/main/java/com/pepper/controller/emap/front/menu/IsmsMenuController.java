@@ -105,7 +105,7 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 				return resultData;
 			}
 		}
-		this.menuService.save(menu);
+		this.menuService.update(menu);
 		systemLogService.log("update menu ", this.request.getRequestURL().toString());
 		return resultData;
 	}

@@ -450,7 +450,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			if(node==null) {
 				return pager;
 			}
-			eventListService.findBySourceCodeAndIdNot( node.getSourceCode(), "1111111111", pager);
+			pager = eventListService.findBySourceCodeAndIdNot( node.getSourceCode(), "1111111111", pager);
 		}else {
 			return pager;
 		}
@@ -490,7 +490,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				if(operatorUser!=null) {
 					AdminUserVo adminUserVo = new AdminUserVo();
 					BeanUtils.copyProperties(operatorUser, adminUserVo);
-					eventListVo.setVideoUrl(this.fileService.getUrl(eventListVo.getVideoUrl()));
+					eventListVo.setVideoUrl(this.fileService.getUrl(obj.getVideo()));
 					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
 					eventListVo.setOperatorVo(adminUserVo);
 				}
@@ -840,7 +840,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				if(currentHandleUser!=null) {
 					AdminUserVo adminUserVo = new AdminUserVo();
 					BeanUtils.copyProperties(currentHandleUser, adminUserVo);
-					eventListVo.setVideoUrl(this.fileService.getUrl(eventListVo.getVideoUrl()));
+					eventListVo.setVideoUrl(this.fileService.getUrl(eventList.getVideo()));
 					adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(currentHandleUser.getHeadPortrait()));
 					eventListVo.setCurrentHandleUserVo(adminUserVo);
 				}

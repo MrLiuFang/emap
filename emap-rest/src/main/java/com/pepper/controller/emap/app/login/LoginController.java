@@ -122,6 +122,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			return resultData;
 		}
 		List<Role> roleList = roleService.findByUserId1(userReal.getId());
+		Boolean isEmployee = false;
 		for(Role role : roleList  ){
 //			if (role == null) {
 //				resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
@@ -129,14 +130,21 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 //				resultData.setCode(1000005);
 //				return resultData;
 //			}
-			
-			if(!role.getCode().equals("EMPLOYEE_ROLE")) {
+			if(role.getIsDefault()&&role.getCode().equals("EMPLOYEE_ROLE")) {
+				isEmployee = true;
+			}
+			if(role.getIsDefault()&&!role.getCode().equals("EMPLOYEE_ROLE")) {
 				resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
 				resultData.setCode(1000008);
 				return resultData;
 			}
 		}
 		
+		if(!isEmployee) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
+			resultData.setCode(1000008);
+			return resultData;
+		}
 		
 		if(userReal.getIsNeverExpire()!=null && userReal.getIsNeverExpire()) {
 			if(userReal.getUpdatePasswordDate()!=null) {
@@ -170,6 +178,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		String token = setLoginInfo(userReal, null);
 		resultData.setData("token", token);
 		resultData.setData("role", roleList);
+		resultData.setData("isManager", userReal.getIsManager());
 		resultData.setData("department", departmentService.findById(userReal.getDepartmentId()));
 		resultData.setData("departmentGroup", departmentGroupService.findById(userReal.getDepartmentGroupId()));
 		if(map.containsKey("language")) {

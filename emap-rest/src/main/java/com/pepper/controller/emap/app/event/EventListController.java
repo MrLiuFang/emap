@@ -700,7 +700,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 			}else {
 				eventListVo.setIsAssistFinish(null);	
 			}
-			eventListVo.setVideoUrl(this.fileService.getUrl(eventListVo.getVideoUrl()));
+//			eventListVo.setVideoUrl(this.fileService.getUrl(eventList.getVideo()));
 			returnList.add(eventListVo);
 		}
 		pager.setData("eventList", returnList);
@@ -718,7 +718,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		if(node !=null) {
 			eventListVo.setNodeName(node.getName());
 		}
-		eventListVo.setVideoUrl(this.fileService.getUrl(eventListVo.getVideoUrl()));
+		eventListVo.setVideoUrl(this.fileService.getUrl(eventList.getVideo()));
 		eventListVo.setIsUrgent(eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
 		EventDispatch eventDispatch = this.eventDispatchService.findEventDispatch(eventList.getId(),adminUser.getId());
 		if(eventDispatch!=null) {
