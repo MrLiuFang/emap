@@ -261,6 +261,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		JsonNode jsonNode = objectMapper.readTree(str);
 		screen.setBuildingId(jsonNode.get("buildingId").asText(""));
 		screen.setSiteId(jsonNode.get("siteId").asText(""));
+		screen.setCode(jsonNode.get("code").asText(""));
 		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
 		
 		if(screenService.findByCode(screen.getCode())!=null) {
@@ -294,6 +295,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		Screen screen = screenService.findById(jsonNode.get("id").asText());
 		screen.setBuildingId(jsonNode.get("buildingId").asText(""));
 		screen.setSiteId(jsonNode.get("siteId").asText(""));
+		screen.setCode(jsonNode.get("code").asText(""));
 		screen.setRefreshFrequency(jsonNode.get("refreshFrequency").asInt(0));
 		
 		Screen oldScreen = screenService.findByCode(screen.getCode());
