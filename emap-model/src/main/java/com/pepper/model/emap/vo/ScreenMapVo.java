@@ -11,24 +11,18 @@ public class ScreenMapVo extends ScreenMap {
 		 */
 	private static final long serialVersionUID = 3481075478346789673L;
 
-	private BuildingInfoVo build;
+//	private BuildingInfoVo build;
+	
+	private MapVo map;
 
-	private List<MapImageUrl> mapImageUrl;
 
-	public BuildingInfoVo getBuild() {
-		return build;
+	public MapVo getMap() {
+		return map;
 	}
 
-	public void setBuild(BuildingInfoVo build) {
-		this.build = build;
+	public void setMap(MapVo map) {
+		this.map = map;
 	}
-
-	public List<MapImageUrl> getMapImageUrl() {
-		return mapImageUrl;
-	}
-
-	public void setMapImageUrl(List<MapImageUrl> mapImageUrl) {
-		this.mapImageUrl = mapImageUrl;
-	}
-
+	
+	
 }

@@ -17,7 +17,7 @@ public class ScreenVo extends Screen {
 	
 	private SiteInfo site;
 	
-	private List<ScreenMapVo> map;
+	private List<ScreenMapVo> screenMap;
 
 	public BuildingInfo getBuild() {
 		return build;
@@ -35,13 +35,14 @@ public class ScreenVo extends Screen {
 		this.site = site;
 	}
 
-	public List<ScreenMapVo> getMap() {
-		return map;
+	public List<ScreenMapVo> getScreenMap() {
+		return screenMap;
 	}
 
-	public void setMap(List<ScreenMapVo> map) {
-		this.map = map;
+	public void setScreenMap(List<ScreenMapVo> screenMap) {
+		this.screenMap = screenMap;
 	}
+
 	
 	
 }
