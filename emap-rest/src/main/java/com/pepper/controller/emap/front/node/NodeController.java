@@ -43,6 +43,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.site.SiteInfo;
@@ -52,6 +53,7 @@ import com.pepper.model.emap.vo.NodeTypeVo;
 import com.pepper.model.emap.vo.NodeVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
+import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
@@ -97,6 +99,9 @@ public class NodeController extends BaseControllerImpl implements BaseController
 
 	@Reference
 	private SystemLogService systemLogService;
+	
+	@Reference
+	private EventListService eventListService;
 
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
@@ -646,6 +651,12 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		for (Node node : list) {
 			NodeVo nodeVo = new NodeVo();
 			BeanUtils.copyProperties(node, nodeVo);
+			EventList eventList = eventListService.findOneByNodeId(node.getId());
+			if(Objects.nonNull(eventList) && StringUtils.hasText(eventList.getCurrentHandleUser())) {
+				nodeVo.setIsEventHandle(true);
+			}else {
+				nodeVo.setIsEventHandle(false);
+			}
 			if (node.getStatus() != null) {
 				nodeVo.setStatusCode(node.getStatus().getName());
 			}

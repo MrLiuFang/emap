@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -21,6 +23,7 @@ import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
+import com.pepper.model.console.enums.MenuType;
 import com.pepper.model.console.menu.Menu;
 import com.pepper.model.console.menu.MenuVo;
 import com.pepper.model.emap.site.SiteInfo;
@@ -39,16 +42,19 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 	@Reference
 	private SystemLogService systemLogService;
 	
-	@RequestMapping(value = "list")
+	
+	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list() {
+	public Object list(String parentId,MenuType menuType) {
 		ResultData resultData = new ResultData();
-		
-		resultData.setData("menu", this.menuService.queryMenu("0", true));
-		systemLogService.log("get menu list", this.request.getRequestURL().toString());
+		List<MenuVo> list = this.menuService.queryMenu(parentId, true, menuType);
+		resultData.setData("menu",list);
+		systemLogService.log("get menuCatalog list", this.request.getRequestURL().toString());
 		return resultData;
 	}
+	
+	
 	
 	@RequestMapping(value = "add")
 	@Authorize(authorizeResources = false)
@@ -57,7 +63,11 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		Menu menu = new Menu();
 		MapToBeanUtil.convert(menu, map);
-		menu.setParentId("0");
+//		menu.setParentId("0");
+		if(Objects.isNull(menu.getParentId())) {
+			menu.setParentId("0");
+		}
+		
 		menu.setStatus(Status.NORMAL);
 		menu.setIsIsms(true);
 		if(menuService.findByCode(menu.getCode())!=null) {
@@ -104,6 +114,12 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 				return resultData;
 			}
+		}
+		
+		if(Objects.equals(menu.getParentId(), menu.getId())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(1600001));
+			resultData.setCode(1600001);
+			return resultData;
 		}
 		this.menuService.update(menu);
 		systemLogService.log("update menu ", this.request.getRequestURL().toString());

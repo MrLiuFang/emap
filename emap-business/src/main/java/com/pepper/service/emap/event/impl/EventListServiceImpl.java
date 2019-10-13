@@ -75,6 +75,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 			String operatorId, String status, String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent) {
 		return eventListDao.historyEventList(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder,sortBy,isSpecial,isUrgent);
 	}
+
+	@Override
+	public EventList findOneByNodeId(String nodeId) {
+		return eventListDao.findOneByNodeId(nodeId);
+	}
 	
 
 }

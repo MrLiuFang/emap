@@ -289,10 +289,13 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		}else {
 			jpql.append(" order by   el.createDate desc ");
 		}
-		
-		
-		
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
+	}
+
+	@Override
+	public EventList findOneByNodeId(String nodeId) {
+		String jpql = " SELECT t1 FROM EventList t1 JOIN Node t2 ON t1.sourceCode = t2.sourceCode WHERE t2.id = '"+nodeId+"' ORDER BY t1.createDate DESC  ";
+		return baseDao.findOne(jpql);
 	} 
 	
 

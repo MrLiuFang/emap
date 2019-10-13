@@ -56,7 +56,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String name,String nodeCode,Boolean isOnLine) throws IOException,
+	public void export(String name,String code,String nodeCode,Boolean isOnLine) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
@@ -64,7 +64,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		response.setHeader("Content-Disposition",
 				"attachment;filename=" + URLEncoder.encode("subsystem.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<Subsystem> pager = getPager( name,nodeCode,isOnLine, true);
+		Pager<Subsystem> pager = getPager( name,code,nodeCode,isOnLine, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
@@ -189,13 +189,16 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		return object;
 	}
 	
-	private Pager< Subsystem> getPager(String name,String nodeCode,Boolean isOnLine, Boolean isExport) {
+	private Pager< Subsystem> getPager(String name,String code,String nodeCode,Boolean isOnLine, Boolean isExport) {
 		Pager< Subsystem> pager = new Pager< Subsystem>();
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
 		if(StringUtils.hasText(nodeCode)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_nodeCode",nodeCode );
+		}
+		if(StringUtils.hasText(code)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
 		}
 		if(isOnLine!=null&&isOnLine) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.IS_TRUE+"_isOnLine",isOnLine );
@@ -212,9 +215,9 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String name,String nodeCode,Boolean isOnLine) {
+	public Object list(String name,String code,String nodeCode,Boolean isOnLine) {
 		systemLogService.log("get subsystem list", this.request.getRequestURL().toString());
-		return getPager(name, nodeCode,isOnLine, false);
+		return getPager(name,code, nodeCode,isOnLine, false);
 	}
 	
 	@RequestMapping(value = "/add")

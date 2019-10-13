@@ -50,5 +50,5 @@ public interface EventListDaoEx {
 	
 	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent);
 	
-
+	public EventList findOneByNodeId(String nodeId);
 }

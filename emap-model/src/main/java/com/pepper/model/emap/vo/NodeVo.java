@@ -14,6 +14,8 @@ public class NodeVo extends Node {
 	private NodeTypeVo nodeType;
 	
 	private String statusCode;
+	
+	private Boolean isEventHandle;
 
 	public MapVo getMap() {
 		return map;
@@ -37,6 +39,14 @@ public class NodeVo extends Node {
 
 	public void setStatusCode(String statusCode) {
 		this.statusCode = statusCode;
+	}
+
+	public Boolean getIsEventHandle() {
+		return isEventHandle;
+	}
+
+	public void setIsEventHandle(Boolean isEventHandle) {
+		this.isEventHandle = isEventHandle;
 	}
 	
 	
