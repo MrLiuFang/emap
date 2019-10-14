@@ -48,27 +48,36 @@ public class SubsystemScheduler {
 				}else {
 					if(Objects.equals(subsystem.getIsOnLine(), true)) {
 						if(Objects.nonNull(subsystem.getNodeCode())) {
-							Node node = nodeService.findBySourceCode(subsystem.getNodeCode());
-							if(Objects.nonNull(node)) {
-								SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-								EventList eventList = new EventList();
-								eventList.setEventDate(formatter.format(new Date()));
-								eventList.setSource(node.getSource());
-								eventList.setSourceCode(node.getSourceCode());
-								eventList.setWarningLevel(5);
-								eventList.setEventId(UUID.randomUUID().toString());
-								eventList.setEventName("subsystem event");
-								eventListService.save(eventList);
-							}
+							addEvent(subsystem.getNodeCode());
 						}
 					}
 					subsystem.setIsOnLine(false);
 					
 				}
-				subsystemService.update(subsystem);
 			} catch (IOException e) {
+				subsystem.setIsOnLine(false);
+				if(Objects.equals(subsystem.getIsOnLine(), true)) {
+					if(Objects.nonNull(subsystem.getNodeCode())) {
+						addEvent(subsystem.getNodeCode());
+					}
+				}
 			}
-			
+			subsystemService.update(subsystem);
+		}
+	}
+	
+	private void addEvent(String nodeCode) {
+		Node node = nodeService.findBySourceCode(nodeCode);
+		if(Objects.nonNull(node)) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			EventList eventList = new EventList();
+			eventList.setEventDate(formatter.format(new Date()));
+			eventList.setSource(node.getSource());
+			eventList.setSourceCode(node.getSourceCode());
+			eventList.setWarningLevel(5);
+			eventList.setEventId(UUID.randomUUID().toString());
+			eventList.setEventName("subsystem event");
+			eventListService.save(eventList);
 		}
 	}
 }

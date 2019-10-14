@@ -232,6 +232,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
 			return resultData;
 		}
+		subsystem.setIsOnLine(false);
 		subsystemService.save(subsystem);
 		systemLogService.log("site subsystem", this.request.getRequestURL().toString());
 		return resultData;

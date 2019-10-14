@@ -405,7 +405,10 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		String image2 = jsonNode.get("image2").asText("");
 		String image3 = jsonNode.get("image3").asText("");
 		String voice1 = jsonNode.get("voice1").asText("");
-		String video = jsonNode.get("video").asText("");
+		String video= "";
+		if(jsonNode.has("video")) {
+			video = jsonNode.get("video").asText("");
+		}
 		Boolean isUnableFinish = jsonNode.get("isUnableFinish").asBoolean(true);
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);

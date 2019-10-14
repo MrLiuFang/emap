@@ -29,6 +29,7 @@ import com.pepper.model.console.menu.MenuVo;
 import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.menu.MenuService;
+import com.pepper.service.console.role.RoleMenuService;
 import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.util.MapToBeanUtil;
 
@@ -38,6 +39,9 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 
 	@Reference
 	private MenuService menuService;
+	
+	@Reference
+	private RoleMenuService roleMenuService;
 	
 	@Reference
 	private SystemLogService systemLogService;
@@ -63,6 +67,9 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		Menu menu = new Menu();
 		MapToBeanUtil.convert(menu, map);
+		if(map.containsKey("menuType")&&Objects.nonNull(map.get("menuType"))) {
+			menu.setMenuType(MenuType.valueOf(map.get("menuType").toString()));
+		}
 //		menu.setParentId("0");
 		if(Objects.isNull(menu.getParentId())) {
 			menu.setParentId("0");
@@ -97,6 +104,9 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		Menu menu = new Menu();
 		MapToBeanUtil.convert(menu, map);
+		if(map.containsKey("menuType")&&Objects.nonNull(map.get("menuType"))) {
+			menu.setMenuType(MenuType.valueOf(map.get("menuType").toString()));
+		}
 		menu.setIsIsms(true);
 //		if(!menu.getParentId().equals("0")) {
 //			Menu menu1 = menuService.findByUrl(menu.getUrl());
@@ -142,12 +152,24 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		for (int i = 0; i < arrayNode.size(); i++) {
 			String id = arrayNode.get(i).asText();
 			try {
+				List<MenuVo> list = this.menuService.queryMenu(id, true,null);
 				menuService.deleteById(id);
+				deleteMenu(list);
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
 		}
 		systemLogService.log("delete menu ", this.request.getRequestURL().toString());
 		return resultData;
+	}
+	
+	private void deleteMenu(List<MenuVo> list) {
+		for(MenuVo menuVo : list) {
+			menuService.deleteById(menuVo.getId());
+			roleMenuService.deleteByMenuId(menuVo.getId());
+			if(Objects.nonNull(menuVo.getChild())&& menuVo.getChild().size()>0) {
+				deleteMenu(menuVo.getChild());
+			}
+		}
 	}
 }
