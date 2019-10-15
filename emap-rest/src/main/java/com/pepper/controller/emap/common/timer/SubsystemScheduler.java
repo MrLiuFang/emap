@@ -1,6 +1,7 @@
 package com.pepper.controller.emap.common.timer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,11 +43,12 @@ public class SubsystemScheduler {
 				if(Objects.isNull(subsystem.getAddress())||Objects.isNull(subsystem.getProt())) {
 					continue;
 				}
-				Socket socket = new Socket(subsystem.getAddress(), subsystem.getProt());
+				Socket socket = new Socket();
+				socket.connect(new InetSocketAddress(subsystem.getAddress(),  subsystem.getProt()), 500);//设置连接请求超时时间1 s
 				if(socket.isConnected()) {
 					subsystem.setIsOnLine(true);
 				}else {
-					if(Objects.equals(subsystem.getIsOnLine(), true)) {
+					if(Objects.isNull(subsystem.getIsOnLine()) || Objects.equals(subsystem.getIsOnLine(), true)) {
 						if(Objects.nonNull(subsystem.getNodeCode())) {
 							addEvent(subsystem.getNodeCode());
 						}
@@ -55,12 +57,12 @@ public class SubsystemScheduler {
 					
 				}
 			} catch (IOException e) {
-				subsystem.setIsOnLine(false);
-				if(Objects.equals(subsystem.getIsOnLine(), true)) {
+				if(Objects.isNull(subsystem.getIsOnLine()) || Objects.equals(subsystem.getIsOnLine(), true)) {
 					if(Objects.nonNull(subsystem.getNodeCode())) {
 						addEvent(subsystem.getNodeCode());
 					}
 				}
+				subsystem.setIsOnLine(false);
 			}
 			subsystemService.update(subsystem);
 		}
