@@ -38,6 +38,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.enums.Classify;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.vo.MapVo;
@@ -64,21 +65,22 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) throws IOException,
+	public void export(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId,Classify classify) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("nodeType export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("nodeType.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<NodeType> pager = getPager(code, name, keyWord, true);
+		Pager<NodeType> pager = getPager(code, name, keyWord, classify,true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("編碼", "code"));
 		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("类别", "classify"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("nodeType"), outputStream, excelColumn);
 	}
 	
-	private Pager<NodeType> getPager(String code,String name,String keyWord, Boolean isExport) {
+	private Pager<NodeType> getPager(String code,String name,String keyWord,Classify classify, Boolean isExport) {
 		Pager<NodeType> pager = new Pager<NodeType>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
@@ -89,6 +91,9 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		}
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
+		}
+		if(Objects.nonNull(classify)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_classify",classify );
 		}
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_code&name",keyWord );
@@ -137,11 +142,16 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 				NodeType nodeType= new NodeType();
 				nodeType.setCode(getCellValue(row.getCell(0)).toString());
 				nodeType.setName(getCellValue(row.getCell(1)).toString());
-				
+				String classify = getCellValue(row.getCell(2)).toString();
+				try {
+					nodeType.setClassify(Classify.valueOf(classify));
+				}catch (Exception e) {
+					nodeType.setClassify(Classify.OTHER);
+				}
 				if (StringUtils.hasText(nodeType.getCode())) {
 					NodeType oldNodeType = nodeTypeService.findByCode(nodeType.getCode());
 					if(Objects.nonNull(oldNodeType)) {
-						String isDelete = getCellValue(row.getCell(2)).toString();
+						String isDelete = getCellValue(row.getCell(3)).toString();
 						if(Objects.equals(isDelete.trim(), "是")) {
 							nodeTypeService.deleteById(oldNodeType.getId());
 							continue;
@@ -175,7 +185,11 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("isDelete")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("classify")) {
+			return false;
+		}
+		
+		if(!getCellValue(row.getCell(3)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;
@@ -205,10 +219,10 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String keyWord) {
+	public Object list(String code,String name,String keyWord,Classify classify) {
 		
 		systemLogService.log("get node type list", this.request.getRequestURL().toString());
-		return getPager(code, name, keyWord, false);
+		return getPager(code, name, keyWord,classify, false);
 	}
 	
 	@RequestMapping(value = "/add")
@@ -218,7 +232,11 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
-		
+		if(map.containsKey("classify")) {
+			nodeType.setClassify(Classify.valueOf(map.get("classify").toString()));
+		}else {
+			nodeType.setClassify(Classify.OTHER);
+		}
 		if(nodeTypeService.findByCode(nodeType.getCode())!=null) {
 			resultData.setCode(2000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
@@ -236,7 +254,11 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		NodeType nodeType = new NodeType();
 		MapToBeanUtil.convert(nodeType, map);
-		
+		if(map.containsKey("classify")) {
+			nodeType.setClassify(Classify.valueOf(map.get("classify").toString()));
+		}else {
+			nodeType.setClassify(Classify.OTHER);
+		}
 		NodeType oldNodeType = nodeTypeService.findByCode(nodeType.getCode());
 		if(oldNodeType!=null && oldNodeType.getCode()!=null&&nodeType.getCode()!=null) {
 			if(!nodeType.getId().equals(oldNodeType.getId())){

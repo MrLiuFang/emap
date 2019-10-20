@@ -138,14 +138,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,Status status,String keyWord) throws IOException, IllegalArgumentException,
+	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,Status status,String keyWord,String roleCode) throws IOException, IllegalArgumentException,
 			IllegalAccessException, NoSuchFieldException, SecurityException {
 		systemLogService.log("user export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("user.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, status,true);
+		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, status,roleCode,true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("賬號", "account"));
 		excelColumn.add(ExcelColumn.build("姓名", "name"));
@@ -160,13 +160,13 @@ public class UserController extends BaseControllerImpl implements BaseController
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
 	}
 
-	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status, Boolean isExport) {
+	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode, Boolean isExport) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
-		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork,status, keyWord);
+		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork,status,roleCode, keyWord);
 		
 		List<AdminUser> list = pager.getResults();
 		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
@@ -195,10 +195,10 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status) {
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode) {
 		
 		systemLogService.log("get user list", this.request.getRequestURL().toString());
-		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord,status, false);
+		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord,status, roleCode,false);
 	}
 	
 	@RequestMapping(value = "/add")

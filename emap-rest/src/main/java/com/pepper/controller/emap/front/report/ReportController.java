@@ -564,7 +564,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId,
-				mapName, buildName, siteName, operatorId, status, employeeId,isOrder,sortBy,isUrgent,isSpecial);
+				mapName, buildName, siteName, operatorId, status, employeeId,isOrder,sortBy,isSpecial,isUrgent);
 		pager.setData("event", convertEventList(pager.getResults(),isUrgent,isSpecial));
 		pager.setResults(null);
 

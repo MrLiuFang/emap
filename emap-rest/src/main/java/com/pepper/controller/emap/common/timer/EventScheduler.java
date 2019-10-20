@@ -158,7 +158,8 @@ public class EventScheduler {
 					return ;
 				}
 			}
-			
+			eventList.setIsSpecial(false);
+			eventListService.update(eventList);
 			if(StringUtils.hasText(eventRule.getFromDateTime())&&StringUtils.hasText(eventRule.getToDateTime())) {
 				Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""));
 				Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""));
