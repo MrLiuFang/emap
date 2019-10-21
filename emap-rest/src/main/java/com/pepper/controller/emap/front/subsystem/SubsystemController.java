@@ -58,7 +58,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	public void export(String name,String code,String nodeCode,Boolean isOnLine) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("help export", this.request.getRequestURL().toString());
+//		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition",
@@ -131,7 +131,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	        }
 			this.subsystemService.saveAll(list);
 		}
-		systemLogService.log("import subsystem");
+//		systemLogService.log("import subsystem");
 		return resultData;
 	}
 	
@@ -216,7 +216,7 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String name,String code,String nodeCode,Boolean isOnLine) {
-		systemLogService.log("get subsystem list", this.request.getRequestURL().toString());
+//		systemLogService.log("get subsystem list", this.request.getRequestURL().toString());
 		return getPager(name,code, nodeCode,isOnLine, false);
 	}
 	

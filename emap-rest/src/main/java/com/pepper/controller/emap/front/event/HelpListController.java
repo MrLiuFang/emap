@@ -69,7 +69,7 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public void export(String code,String name,String nodeTypeId,Integer warningLevel,String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("help export", this.request.getRequestURL().toString());
+//		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("help.xlsx", "UTF-8"));
@@ -177,7 +177,7 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 	        }
 			this.helpListService.saveAll(list);
 		}
-		systemLogService.log("import help list");
+//		systemLogService.log("import help list");
 		return resultData;
 	}
 	
@@ -238,7 +238,7 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public Object list(String code,String name,String nodeTypeId,Integer warningLevel,String keyWord) {
 		
-		systemLogService.log("get help list", this.request.getRequestURL().toString());
+//		systemLogService.log("get help list", this.request.getRequestURL().toString());
 		return getPager(code, name, nodeTypeId, warningLevel, keyWord, false);
 	}
 	

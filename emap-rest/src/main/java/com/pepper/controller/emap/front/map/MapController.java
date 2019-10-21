@@ -77,7 +77,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public void export(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("map export", this.request.getRequestURL().toString());
+//		systemLogService.log("map export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("map.xlsx", "UTF-8"));
@@ -157,7 +157,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	        }
 			this.mapService.saveAll(list);
 		}
-		systemLogService.log("import map");
+//		systemLogService.log("import map");
 		return resultData;
 	}
 	
@@ -281,7 +281,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) {
 		
-		systemLogService.log("get map list", this.request.getRequestURL().toString());
+//		systemLogService.log("get map list", this.request.getRequestURL().toString());
 		return getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,false);
 	}
 

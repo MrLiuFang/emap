@@ -91,7 +91,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	@ResponseBody
 	public void export(String buildingId, String siteId) throws IOException, IllegalArgumentException,
 			IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("screen export", this.request.getRequestURL().toString());
+//		systemLogService.log("screen export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("screen.xlsx", "UTF-8"));
@@ -191,7 +191,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	        }
 			this.screenService.saveAll(list);
 		}
-		systemLogService.log("import screen", this.request.getRequestURL().toString());
+//		systemLogService.log("import screen", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -247,7 +247,7 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 	@ResponseBody
 	public Object list(String buildingId, String siteId) {
 
-		systemLogService.log("get screen list", this.request.getRequestURL().toString());
+//		systemLogService.log("get screen list", this.request.getRequestURL().toString());
 		return getPager(buildingId, siteId, false);
 	}
 

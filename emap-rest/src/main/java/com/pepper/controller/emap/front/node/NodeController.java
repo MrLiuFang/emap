@@ -109,7 +109,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	public void export(String code, String name, String source, String sourceCode, String mapId, String nodeTypeId,
 			String siteId, String buildId, String floor, String hasXY, String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("node export", this.request.getRequestURL().toString());
+//		systemLogService.log("node export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("node.xlsx", "UTF-8"));
@@ -169,7 +169,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	public Object list(String code, String name, String source, String sourceCode, String mapId, String nodeTypeId,
 			String siteId, String buildId, String floor, String hasXY, String keyWord) {
 
-		systemLogService.log("get node list", this.request.getRequestURL().toString());
+//		systemLogService.log("get node list", this.request.getRequestURL().toString());
 		return getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord,
 				false);
 	}
@@ -316,7 +316,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 			MultipartFile file = files.get(fileName);
 			return importNode(file.getInputStream(), fileName);
 		}
-		systemLogService.log("node import camera", this.request.getRequestURL().toString());
+//		systemLogService.log("node import camera", this.request.getRequestURL().toString());
 		return resultData;
 	}
 
@@ -553,7 +553,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 
 		}
 		this.nodeService.saveAll(list);
-		systemLogService.log("node import", this.request.getRequestURL().toString());
+//		systemLogService.log("node import", this.request.getRequestURL().toString());
 		return resultData;
 	}
 
@@ -670,7 +670,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 			returnList.add(nodeVo);
 		}
 		resultData.setData("node", returnList);
-		systemLogService.log("get node for map list", this.request.getRequestURL().toString());
+//		systemLogService.log("get node for map list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 
@@ -678,7 +678,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object openDoor(String nodeId) throws Exception {
-		systemLogService.log("open door", this.request.getRequestURL().toString());
+//		systemLogService.log("open door", this.request.getRequestURL().toString());
 		ResultData resultData = new ResultData();
 		Node node = this.nodeService.findById(nodeId);
 		if (node == null) {

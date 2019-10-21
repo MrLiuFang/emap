@@ -75,7 +75,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public void export(String name,String email,String siteId,String idCard,String status,String staffType,String userNo,String sex,String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("staff export", this.request.getRequestURL().toString());
+//		systemLogService.log("staff export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("staff.xlsx", "UTF-8"));
@@ -149,7 +149,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object list(String name,String email,String siteId,String idCard,String status,String staffType,String userNo,String sex,String keyWord) {
 		
-		systemLogService.log("get staff list", this.request.getRequestURL().toString());
+//		systemLogService.log("get staff list", this.request.getRequestURL().toString());
 		return getPager(name, email, siteId, idCard,status,staffType,userNo,sex, keyWord, false);
 	}
 
@@ -333,7 +333,7 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 			
 			this.staffService.saveAll(list);
 		}
-		systemLogService.log("staff import");
+//		systemLogService.log("staff import");
 		return resultData;
 	}
 	

@@ -185,7 +185,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
-		systemLogService.log("get event list", this.request.getRequestURL().toString());
+//		systemLogService.log("get event list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -204,7 +204,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
 		pager.setData("eventList",convertVo(list));
-		systemLogService.log("get event automatic list", this.request.getRequestURL().toString());
+//		systemLogService.log("get event automatic list", this.request.getRequestURL().toString());
 		return pager;
 		
 	}
@@ -242,7 +242,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setOperator(currentUser.getId());
 			eventListService.update(eventList);
 		}
-		systemLogService.log("event to me", this.request.getRequestURL().toString());
+//		systemLogService.log("event to me", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -250,7 +250,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object eventForMeHandle(Boolean isHandle,String id,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss" ) Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss" ) Date endDate) {
-		systemLogService.log("event for me handle", this.request.getRequestURL().toString());
+//		systemLogService.log("event for me handle", this.request.getRequestURL().toString());
 		return eventForMeEx(true,id,startDate,endDate);
 	}
 	
@@ -258,7 +258,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object eventForMeNoHandle(Boolean isHandle,String id) {
-		systemLogService.log("event for me no handle", this.request.getRequestURL().toString());
+//		systemLogService.log("event for me no handle", this.request.getRequestURL().toString());
 		return eventForMeEx(false,id,null,null);
 	}
 	
@@ -310,7 +310,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			pager.setData("helpList", pager.getResults());
 			pager.setResults(null);
 		}
-		systemLogService.log("get event help", this.request.getRequestURL().toString());
+//		systemLogService.log("get event help", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -461,7 +461,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		pager.setData("historyEvent", convertHistoryEventList(list));
 		pager.setResults(null);
-		systemLogService.log("event history list", this.request.getRequestURL().toString());
+//		systemLogService.log("event history list", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -474,7 +474,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		pager.setData("historyEvent",  convertHistoryEventList(pager.getResults()));
 		pager.setResults(null);
-		systemLogService.log("event historyEventList ", this.request.getRequestURL().toString());
+//		systemLogService.log("event historyEventList ", this.request.getRequestURL().toString());
 		return pager;
 	}
 	
@@ -751,7 +751,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventListService.update(eventList);
 		}
 		resultData.setData("eventList", list);
-		systemLogService.log("event to operator round robin", this.request.getRequestURL().toString());
+//		systemLogService.log("event to operator round robin", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

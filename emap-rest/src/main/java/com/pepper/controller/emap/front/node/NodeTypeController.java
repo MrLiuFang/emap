@@ -67,7 +67,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public void export(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId,Classify classify) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("nodeType export", this.request.getRequestURL().toString());
+//		systemLogService.log("nodeType export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("nodeType.xlsx", "UTF-8"));
@@ -167,7 +167,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	        }
 			this.nodeTypeService.saveAll(list);
 		}
-		systemLogService.log("import nodeType");
+//		systemLogService.log("import nodeType");
 		return resultData;
 	}
 	
@@ -221,7 +221,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public Object list(String code,String name,String keyWord,Classify classify) {
 		
-		systemLogService.log("get node type list", this.request.getRequestURL().toString());
+//		systemLogService.log("get node type list", this.request.getRequestURL().toString());
 		return getPager(code, name, keyWord,classify, false);
 	}
 	
@@ -279,7 +279,7 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		resultData.setData("nodeType",convertNodeTypeVo(nodeTypeService.findById(id)));
-		systemLogService.log("get node type info", this.request.getRequestURL().toString());
+//		systemLogService.log("get node type info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

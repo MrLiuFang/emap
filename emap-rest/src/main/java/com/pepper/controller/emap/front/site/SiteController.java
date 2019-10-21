@@ -59,7 +59,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public void export(String code,String name,String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("help export", this.request.getRequestURL().toString());
+//		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition",
@@ -145,7 +145,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	        }
 			this.siteInfoService.saveAll(list);
 		}
-		systemLogService.log("import help");
+//		systemLogService.log("import help");
 		return resultData;
 	}
 	
@@ -195,7 +195,7 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object list(String code,String name,String keyWord) {
 		
-		systemLogService.log("get site list", this.request.getRequestURL().toString());
+//		systemLogService.log("get site list", this.request.getRequestURL().toString());
 		return getPager(code, name, keyWord, false);
 	}
 	

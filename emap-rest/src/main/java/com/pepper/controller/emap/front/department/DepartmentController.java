@@ -64,7 +64,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	@ResponseBody
 	public void export(String name,String code,String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("department export", this.request.getRequestURL().toString());
+//		systemLogService.log("department export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("department.xlsx", "UTF-8"));
@@ -178,7 +178,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	@ResponseBody
 	public Object list(String name,String code,String keyWord) {
 		
-		systemLogService.log("get department list", this.request.getRequestURL().toString());
+//		systemLogService.log("get department list", this.request.getRequestURL().toString());
 		return getPager(name, code, keyWord, false);
 	}
 	
@@ -316,7 +316,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		BeanUtils.copyProperties(department, departmentVo);
 		departmentVo.setDepartmentGroup(departmentGroupService.findByDepartmentId(department.getId()));
 		resultData.setData("department",departmentVo);
-		systemLogService.log("get department info", this.request.getRequestURL().toString());
+//		systemLogService.log("get department info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

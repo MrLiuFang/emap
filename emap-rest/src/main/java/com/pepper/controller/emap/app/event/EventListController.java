@@ -130,7 +130,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object list(Boolean isFinish) {
-		systemLogService.log("App event list", this.request.getRequestURL().toString());
+//		systemLogService.log("App event list", this.request.getRequestURL().toString());
 		
 		AdminUser adminUser =  (AdminUser) this.getCurrentUser();
 		if(!isFinish) {
@@ -175,7 +175,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 	@ResponseBody
 	@Authorize(authorizeResources = false)
 	public Object actionList(String id) throws IOException {
-		systemLogService.log("App action list", this.request.getRequestURL().toString());
+//		systemLogService.log("App action list", this.request.getRequestURL().toString());
 		ResultData resultData = new ResultData();
 		ActionList actionList = actionListService.findById(id);
 		EventList eventList = this.eventListService.findById(actionList.getEventListId());
@@ -215,7 +215,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		pager.setData("eventList",convertVo(pager.getResults()));
 		pager.setResults(null);
 		
-		systemLogService.log("App event transfer list", this.request.getRequestURL().toString());
+//		systemLogService.log("App event transfer list", this.request.getRequestURL().toString());
 		return pager;
 		
 	}
@@ -302,7 +302,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 		}
 		resultData.setData("finishActionList",finishActionList);
 		
-		systemLogService.log("App event info", this.request.getRequestURL().toString());
+//		systemLogService.log("App event info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -706,7 +706,7 @@ public class EventListController  extends BaseControllerImpl implements BaseCont
 //			eventListVo.setVideoUrl(this.fileService.getUrl(eventList.getVideo()));
 			returnList.add(eventListVo);
 		}
-		pager.setData("eventList", returnList);
+//		pager.setData("eventList", returnList);
 		pager.setResults(null);
 		
 		return pager;

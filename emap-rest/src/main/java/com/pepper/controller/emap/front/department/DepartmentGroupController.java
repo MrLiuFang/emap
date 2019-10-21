@@ -68,7 +68,7 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 	@ResponseBody
 	public void export(String code, String departmentId,String name) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("departmentGroup export", this.request.getRequestURL().toString());
+//		systemLogService.log("departmentGroup export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("departmentGroup.xlsx", "UTF-8"));
@@ -173,7 +173,7 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 	        }
 			this.departmentGroupService.saveAll(list);
 		}
-		systemLogService.log("import departmentGroup");
+//		systemLogService.log("import departmentGroup");
 		return resultData;
 	}
 	
@@ -232,7 +232,7 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 	@ResponseBody
 	public Object list(String code,String departmentId,String name) {
 		
-		systemLogService.log("get department group list", this.request.getRequestURL().toString());
+//		systemLogService.log("get department group list", this.request.getRequestURL().toString());
 		return getPager(code,departmentId, name, false);
 	}
 	

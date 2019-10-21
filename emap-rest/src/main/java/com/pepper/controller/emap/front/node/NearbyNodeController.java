@@ -105,7 +105,7 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 			nearbyNodeVo.setNearbyNode(listNodeVo);
 		}
 		resultData.setData(nearbyNodeVo);
-		systemLogService.log("get nearby node list", this.request.getRequestURL().toString());
+//		systemLogService.log("get nearby node list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

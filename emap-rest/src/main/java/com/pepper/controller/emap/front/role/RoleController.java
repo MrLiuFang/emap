@@ -84,7 +84,7 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public void export(Boolean isDefault) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("staff export", this.request.getRequestURL().toString());
+//		systemLogService.log("staff export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("role.xlsx", "UTF-8"));
@@ -167,7 +167,7 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	        }
 			this.roleService.saveAll(list);
 		}
-		systemLogService.log("import screen", this.request.getRequestURL().toString());
+//		systemLogService.log("import screen", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -221,7 +221,7 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 	@ResponseBody
 	public Object list(Boolean isDefault) {
 		
-		systemLogService.log("role list", this.request.getRequestURL().toString());
+//		systemLogService.log("role list", this.request.getRequestURL().toString());
 		return getPager(isDefault,false);
 	}
 	
@@ -395,7 +395,7 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 			}
 		}
 		resultData.setData("list", returnList);
-		systemLogService.log("roleUser list", this.request.getRequestURL().toString());
+//		systemLogService.log("roleUser list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

@@ -54,7 +54,7 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		List<MenuVo> list = this.menuService.queryMenu(parentId, true, menuType);
 		resultData.setData("menu",list);
-		systemLogService.log("get menuCatalog list", this.request.getRequestURL().toString());
+//		systemLogService.log("get menuCatalog list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -93,7 +93,7 @@ public class IsmsMenuController extends BaseControllerImpl implements BaseContro
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		resultData.setData("menu",menuService.findById(id));
-		systemLogService.log("get menu info", this.request.getRequestURL().toString());
+//		systemLogService.log("get menu info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

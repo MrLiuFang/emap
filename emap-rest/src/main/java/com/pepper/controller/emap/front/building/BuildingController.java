@@ -65,7 +65,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 	@ResponseBody
 	public void export(String code, String name, String siteId, String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("get build export", this.request.getRequestURL().toString());
+//		systemLogService.log("get build export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("build.xlsx", "UTF-8"));
@@ -196,7 +196,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String code, String name, String siteId, String keyWord) {
-		systemLogService.log("get build list", this.request.getRequestURL().toString());
+//		systemLogService.log("get build list", this.request.getRequestURL().toString());
 		return getPager(code, name, siteId, keyWord, false);
 	}
 
@@ -284,7 +284,7 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		buildingInfoVo.setSite(this.siteInfoService.findById(buildingInfo.getSiteInfoId()));
 		resultData.setData("build", buildingInfoVo);
 
-		systemLogService.log("get build info ", this.request.getRequestURL().toString());
+//		systemLogService.log("get build info ", this.request.getRequestURL().toString());
 		return resultData;
 	}
 

@@ -79,7 +79,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	public void export(String nodeId,String nodeTypeId, Integer warningLevel, String keyWord) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("help export", this.request.getRequestURL().toString());
+//		systemLogService.log("help export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition",
@@ -201,7 +201,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 			}
 			this.eventRuleService.saveAll(list);
 		}
-		systemLogService.log("import event rule");
+//		systemLogService.log("import event rule");
 		return resultData;
 	}
 
@@ -285,7 +285,7 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	public Object list(String nodeId,String nodeTypeId, Integer warningLevel) {
 
-		systemLogService.log("get event rule list", this.request.getRequestURL().toString());
+//		systemLogService.log("get event rule list", this.request.getRequestURL().toString());
 		return getPager(nodeId,nodeTypeId, warningLevel, false);
 	}
 

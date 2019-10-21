@@ -49,7 +49,7 @@ public class SystemLogController extends BaseControllerImpl implements BaseContr
 	@ResponseBody
 	public void export(String userName,String account,String role,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date endDate) throws IOException,
 			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("staff export", this.request.getRequestURL().toString());
+//		systemLogService.log("staff export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("systemlog.xlsx", "UTF-8"));
@@ -97,7 +97,7 @@ public class SystemLogController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String userName,String account,String role,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss") Date endDate) {
-		systemLogService.log("get system log list", this.request.getRequestURI());
+//		systemLogService.log("get system log list", this.request.getRequestURI());
 		
 		return getPager(userName, account, role, startDate, endDate, false);
 	}

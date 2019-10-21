@@ -140,7 +140,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,Status status,String keyWord,String roleCode) throws IOException, IllegalArgumentException,
 			IllegalAccessException, NoSuchFieldException, SecurityException {
-		systemLogService.log("user export", this.request.getRequestURL().toString());
+//		systemLogService.log("user export", this.request.getRequestURL().toString());
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("user.xlsx", "UTF-8"));
@@ -197,7 +197,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode) {
 		
-		systemLogService.log("get user list", this.request.getRequestURL().toString());
+//		systemLogService.log("get user list", this.request.getRequestURL().toString());
 		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord,status, roleCode,false);
 	}
 	
@@ -314,7 +314,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setData("role", returnListRole);
 		}
 		
-		systemLogService.log("get user to edit", this.request.getRequestURL().toString());
+//		systemLogService.log("get user to edit", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -535,7 +535,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			}
 			
 		}
-		systemLogService.log("user import");
+//		systemLogService.log("user import");
 		return resultData;
 	}
 	

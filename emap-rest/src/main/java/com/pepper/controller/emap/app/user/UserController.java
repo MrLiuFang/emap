@@ -95,7 +95,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
 		resultData.setData("user", adminUserVo);
 		
-		systemLogService.log("app get user info", this.request.getRequestURL().toString());
+//		systemLogService.log("app get user info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -129,7 +129,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return resultData;
 		}		
 		resultData.setData("user", convertDepartmentVo1(department));
-		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -164,7 +164,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		valueOperationsService.set("userDeviceId_"+currentUser.getId(), map.get("deviceId"));
 		
-		systemLogService.log("app bind device id", this.request.getRequestURL().toString());
+//		systemLogService.log("app bind device id", this.request.getRequestURL().toString());
 		return new ResultData();
 	}
 	
@@ -190,7 +190,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 			}
 		}
 		resultData.setData("user", departmentVo1);
-		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
