@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -98,6 +99,9 @@ public class NodeTypeController extends BaseControllerImpl implements BaseContro
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_code&name",keyWord );
 		}
+		
+		pager.getJpqlParameter().setSortParameter("code", Direction.DESC);
+		
 		pager = nodeTypeService.findNavigator(pager);
 		List<NodeType> list = pager.getResults();
 		List<NodeTypeVo> returnList = new ArrayList<NodeTypeVo>();

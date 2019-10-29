@@ -191,7 +191,8 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 
 	private String setLoginInfo(AdminUser user, List<String> resourceList) {
 		String token = UUID.randomUUID().toString();
-
+		String oldToken = valueOperationsService.get(user.getId() + GlobalConstant.AUTHORIZE_TOKEN);
+		frontAuthorize.deleteAuthorizeInfo(oldToken);
 		// 记录用户登录状态
 		frontAuthorize.setAuthorizeInfo(user.getId(), token);
 		// 先删除以前的权限资源

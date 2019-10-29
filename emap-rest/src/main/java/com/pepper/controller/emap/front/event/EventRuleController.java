@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -119,6 +120,8 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		if (warningLevel != null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL + "_warningLevel", warningLevel);
 		}
+		pager.getJpqlParameter().setSortParameter("nodeTypeId",Direction.ASC);
+		pager.getJpqlParameter().setSortParameter("nodeId",Direction.ASC);
 		pager = eventRuleService.findNavigator(pager);
 		List<EventRule> list = pager.getResults();
 		List<EventRuleVo> returnList = new ArrayList<EventRuleVo>();

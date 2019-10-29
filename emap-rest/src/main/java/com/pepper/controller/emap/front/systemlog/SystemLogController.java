@@ -69,7 +69,7 @@ public class SystemLogController extends BaseControllerImpl implements BaseContr
 		Pager<SystemLog> pager = new Pager<SystemLog>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
-			pager.setPageSize(500);
+			pager.setPageSize(10000);
 		}
 		if(StringUtils.hasText(userName)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_userName", userName);

@@ -189,6 +189,8 @@ public class EventListDaoImpl  implements EventListDaoEx {
 				jpql.append(" and (el.status = :status1 or el.status = :status2) ");
 				searchParameter.put("status1", status.split(",")[0]);
 				searchParameter.put("status2", status.split(",")[1]);
+			}else if(java.util.Objects.equals(status.toUpperCase(), "NULL")) {
+				jpql.append(" and (el.status is null or el.status = 'N') ");
 			}else {
 				jpql.append(" and el.status = :status  ");
 				searchParameter.put("status", status);

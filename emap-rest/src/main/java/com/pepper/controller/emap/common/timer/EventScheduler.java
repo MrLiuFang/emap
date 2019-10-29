@@ -150,9 +150,13 @@ public class EventScheduler {
 					
 					if(StringUtils.hasText(eventRule.getsMSReceiver())) {
 						eventMessage.setType(2);
-						eventMessage.setMobile(eventRule.getsMSReceiver());
 						eventMessage.setMessage(eventRule.getsMSContent());
-						eventMessageService.save(eventMessage);
+						String[] mobile = eventRule.getsMSReceiver().split(";");
+						for(String str : mobile) {
+							eventMessage.setMobile(str);
+							eventMessageService.save(eventMessage);
+							eventMessage.setId(null);
+						}						
 					}
 					
 					return ;

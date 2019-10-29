@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -107,6 +108,8 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&code",keyWord );
 		}
+		pager.getJpqlParameter().setSortParameter("code",Direction.ASC);
+		
 		pager = helpListService.findNavigator(pager);
 		List<HelpList> list = pager.getResults();
 		List<HelpListVo> returnList = new ArrayList<HelpListVo>();
