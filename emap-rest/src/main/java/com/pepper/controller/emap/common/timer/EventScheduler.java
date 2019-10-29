@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Resource;
 
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
 import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
@@ -29,6 +31,7 @@ import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
+import com.pepper.service.emap.department.DepartmentService;
 import com.pepper.service.emap.event.EventDispatchService;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.emap.event.EventMessageService;
@@ -68,6 +71,9 @@ public class EventScheduler {
 	
 	@Reference
 	private DepartmentGroupService departmentGroupService;
+	
+	@Reference
+	private DepartmentService departmentService;
 	
 	@Reference
 	private HelpListService helpListService;
@@ -150,7 +156,8 @@ public class EventScheduler {
 					
 					if(StringUtils.hasText(eventRule.getsMSReceiver())) {
 						eventMessage.setType(2);
-						eventMessage.setMessage(eventRule.getsMSContent());
+						Department department = this.departmentService.findById(eventRule.getSpecialDepartmentId());
+						eventMessage.setMessage(eventList.getEventDate()+ "/" + (Objects.nonNull(department)?department.getName():"") + "/"+ eventList.getEventName() + "/"+ eventRule.getsMSContent());
 						String[] mobile = eventRule.getsMSReceiver().split(";");
 						for(String str : mobile) {
 							eventMessage.setMobile(str);
