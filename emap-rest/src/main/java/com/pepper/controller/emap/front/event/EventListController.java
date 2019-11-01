@@ -909,6 +909,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		for(AdminUser adminUser : listManagerUser) {
 			if(StringUtils.hasText(adminUser.getEmail())) {
 				EventMessage eventMessage = new EventMessage();
+				eventMessage.setType(1);
 				eventMessage.setTitle(eventList.getEventName()+"處理情況");
 				eventMessage.setEmail(adminUser.getEmail());
 				eventMessage.setMessage(eventList.getEventName()+"處理情況："+(actionList==null?"":actionList.getContent()));
