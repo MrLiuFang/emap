@@ -14,5 +14,5 @@ public interface ActionListDao extends BaseDao<ActionList> {
 	
 	public List<ActionList> findByEventListId(String eventListId); 
 	
-	public ActionList findOneByEventListIdOrderByCreateDateDesc(String eventListId);
+	public List<ActionList> findOneByEventListIdOrderByCreateDateDesc(String eventListId);
 }

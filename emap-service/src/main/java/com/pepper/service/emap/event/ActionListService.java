@@ -13,5 +13,5 @@ public interface ActionListService extends BaseService<ActionList> {
 	
 	public List<ActionList> findByEventListId(String eventListId); 
 	
-	public ActionList findActionList(String eventListId); 
+	public List<ActionList> findActionList(String eventListId); 
 }

@@ -669,10 +669,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object eventListHelpList(String id) throws IOException {
 		ResultData resultData = new ResultData();
 		EventList eventList = this.eventListService.findById(id);
-		ActionList actionList = this.actionListService.findActionList(eventList.getId());
+		List<ActionList> list = this.actionListService.findActionList(eventList.getId());
 		ObjectMapper objectMapper = new ObjectMapper();
 		List<HelpList> returnList = new ArrayList<HelpList>();
-		if(actionList!=null) {
+		if(Objects.nonNull(list)&&list.size()>0) {
+			ActionList actionList = list.get(0);
 			String helpList = actionList.getHelpId();
 			if(StringUtils.hasText(helpList)) {
 				ArrayNode arrayNode =  (ArrayNode) objectMapper.readTree(helpList);
@@ -902,10 +903,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			return ;
 		}
 		List<AdminUser> listManagerUser= adminUserService.findByDepartmentIdAndIsManagerAndDepartmentGroupIdIsNullOrDepartmentGroupId(admiUser.getDepartmentId(),true);
-		ActionList actionList = this.actionListService.findActionList(eventList.getId());
-		if(Objects.isNull(actionList)) {
+		List<ActionList> list = this.actionListService.findActionList(eventList.getId());
+		if(Objects.isNull(list) || list.size()<=0) {
 			return ;
 		}
+		ActionList actionList = list.get(0);
 		for(AdminUser adminUser : listManagerUser) {
 			if(StringUtils.hasText(adminUser.getEmail())) {
 				EventMessage eventMessage = new EventMessage();
