@@ -126,19 +126,19 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1000005);
 			return resultData;
 		}
-		for(Role role : roleList) {
-			if(role.getCode().equals("EMPLOYEE_ROLE")) {
-				resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
-				resultData.setCode(1000007);
-				return resultData;
-			}
+//		for(Role role : roleList) {
+//			if(role.getCode().equals("EMPLOYEE_ROLE")) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
+//				resultData.setCode(1000007);
+//				return resultData;
+//			}
 //			if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
 //				resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
 //				resultData.setStatus(Status.LOGIN_FAIL.getKey());
 //				resultData.setCode(1000006);
 //				return resultData;
 //			}
-		}
+//		}
 		
 		if(userReal.getIsNeverExpire()!=null && userReal.getIsNeverExpire()) {
 			if(userReal.getUpdatePasswordDate()!=null) {
