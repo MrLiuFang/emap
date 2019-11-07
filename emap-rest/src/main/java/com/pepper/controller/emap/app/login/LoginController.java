@@ -146,7 +146,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			return resultData;
 		}
 		
-		if(userReal.getIsNeverExpire()!=null && userReal.getIsNeverExpire()) {
+		if(userReal.getIsNeverExpire()!=null && !userReal.getIsNeverExpire()) {
 			if(userReal.getUpdatePasswordDate()!=null) {
 				if((LocalDate.now().toEpochDay() - userReal.getUpdatePasswordDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())>=30) {
 					resultData.setMessage(Internationalization.getMessageInternationalization(1000009));
@@ -157,7 +157,7 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			}
 		}
 		
-		if(userReal.getAutomaticLogOutDate()!=null) {
+		if(userReal.getAutomaticLogOutDate()!=null && userReal.getIsNeverExpire()!=null &&!userReal.getIsNeverExpire()) {
 			if(userReal.getUpdatePasswordDate()!=null) {
 				if((LocalDate.now().toEpochDay() - userReal.getAutomaticLogOutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())>=0) {
 					resultData.setMessage(Internationalization.getMessageInternationalization(1000010));
