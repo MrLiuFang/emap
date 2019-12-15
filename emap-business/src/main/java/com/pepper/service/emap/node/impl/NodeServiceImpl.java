@@ -48,6 +48,14 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 	@Override
 	public Node findByName(String name) {
 		return nodeDao.findFirstByName(name);
+<<<<<<< HEAD
+=======
+	}
+	
+	@Override
+	public List<Node> findByNameLike(String name) {
+		return nodeDao.findByNameLike("%"+name+"%");
+>>>>>>> refs/heads/master
 	}
 
 	

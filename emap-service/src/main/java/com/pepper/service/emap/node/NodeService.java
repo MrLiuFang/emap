@@ -45,4 +45,9 @@ public interface NodeService extends BaseService<Node> {
 	public Node findByCode(String code);
 	
 	public Node findByName(String name);
+<<<<<<< HEAD
+=======
+
+	List<Node> findByNameLike(String name);
+>>>>>>> refs/heads/master
 }

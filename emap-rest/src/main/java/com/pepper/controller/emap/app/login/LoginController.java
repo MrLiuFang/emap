@@ -176,6 +176,10 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		// 获取用户所有资源，并让其处于登录状态。
 		//List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
 		String token = setLoginInfo(userReal, null);
+<<<<<<< HEAD
+=======
+		resultData.setData("userInfo", userReal);
+>>>>>>> refs/heads/master
 		resultData.setData("token", token);
 		resultData.setData("role", roleList);
 		resultData.setData("isManager", userReal.getIsManager());

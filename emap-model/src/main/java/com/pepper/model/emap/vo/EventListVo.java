@@ -50,9 +50,46 @@ public class EventListVo extends EventList implements Comparable<EventListVo> {
 	
 	private String videoUrl;
 	
+<<<<<<< HEAD
 	
 //	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
 	
+=======
+	private Boolean isEmployeeTransfer;
+	
+	private Map<String,Object> employeeTransferFIle;
+	
+	private String transferRemarks;
+
+//	private List<Map<String,Object>> assist = new ArrayList<Map<String,Object>>();
+	
+	
+
+	public String getTransferRemarks() {
+		return transferRemarks;
+	}
+
+	public Map<String, Object> getEmployeeTransferFIle() {
+		return employeeTransferFIle;
+	}
+
+	public void setEmployeeTransferFIle(Map<String, Object> employeeTransferFIle) {
+		this.employeeTransferFIle = employeeTransferFIle;
+	}
+
+	public void setTransferRemarks(String transferRemarks) {
+		this.transferRemarks = transferRemarks;
+	}
+
+	public Boolean getIsEmployeeTransfer() {
+		return isEmployeeTransfer;
+	}
+
+	public void setIsEmployeeTransfer(Boolean isEmployeeTransfer) {
+		this.isEmployeeTransfer = isEmployeeTransfer;
+	}
+
+>>>>>>> refs/heads/master
 	public String getVideoUrl() {
 		return videoUrl;
 	}

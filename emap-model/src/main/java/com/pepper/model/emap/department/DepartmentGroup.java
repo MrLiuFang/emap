@@ -1,5 +1,6 @@
 package com.pepper.model.emap.department;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -23,9 +24,42 @@ public class DepartmentGroup  extends BaseModel {
 	
 	private String name;
 	
+	private String colour;
+	
+	@Column( name = "labelled_alphabet")
+	private String labelledAlphabet;
+	
+	private String remark;
+	
 	private String startTime;
 	
 	private String endTime;
+	
+	
+
+	public String getColour() {
+		return colour;
+	}
+
+	public void setColour(String colour) {
+		this.colour = colour;
+	}
+
+	public String getLabelledAlphabet() {
+		return labelledAlphabet;
+	}
+
+	public void setLabelledAlphabet(String labelledAlphabet) {
+		this.labelledAlphabet = labelledAlphabet;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
 
 	public String getDepartmentId() {
 		return departmentId;

@@ -29,7 +29,11 @@ public class ActionListServiceImpl extends BaseServiceImpl<ActionList> implement
 
 	@Override
 	public List<ActionList> findActionList(String eventListId) {
+<<<<<<< HEAD
 		return actionListDao.findOneByEventListIdOrderByCreateDateDesc(eventListId);
+=======
+		return actionListDao.findFirstByEventListIdOrderByCreateDateDesc(eventListId);
+>>>>>>> refs/heads/master
 	}
 
 //	@Override

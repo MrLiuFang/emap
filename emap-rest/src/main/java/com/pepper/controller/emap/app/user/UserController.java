@@ -153,8 +153,44 @@ public class UserController extends BaseControllerImpl implements BaseController
 			departmentGroupV1.setUser(listAdminUserVo);
 			listDepartmentGroupV1.add(departmentGroupV1);
 		}
+		listDepartmentGroupV1.add(setDepartmentManager(department.getId()));
+//		listDepartmentGroupV1.add(setNoDepartment());
 		departmentVo1.setDepartmentGroup(listDepartmentGroupV1);
 		return departmentVo1;
+<<<<<<< HEAD
+=======
+	}
+	
+	private DepartmentGroupVo1 setDepartmentManager(String departmentId) {
+		List<AdminUser> listAdminUser  = adminUserService.findByDepartmentId(departmentId, true);
+//		listAdminUser.addAll(adminUserService.findEmployeeUserNotInDepartment());
+		DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+		departmentGroupV1.setName("未分組");
+		List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+		for(AdminUser adminUser : listAdminUser) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(adminUser, adminUserVo);
+			adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+			listAdminUserVo.add(adminUserVo);
+		}
+		departmentGroupV1.setUser(listAdminUserVo);
+		return departmentGroupV1;
+	}
+
+	private DepartmentGroupVo1 setNoDepartment() {
+		List<AdminUser> listAdminUser  = adminUserService.findEmployeeUserNotInDepartment();
+		DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+		departmentGroupV1.setName("无部门");
+		List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+		for(AdminUser adminUser : listAdminUser) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(adminUser, adminUserVo);
+			adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+			listAdminUserVo.add(adminUserVo);
+		}
+		departmentGroupV1.setUser(listAdminUserVo);
+		return departmentGroupV1;
+>>>>>>> refs/heads/master
 	}
 	
 	@RequestMapping(value = "/bindDeviceId")

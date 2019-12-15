@@ -52,6 +52,10 @@ public class HelpListServiceImpl extends BaseServiceImpl<HelpList> implements He
 
 	@Override
 	public HelpList findByCode(String code) {
+<<<<<<< HEAD
 		return helpListDao.findOneByCode(code);
+=======
+		return helpListDao.findFirstByCode(code);
+>>>>>>> refs/heads/master
 	}
 }

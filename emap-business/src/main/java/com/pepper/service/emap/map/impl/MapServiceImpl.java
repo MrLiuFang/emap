@@ -20,7 +20,11 @@ public class MapServiceImpl extends BaseServiceImpl<Map> implements MapService {
 
 	@Override
 	public Map findByCode(String code) {
+<<<<<<< HEAD
 		return mapDao.findOneByCode(code);
+=======
+		return mapDao.findFirstByCode(code);
+>>>>>>> refs/heads/master
 	}
 
 	@Override

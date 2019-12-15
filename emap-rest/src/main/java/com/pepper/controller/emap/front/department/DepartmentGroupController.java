@@ -36,6 +36,7 @@ import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
+import com.pepper.core.ResultEnum;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
@@ -138,6 +139,7 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 			int totalRowNum = sheet.getLastRowNum();
 			if(!check(sheet.getRow(0))) {
 				resultData.setMessage("数据错误！");
+<<<<<<< HEAD
 				return resultData;
 			}
 			for(int i = 1 ; i <= totalRowNum ; i++)
@@ -186,6 +188,57 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 	
 	private Boolean check(Row row) {
 		if(!getCellValue(row.getCell(0)).toString().equals("departmentCode")) {
+=======
+				resultData.setCode(ResultEnum.Status.LOGIC_ERROR.getKey());
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				DepartmentGroup departmentGroup = new DepartmentGroup();
+				String department = getCellValue(row.getCell(0)).toString();
+				departmentGroup.setCode(getCellValue(row.getCell(1)).toString());
+				departmentGroup.setName(getCellValue(row.getCell(2)).toString());
+				departmentGroup.setStartTime(getCellValue(row.getCell(3)).toString());
+				departmentGroup.setEndTime(getCellValue(row.getCell(4)).toString());
+				if (StringUtils.hasText(department)&&departmentService.findByCode(department) != null) {
+					departmentGroup.setDepartmentId(departmentService.findByCode(department).getId());
+				}else {
+					continue;
+				}
+				
+				if (StringUtils.hasText(departmentGroup.getCode())) {
+					DepartmentGroup oldDepartmentGroup = departmentGroupService.findByCode(departmentGroup.getCode());
+					if(Objects.nonNull(oldDepartmentGroup)) {
+						String isDelete = getCellValue(row.getCell(5)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							departmentGroupService.deleteById(oldDepartmentGroup.getId());
+							continue;
+						}else {
+							departmentGroup.setId(oldDepartmentGroup.getId());
+							departmentGroupService.update(departmentGroup);
+							continue;
+						}
+					}
+					list.add(departmentGroup);
+				}
+	        }
+			this.departmentGroupService.saveAll(list);
+		}
+//		systemLogService.log("import departmentGroup");
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("department")) {
+>>>>>>> refs/heads/master
 			return false;
 		}
 		if(!getCellValue(row.getCell(1)).toString().equals("code")) {

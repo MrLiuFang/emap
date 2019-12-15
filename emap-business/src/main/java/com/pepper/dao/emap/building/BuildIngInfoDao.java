@@ -10,8 +10,8 @@ public interface BuildIngInfoDao extends BaseDao<BuildingInfo> {
 	 * @param code
 	 * @return
 	 */
-	public BuildingInfo findOneByCode(String code);
+	public BuildingInfo findFirstByCode(String code);
 	
 	
-	public BuildingInfo findOneByName(String name);
+	public BuildingInfo findFirstByName(String name);
 }

@@ -7,7 +7,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.pepper.core.IEnum;
 
 public enum Classify implements IEnum {
+<<<<<<< HEAD
 	DOOR(0, "门"), CAMERA(1, "摄像头"),OTHER(2, "其它");
+=======
+	DOOR(0, "门"), CAMERA(1, "摄像头"),OTHER(2, "其它")
+	,VIDEO_CAMERA(3, "摄像机"),DOOR_MAGENTIC_LOCK(4, "门磁锁"),CARD_READER(5, "读卡器")
+	,DETECTOR(6, "检测器"),GATE_CONTROL(7, "门控制"),SERVER(8, "服务器");
+>>>>>>> refs/heads/master
 
 	private final int key;
 

@@ -24,5 +24,9 @@ public interface SiteInfoDao  extends BaseDao<SiteInfo> {
 	 * @param code
 	 * @return
 	 */
+<<<<<<< HEAD
 	public SiteInfo findOneByName(String name);
+=======
+	public SiteInfo findFirstByName(String name);
+>>>>>>> refs/heads/master
 }

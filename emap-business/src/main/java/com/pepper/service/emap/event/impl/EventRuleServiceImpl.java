@@ -17,12 +17,20 @@ public class EventRuleServiceImpl extends BaseServiceImpl<EventRule> implements 
 	
 	@Override
 	public EventRule findByNodeId(String nodeId) {
+<<<<<<< HEAD
 		return eventRuleDao.findOneByNodeId(nodeId);
+=======
+		return eventRuleDao.findFirstByNodeId(nodeId);
+>>>>>>> refs/heads/master
 	}
 
 	@Override
 	public EventRule findByNodeTypeId(String nodeTypeId) {
+<<<<<<< HEAD
 		return eventRuleDao.findOneByNodeTypeId(nodeTypeId);
+=======
+		return eventRuleDao.findFirstByNodeTypeId(nodeTypeId);
+>>>>>>> refs/heads/master
 	}
 
 }

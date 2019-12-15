@@ -166,6 +166,13 @@ public class EventScheduler {
 						}						
 					}
 					
+<<<<<<< HEAD
+=======
+					return ;
+				}else {
+					eventList.setIsNotFoundEmployee(true);
+					eventListService.update(eventList);
+>>>>>>> refs/heads/master
 					return ;
 				}
 			}
@@ -228,7 +235,7 @@ public class EventScheduler {
 				}
 			}
 		}
-		if(user== null) {
+		if(user== null && Objects.nonNull(departmentId)) {
 			List<AdminUser> list = this.adminUserService.findByDepartmentId(departmentId, true);
 			user = getCurrentHandleUser(list);
 		}	
@@ -261,6 +268,7 @@ public class EventScheduler {
 		eventListService.update(eventList);
 		
 		EventDispatch eventDispatch = new EventDispatch();
+		eventDispatch.setDepartmentId(adminUserService.findById(eventList.getCurrentHandleUser()).getDepartmentId());
 		eventDispatch.setOperator(user.getId());
 		eventDispatch.setCreateDate(new Date());
 		eventDispatch.setEventId(eventList.getEventId());

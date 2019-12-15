@@ -34,6 +34,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
+<<<<<<< HEAD
+=======
+import com.pepper.controller.emap.util.Internationalization;
+>>>>>>> refs/heads/master
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
@@ -253,6 +257,11 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		HelpList helpList = new HelpList();
 		MapToBeanUtil.convert(helpList, map);
+		if(helpListService.findByCode(helpList.getCode())!=null) {
+			resultData.setCode(2000001);
+			resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+			return resultData;
+		}
 		helpListService.save(helpList);
 		systemLogService.log("help list add", this.request.getRequestURL().toString());
 		return resultData;
@@ -265,6 +274,14 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		ResultData resultData = new ResultData();
 		HelpList helpList = new HelpList();
 		MapToBeanUtil.convert(helpList, map);
+		HelpList oldHelpList = helpListService.findByCode(helpList.getCode());
+		if(oldHelpList!=null && oldHelpList.getCode()!=null&&helpList.getCode()!=null) {
+			if(!helpList.getId().equals(oldHelpList.getId())){
+				resultData.setCode(2000001);
+				resultData.setMessage(Internationalization.getMessageInternationalization(2000001));
+				return resultData;
+			}
+		}
 		helpListService.update(helpList);
 		systemLogService.log("help list update", this.request.getRequestURL().toString());
 		return resultData;

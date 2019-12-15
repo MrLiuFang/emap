@@ -16,6 +16,10 @@ public class SubsystemServiceImpl  extends BaseServiceImpl<Subsystem> implements
 
 	@Override
 	public Subsystem findByCode(String code) {
+<<<<<<< HEAD
 		return subsystemDao.findOneByCode(code);
+=======
+		return subsystemDao.findFirstByCode(code);
+>>>>>>> refs/heads/master
 	}
 }

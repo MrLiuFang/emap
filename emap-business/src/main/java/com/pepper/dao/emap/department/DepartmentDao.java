@@ -21,5 +21,5 @@ public interface DepartmentDao extends BaseDao<Department> {
 	
 	public List<Department> findByName(String name);
 	
-	public Department findOneByName(String name);
+	public Department findFirstByName(String name);
 }

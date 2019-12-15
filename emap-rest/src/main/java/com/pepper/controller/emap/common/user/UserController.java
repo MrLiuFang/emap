@@ -115,7 +115,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
 		stringValueOperationsService.set(adminUser.getId()+"_language", map.get("language")==null?"zh":map.get("language").toString() );
-		systemLogService.log("user set language", this.request.getRequestURL().toString());
+//		systemLogService.log("user set language", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

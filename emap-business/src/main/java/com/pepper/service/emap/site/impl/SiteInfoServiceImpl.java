@@ -29,7 +29,11 @@ public class SiteInfoServiceImpl extends BaseServiceImpl<SiteInfo> implements Si
 
 	@Override
 	public SiteInfo findSiteInfo(String name) {
+<<<<<<< HEAD
 		return siteInfoDao.findOneByName(name);
+=======
+		return siteInfoDao.findFirstByName(name);
+>>>>>>> refs/heads/master
 	}
 
 }

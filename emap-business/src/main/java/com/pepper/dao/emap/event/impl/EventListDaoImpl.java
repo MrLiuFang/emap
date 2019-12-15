@@ -1,15 +1,14 @@
 package com.pepper.dao.emap.event.impl;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import org.hibernate.jdbc.ReturningWork;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 
-import com.google.common.base.Objects;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseDao;
 import com.pepper.dao.emap.event.EventListDaoEx;
@@ -24,6 +23,9 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 	@Autowired
 	private BaseDao<EventList> baseDao;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 	
 	@Override
 	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
@@ -37,17 +39,100 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		jpql.append(" (select  er.warningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode and t1.id=el.id )   ");
 		jpql.append(" and el.id not in (select t2.id from EventList t2 join Node t3 on t2.sourceCode = t3.sourceCode join EventRule t4 on t3.id = t4.nodeId where t2.status = 'N'  )   ");
 		jpql.append(" ) order by createDate desc   ");
-		
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
+	}
+	
+	@Override
+	public Pager<EventList> appList(Pager<EventList> pager, Boolean isFinish,Boolean isUrgent,String eventId,String nodeName,String eventName,Date startDate,Date endDate,String currentHandleUser){
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ; 
+		StringBuffer jpql = new StringBuffer();
+		Map<String,Object> searchParameter = new HashMap<String, Object>();
+		jpql.append(" select t1 from EventList t1 join Node t2 on t1.sourceCode = t2.sourceCode ");
+		if(java.util.Objects.nonNull(isFinish) && isFinish ) {
+			jpql.append("  join ActionList t3 on t1.id = t3.eventListId ");
+		}
+		jpql.append("  where 1=1  ");
+		if(java.util.Objects.nonNull(isFinish) &&isFinish ) {
+			jpql.append(" and t3.operator = :operator  ");
+			searchParameter.put("operator", currentHandleUser);
+			
+			jpql.append(" and t3.status = 'B'  ");
+		}else if(java.util.Objects.nonNull(isFinish) && !isFinish ) {
+			jpql.append(" and t1.status not in ('P','B')  ");
+			jpql.append(" and t1.currentHandleUser = :currentHandleUser  ");
+			searchParameter.put("currentHandleUser", currentHandleUser);
+		}
 		
+		if(java.util.Objects.nonNull(isUrgent)) {
+			if(isUrgent) {
+				jpql.append(" and t1.isUrgent is true  ");
+			}else {
+				jpql.append(" and t1.isUrgent is not true ");
+			}
+		}
+		if(StringUtils.hasText(eventId)) {
+			jpql.append(" and t1.eventId like :eventId ");
+			searchParameter.put("eventId", "%"+eventId+"%");
+		}
+		if(StringUtils.hasText(eventName)) {
+			jpql.append(" and t1.eventName like :eventName  ");
+			searchParameter.put("eventName", "%"+eventName+"%");
+		}
+		if(StringUtils.hasText(nodeName)) {
+			jpql.append(" and t2.name like :nodeName  ");
+			searchParameter.put("nodeName", "%"+nodeName+"%");
+		}
+		if(java.util.Objects.nonNull(startDate)) {
+			jpql.append(" and t1.eventDate >= :startDate  ");
+			searchParameter.put("startDate", dateFormat.format(startDate));
+		}
+		if(java.util.Objects.nonNull(endDate)) {
+			jpql.append(" and t1.eventDate <= :endDate  ");
+			searchParameter.put("endDate", dateFormat.format(endDate));
+		}
+		
+		
+		jpql.append(" order by t1.assignDate desc  ");
+		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
 
 	@Override
-	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom) {
+	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom,String eventId,Boolean isUrgent,String nodeName,String eventName,Date startDate,Date endDate) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ; 
 		StringBuffer jpql = new StringBuffer();
-		jpql.append("select  distinct el from  EventList el join EventDispatch ed on el.id = ed.eventListId where ed.dispatchFrom = :dispatchFrom order by ed.createDate desc ");
+		jpql.append("select  distinct el from  EventList el join EventDispatch ed on el.id = ed.eventListId join Node n on el.sourceCode = n.sourceCode  "
+				+ " where ed.dispatchFrom = :dispatchFrom and ed.isEmployeeTransfer = true  ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		searchParameter.put("dispatchFrom", dispatchFrom);
+		if(StringUtils.hasText(nodeName)) {
+			jpql.append(" and n.name like :nodeName  ");
+			searchParameter.put("nodeName", "%"+nodeName+"%");
+		}
+		
+		if(StringUtils.hasText(eventId)) {
+			jpql.append(" and el.eventId like :eventId ");
+			searchParameter.put("eventId", "%"+eventId+"%");
+		}
+		if(java.util.Objects.nonNull(isUrgent)) {
+			if(isUrgent) {
+				jpql.append(" and el.isUrgent is true  ");
+			}else {
+				jpql.append(" and el.isUrgent is not true ");
+			}
+		}
+		if(StringUtils.hasText(eventName)) {
+			jpql.append(" and el.eventName like :eventName  ");
+			searchParameter.put("eventName", "%"+eventName+"%");
+		}
+		if(java.util.Objects.nonNull(startDate)) {
+			jpql.append(" and el.eventDate >= :startDate  ");
+			searchParameter.put("startDate", dateFormat.format(startDate));
+		}
+		if(java.util.Objects.nonNull(endDate)) {
+			jpql.append(" and el.eventDate <= :endDate  ");
+			searchParameter.put("endDate", dateFormat.format(endDate));
+		}
+		jpql.append( " order by ed.createDate desc ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
 
@@ -117,7 +202,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 	@Override
 	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId
-			,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent) {
+			,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent,String eventId,String departmentId) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -129,6 +214,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		jpql.append(" left join SiteInfo si on si.id = bi.siteInfoId ");
 		jpql.append(" left join AdminUser au on au.id = el.operator ");
 		jpql.append(" left join ActionList al on el.id = al.eventListId ");
+		jpql.append(" left join EventDispatch ed on el.id = ed.eventListId ");
 		
 //		if(StringUtils.hasText(node)) {
 //			joinKey.put("node", "");
@@ -183,6 +269,10 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		
 		jpql.append(" where 1=1 ");
 		
+		if(StringUtils.hasText(departmentId)) {
+			jpql.append(" and (al.departmentId = :departmentId or ed.departmentId =:departmentId) ");
+			searchParameter.put("departmentId", departmentId);
+		}
 		
 		if(StringUtils.hasText(status)) {
 			if(status.split(",").length==2) {
@@ -195,6 +285,10 @@ public class EventListDaoImpl  implements EventListDaoEx {
 				jpql.append(" and el.status = :status  ");
 				searchParameter.put("status", status);
 			}
+		}
+		if(StringUtils.hasText(eventId)) {
+			jpql.append(" and el.eventId like :eventId ");
+			searchParameter.put("eventId", "%"+eventId+"%");
 		}
 		if(StringUtils.hasText(event)) {
 			jpql.append(" and ( el.id like :event or  el.eventName like :event ) ");
@@ -295,10 +389,35 @@ public class EventListDaoImpl  implements EventListDaoEx {
 	}
 
 	@Override
-	public EventList findOneByNodeId(String nodeId) {
+	public EventList findFirstByNodeId(String nodeId) {
 		String jpql = " SELECT t1 FROM EventList t1 JOIN Node t2 ON t1.sourceCode = t2.sourceCode WHERE t2.id = '"+nodeId+"' ORDER BY t1.createDate DESC  ";
 		return baseDao.findOne(jpql);
-	} 
-	
+	}
+
+	@Override
+	public List<Map<String,Object>> yearTypeCount(String where,Date startDate,Date endDate) {
+		List<Object> pararms = new ArrayList<Object>();
+		String sql = "select date_format( create_date, '%Y-%m' ) AS create_date,  count(1) as count from t_event_list where 1=1    ";
+		if(Objects.equals(where,"isSpecial")){
+			sql += " and is_special is true ";
+		}
+		if(Objects.equals(where,"isUrgent")){
+			sql += " and is_urgent is true ";
+		}
+		if(Objects.equals(where,"ordinary")){
+			sql += " and is_urgent is null and is_special is null ";
+		}
+		if(Objects.nonNull(startDate)){
+			sql += " and create_date >= ? ";
+			pararms.add(startDate);
+		}
+		if(Objects.nonNull(endDate)){
+			sql += " and create_date <= ? ";
+			pararms.add(endDate);
+		}
+		sql += " group by date_format( create_date, '%Y-%m' ) ";
+
+		return this.jdbcTemplate.queryForList(sql,pararms.toArray());
+	}
 
 }

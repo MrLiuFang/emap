@@ -18,7 +18,11 @@ public class ScreenServiceImpl extends BaseServiceImpl<Screen> implements Screen
 
 	@Override
 	public Screen findByCode(String code) {
+<<<<<<< HEAD
 		return screenDao.findOneByCode(code);
+=======
+		return screenDao.findFirstByCode(code);
+>>>>>>> refs/heads/master
 	}
 
 }

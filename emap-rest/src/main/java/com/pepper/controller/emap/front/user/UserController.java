@@ -131,13 +131,18 @@ public class UserController extends BaseControllerImpl implements BaseController
 			returnListRole.add(roleVo);
 		}
 		resultData.setData("role", returnListRole);
+<<<<<<< HEAD
 		systemLogService.log("get user info", this.request.getRequestURL().toString());
+=======
+//		systemLogService.log("get user info", this.request.getRequestURL().toString());
+>>>>>>> refs/heads/master
 		return resultData;
 	}
 	
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
 	@ResponseBody
+<<<<<<< HEAD
 	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,Status status,String keyWord,String roleCode) throws IOException, IllegalArgumentException,
 			IllegalAccessException, NoSuchFieldException, SecurityException {
 //		systemLogService.log("user export", this.request.getRequestURL().toString());
@@ -161,12 +166,41 @@ public class UserController extends BaseControllerImpl implements BaseController
 	}
 
 	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode, Boolean isExport) {
+=======
+	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,Status status,String keyWord,String roleCode,Boolean isManager) throws IOException, IllegalArgumentException,
+			IllegalAccessException, NoSuchFieldException, SecurityException {
+//		systemLogService.log("user export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("user.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, status,roleCode,isManager,true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("賬號", "account"));
+		excelColumn.add(ExcelColumn.build("姓名", "name"));
+		excelColumn.add(ExcelColumn.build("郵箱", "email"));
+		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
+		excelColumn.add(ExcelColumn.build("昵稱", "nickName"));
+		excelColumn.add(ExcelColumn.build("角色", "role.code"));
+		excelColumn.add(ExcelColumn.build("部門", "department.code"));
+		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.code"));
+		excelColumn.add(ExcelColumn.build("是否管理员", "isManager"));
+		excelColumn.add(ExcelColumn.build("工號", "userNo"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
+	}
+
+	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode,Boolean isManager, Boolean isExport) {
+>>>>>>> refs/heads/master
 		Pager<AdminUser> pager = new Pager<AdminUser>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
+<<<<<<< HEAD
 		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork,status,roleCode, keyWord);
+=======
+		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork,status,roleCode, isManager,keyWord);
+>>>>>>> refs/heads/master
 		
 		List<AdminUser> list = pager.getResults();
 		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
@@ -195,10 +229,17 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
+<<<<<<< HEAD
 	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode) {
 		
 //		systemLogService.log("get user list", this.request.getRequestURL().toString());
 		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord,status, roleCode,false);
+=======
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode,Boolean isManager ) {
+		
+//		systemLogService.log("get user list", this.request.getRequestURL().toString());
+		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord,status, roleCode,isManager,false);
+>>>>>>> refs/heads/master
 	}
 	
 	@RequestMapping(value = "/add")
@@ -461,6 +502,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 					return resultData;
 				}
 				
+<<<<<<< HEAD
 				if(role.getCode().equals("EMPLOYEE_ROLE")) {
 					String departmentName= getCellValue(row.getCell(6)).toString();
 					String departmentGroupName= getCellValue(row.getCell(7)).toString();
@@ -480,7 +522,52 @@ public class UserController extends BaseControllerImpl implements BaseController
 							resultData.setCode(4000011);
 							resultData.setMessage(Internationalization.getMessageInternationalization(4000011).replace("{1}", String.valueOf(i)));
 							return resultData;
+=======
+//				if(role.getCode().equals("EMPLOYEE_ROLE")) {
+//					String departmentName= getCellValue(row.getCell(6)).toString();
+//					String departmentGroupName= getCellValue(row.getCell(7)).toString();
+//					String isManager= getCellValue(row.getCell(8)).toString();
+//					if(StringUtils.hasText(isManager)&&!(isManager.toLowerCase().equals("true")||isManager.toLowerCase().equals("false"))) {
+//						resultData.setCode(4000009);
+//						resultData.setMessage(Internationalization.getMessageInternationalization(4000009).replace("{1}", String.valueOf(i)));
+//						return resultData;
+//					}
+//					if(!StringUtils.hasText(departmentName)) {
+//						resultData.setCode(4000010);
+//						resultData.setMessage(Internationalization.getMessageInternationalization(4000010).replace("{1}", String.valueOf(i)));
+//						return resultData;
+//					}else {
+//						Department department = this.departmentService.findByCode(departmentName);
+//						if(Objects.isNull(department)) {
+//							resultData.setCode(4000011);
+//							resultData.setMessage(Internationalization.getMessageInternationalization(4000011).replace("{1}", String.valueOf(i)));
+//							return resultData;
+//						}else {
+//							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndCode(department.getId(), departmentGroupName);
+//							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
+//								resultData.setCode(4000012);
+//								resultData.setMessage(Internationalization.getMessageInternationalization(4000012).replace("{1}", String.valueOf(i)));
+//								return resultData;
+//							}else {
+//								adminUser.setDepartmentId(department.getId());
+//								adminUser.setDepartmentGroupId(listDepartmentGroup.size()==1?listDepartmentGroup.get(0).getId():null);
+//								adminUser.setIsManager(Boolean.valueOf(StringUtils.hasText(isManager)?isManager.toLowerCase():"false"));
+//							}
+//						}
+//					}
+//				}
+
+				adminUser.setUserNo(getCellValue(row.getCell(9)).toString());
+				if (StringUtils.hasText(adminUser.getAccount())) {
+					AdminUser oldAdminUser = adminUserService.findByAccount(adminUser.getAccount());
+					if(Objects.nonNull(oldAdminUser)) {
+						String isDelete = getCellValue(row.getCell(10)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							adminUserService.deleteById(oldAdminUser.getId());
+							continue;
+>>>>>>> refs/heads/master
 						}else {
+<<<<<<< HEAD
 							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndCode(department.getId(), departmentGroupName);
 							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
 								resultData.setCode(4000012);
@@ -490,9 +577,27 @@ public class UserController extends BaseControllerImpl implements BaseController
 								adminUser.setDepartmentId(department.getId());
 								adminUser.setDepartmentGroupId(listDepartmentGroup.size()==1?listDepartmentGroup.get(0).getId():null);
 								adminUser.setIsManager(Boolean.valueOf(StringUtils.hasText(isManager)?isManager.toLowerCase():"false"));
+=======
+							adminUser.setId(oldAdminUser.getId());
+							RoleUser roleUsers = roleUserService.findRoleUserByUserId(adminUser.getId());
+							if(Objects.nonNull(roleUsers)) {
+								roleUserService.delete(roleUsers);
+>>>>>>> refs/heads/master
 							}
+							RoleUser roleUser = new RoleUser();
+							roleUser.setCreateDate(new Date());
+							roleUser.setCreateUser(adminUser.getCreateUser());
+							roleUser.setRoleId( role.getId());
+							roleUser.setUserId(adminUser.getId());
+							roleUserService.save(roleUser);
+							adminUserService.update(adminUser);
+							continue;
 						}
 					}
+					String roleId = role.getId();
+					Map<String,AdminUser> map = new HashMap<String, AdminUser>();
+					map.put(roleId, adminUser);
+					list.add(map);
 				}
 				adminUser.setUserNo(getCellValue(row.getCell(9)).toString());
 				if (StringUtils.hasText(adminUser.getAccount())) {

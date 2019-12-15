@@ -10,7 +10,15 @@ import com.pepper.model.emap.node.NodeType;
  */
 public interface NodeTypeDao extends BaseDao<NodeType> {
 
+<<<<<<< HEAD
 	public NodeType findOneByCode(String code);
+=======
+	public NodeType findFirstByCode(String code);
+>>>>>>> refs/heads/master
 	
+<<<<<<< HEAD
 	public NodeType findOneByName(String name);
+=======
+	public NodeType findFirstByName(String name);
+>>>>>>> refs/heads/master
 }

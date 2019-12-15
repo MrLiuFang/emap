@@ -12,7 +12,11 @@ public interface MapDao extends BaseDao<Map> ,MapDaoEx {
 	 * @param code
 	 * @return
 	 */
+<<<<<<< HEAD
 	public Map findOneByCode(String code);
+=======
+	public Map findFirstByCode(String code);
+>>>>>>> refs/heads/master
 	
 	public List<Map> findByName(String name);
 }

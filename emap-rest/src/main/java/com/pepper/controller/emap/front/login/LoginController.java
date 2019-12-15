@@ -44,68 +44,48 @@ import com.pepper.service.redis.string.serializer.StringRedisTemplateService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.MapToBeanUtil;
 
-@Controller("frontLoginController")
-@RequestMapping(value = "/front")
+@Controller ( "frontLoginController" )
+@RequestMapping ( value = "/front" )
 @Validated
 public class LoginController extends BaseControllerImpl implements BaseController {
-	@SuppressWarnings("unused")
-	@Autowired
-	private Environment environment;
+    @SuppressWarnings ( "unused" )
+    @Autowired
+    private Environment environment;
 
-	@Reference
-	private ParameterService parameterService;
+    @Reference
+    private ParameterService parameterService;
 
-	@Reference
-	private AdminUserService adminUserService;
+    @Reference
+    private AdminUserService adminUserService;
 
-	@Reference
-	private ValueOperationsService valueOperationsService;
+    @Reference
+    private ValueOperationsService valueOperationsService;
 
-	@Reference
-	private StringRedisTemplateService stringRedisTemplateService;
+    @Reference
+    private StringRedisTemplateService stringRedisTemplateService;
 
-	@Reference
-	private SetOperationsService setOperationsService;
+    @Reference
+    private SetOperationsService setOperationsService;
 
-	@Reference
-	private RoleUserService roleUserService;
+    @Reference
+    private RoleUserService roleUserService;
 
-	@Reference
-	private RoleService roleService;
+    @Reference
+    private RoleService roleService;
 
-	@Reference
-	private MenuService menuService;
+    @Reference
+    private MenuService menuService;
 
-	@Autowired
-	private FrontAuthorize frontAuthorize;
-	
-	@Reference
-	private ValueOperationsService stringValueOperationsService;
-	
-	@Reference
-	private SystemLogService systemLogService;
-	
-	@RequestMapping(value = "/login")
-	@ResponseBody
-	public Object login(@RequestBody java.util.Map<String,Object> map ) {
-		AdminUser user = new AdminUser();
-		MapToBeanUtil.convert(user, map);
-		ResultData resultData = new ResultData();
+    @Autowired
+    private FrontAuthorize frontAuthorize;
 
-		if (!StringUtils.hasText(user.getAccount())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000001));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000001);
-			return resultData;
-		}
-		if (!StringUtils.hasText(user.getPassword())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000002));
-			resultData.setCode(1000002);
-			return resultData;
-		}
+    @Reference
+    private ValueOperationsService stringValueOperationsService;
 
-		AdminUser userReal = adminUserService.findByAccountAndPassword(user.getAccount(), user.getPassword());
+    @Reference
+    private SystemLogService systemLogService;
 
+<<<<<<< HEAD
 		if (userReal == null) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1000003));
 			resultData.setStatus(Status.LOGIN_FAIL.getKey());
@@ -161,12 +141,30 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 				}
 			}
 		}
+=======
+    @RequestMapping ( value = "/login" )
+    @ResponseBody
+    public Object login ( @RequestBody java.util.Map <String, Object> map ) {
+        AdminUser user = new AdminUser();
+        MapToBeanUtil.convert(user, map);
+        ResultData resultData = new ResultData();
+>>>>>>> refs/heads/master
 
-		// 更新用户的最后登录时间
-		userReal.setLastLoginTime(new Date());
+        if (!StringUtils.hasText(user.getAccount())) {
+            resultData.setMessage(Internationalization.getMessageInternationalization(1000001));
+            resultData.setStatus(Status.LOGIN_FAIL.getKey());
+            resultData.setCode(1000001);
+            return resultData;
+        }
+        if (!StringUtils.hasText(user.getPassword())) {
+            resultData.setMessage(Internationalization.getMessageInternationalization(1000002));
+            resultData.setCode(1000002);
+            return resultData;
+        }
 
-		adminUserService.updateLoginTime(userReal.getId());
+        AdminUser userReal = adminUserService.findByAccountAndPassword(user.getAccount(), user.getPassword());
 
+<<<<<<< HEAD
 		// 获取用户所有资源，并让其处于登录状态。
 //		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
 		String token = setLoginInfo(userReal, new ArrayList<String>());
@@ -188,7 +186,43 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		systemLogService.log("user login", this.request.getRequestURI());
 		return resultData;
 	}
+=======
+        if (userReal == null) {
+            resultData.setMessage(Internationalization.getMessageInternationalization(1000003));
+            resultData.setStatus(Status.LOGIN_FAIL.getKey());
+            resultData.setCode(1000003);
+            return resultData;
+        }
+        if ((userReal.getStatus() != null && com.pepper.common.emuns.Status.DISABLE.equals(userReal.getStatus()))
+                || userReal.getStatus() == null) {
+            resultData.setMessage(Internationalization.getMessageInternationalization(1000004));
+            resultData.setStatus(Status.LOGIN_FAIL.getKey());
+            resultData.setCode(1000004);
+            return resultData;
+        }
+        List <Role> roleList = roleService.findByUserId1(userReal.getId());
+        if (roleList == null || roleList.size() <= 0) {
+            resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
+            resultData.setStatus(Status.LOGIN_FAIL.getKey());
+            resultData.setCode(1000005);
+            return resultData;
+        }
+//		for(Role role : roleList) {
+//			if(role.getCode().equals("EMPLOYEE_ROLE")) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
+//				resultData.setCode(1000007);
+//				return resultData;
+//			}
+//			if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
+//				resultData.setStatus(Status.LOGIN_FAIL.getKey());
+//				resultData.setCode(1000006);
+//				return resultData;
+//			}
+//		}
+>>>>>>> refs/heads/master
 
+<<<<<<< HEAD
 	private String setLoginInfo(AdminUser user, List<String> resourceList) {
 		String token = UUID.randomUUID().toString();
 		String oldToken = valueOperationsService.get(user.getId() + GlobalConstant.AUTHORIZE_TOKEN);
@@ -201,15 +235,34 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		frontAuthorize.setUserResources(resourceList, user.getId());
 		// 将当前用户信息保存到redis
 		frontAuthorize.setCurrentUser(user.getId(), user);
+=======
+        if (userReal.getIsNeverExpire() != null && !userReal.getIsNeverExpire()) {
+            if (userReal.getUpdatePasswordDate() != null) {
+                if ((LocalDate.now().toEpochDay() - userReal.getUpdatePasswordDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()) >= 30) {
+                    resultData.setMessage(Internationalization.getMessageInternationalization(1000009));
+                    resultData.setStatus(Status.LOGIN_FAIL.getKey());
+                    resultData.setCode(1000009);
+                    return resultData;
+                }
+            }
+        }
 
-		/**
-		 * 写token cookie到前端
-		 */
-		Cookie cookieToken = new Cookie(GlobalConstant.AUTHORIZE_TOKEN, token);
-		cookieToken.setMaxAge(-1);
-		cookieToken.setPath("/");
-		response.addCookie(cookieToken);
+        if (userReal.getAutomaticLogOutDate() != null && userReal.getIsNeverExpire() != null && !userReal.getIsNeverExpire()) {
+            if (userReal.getUpdatePasswordDate() != null) {
+                if ((LocalDate.now().toEpochDay() - userReal.getAutomaticLogOutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()) >= 0) {
+                    resultData.setMessage(Internationalization.getMessageInternationalization(1000010));
+                    resultData.setStatus(Status.LOGIN_FAIL.getKey());
+                    resultData.setCode(1000010);
+                    return resultData;
+                }
+            }
+        }
+>>>>>>> refs/heads/master
 
+        // 更新用户的最后登录时间
+        userReal.setLastLoginTime(new Date());
+
+<<<<<<< HEAD
 		/**
 		 * 将用户资源放到redis中，用于jsp的鉴权标签
 		 */
@@ -219,28 +272,85 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 //			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
 //					authMenuCode.toArray(authMenuCodeArr));
 //		}
+=======
+        adminUserService.updateLoginTime(userReal.getId());
+>>>>>>> refs/heads/master
 
-		return token;
-	}
+        // 获取用户所有资源，并让其处于登录状态。
+//		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
+        String token = setLoginInfo(userReal, new ArrayList <String>());
+        resultData.setData("userInfo", userReal);
+        resultData.setData("token", token);
+        List <RoleVo> returnListRole = new ArrayList <RoleVo>();
+        for (Role role : roleList) {
+            RoleVo roleVo = new RoleVo();
+            BeanUtils.copyProperties(role, roleVo);
+            roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
+            returnListRole.add(roleVo);
+        }
+        resultData.setData("role", returnListRole);
+        if (map.containsKey("language")) {
+            stringValueOperationsService.set(userReal.getId() + "_language", map.get("language") == null ? "zh" : map.get("language").toString());
+        } else if (this.request.getParameter("language") != null) {
+            stringValueOperationsService.set(userReal.getId() + "_language", request.getParameter("language") == null ? "zh" : request.getParameter("language"));
+        }
 
-	/**
-	 * 退出登录
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/loginOut")
-	@Authorize(authorizeResources = false, authorizeLogin = false)
-	@ResponseBody
-	public ResultData loginOut() {
-		ResultData resultData = new ResultData();
-		String token = this.getCookie(GlobalConstant.AUTHORIZE_TOKEN);
-		String userId = frontAuthorize.getUserId(token);
-		frontAuthorize.deleteAuthorizeInfo(token);
-		frontAuthorize.deleteUserResources(userId);
-		frontAuthorize.deleteResourceCode(userId);
-		if(StringUtils.hasText(userId)) {
-			this.systemLogService.log("login out", this.request.getRequestURI(), this.adminUserService.findById(userId));
-		}
-		return resultData;
-	}
+        systemLogService.log("user login", this.request.getRequestURI());
+        return resultData;
+    }
+
+    private String setLoginInfo ( AdminUser user, List <String> resourceList ) {
+        String token = UUID.randomUUID().toString();
+        String oldToken = valueOperationsService.get(user.getId() + GlobalConstant.AUTHORIZE_TOKEN);
+        frontAuthorize.deleteAuthorizeInfo(oldToken);
+        // 记录用户登录状态
+        frontAuthorize.setAuthorizeInfo(user.getId(), token);
+        // 先删除以前的权限资源
+        frontAuthorize.deleteUserResources(user.getId());
+        // 设置权限资源
+        frontAuthorize.setUserResources(resourceList, user.getId());
+        // 将当前用户信息保存到redis
+        frontAuthorize.setCurrentUser(user.getId(), user);
+
+        /**
+         * 写token cookie到前端
+         */
+        Cookie cookieToken = new Cookie(GlobalConstant.AUTHORIZE_TOKEN, token);
+        cookieToken.setMaxAge(-1);
+        cookieToken.setPath("/");
+        response.addCookie(cookieToken);
+
+        /**
+         * 将用户资源放到redis中，用于jsp的鉴权标签
+         */
+//		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
+//		if (authMenuCode != null && authMenuCode.size() > 0) {
+//			String[] authMenuCodeArr = new String[authMenuCode.size()];
+//			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
+//					authMenuCode.toArray(authMenuCodeArr));
+//		}
+
+        return token;
+    }
+
+    /**
+     * 退出登录
+     *
+     * @return
+     */
+    @RequestMapping ( value = "/loginOut" )
+    @Authorize ( authorizeResources = false, authorizeLogin = false )
+    @ResponseBody
+    public ResultData loginOut ( ) {
+        ResultData resultData = new ResultData();
+        String token = this.getCookie(GlobalConstant.AUTHORIZE_TOKEN);
+        String userId = frontAuthorize.getUserId(token);
+        frontAuthorize.deleteAuthorizeInfo(token);
+        frontAuthorize.deleteUserResources(userId);
+        frontAuthorize.deleteResourceCode(userId);
+        if (StringUtils.hasText(userId)) {
+            this.systemLogService.log("login out", this.request.getRequestURI(), this.adminUserService.findById(userId));
+        }
+        return resultData;
+    }
 }

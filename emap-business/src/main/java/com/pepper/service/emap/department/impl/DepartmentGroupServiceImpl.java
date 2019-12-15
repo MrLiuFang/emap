@@ -37,7 +37,11 @@ public class DepartmentGroupServiceImpl extends BaseServiceImpl<DepartmentGroup>
 
 	@Override
 	public DepartmentGroup findByCode(String code) {
+<<<<<<< HEAD
 		return departmentGroupDao.findOneByCode(code);
+=======
+		return departmentGroupDao.findFirstByCode(code);
+>>>>>>> refs/heads/master
 	}
 
 }

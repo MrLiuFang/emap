@@ -2,7 +2,9 @@ package com.pepper.service.emap.event;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +53,7 @@ public interface EventListService extends BaseService<EventList> {
 	 * @param pager
 	 * @return
 	 */
+<<<<<<< HEAD
 	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom);
 	
 	/**
@@ -77,4 +80,56 @@ public interface EventListService extends BaseService<EventList> {
 	public Pager<EventList>  report(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ,String employeeId,Boolean isOrder,String sortBy ,Boolean isSpecial,Boolean isUrgent);
 
 	public EventList findOneByNodeId(String nodeId);
+=======
+	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom,String eventId,Boolean isUrgent,String nodeName,String eventName,Date startDate,Date endDate);
+	
+	/**
+	 *  查询打卡记录
+	 * @param pager
+	 * @param eventListId
+	 * @param startDate
+	 * @param endDate
+	 * @param staffId
+	 * @return
+	 */
+	public Pager<EventList> doorAttendance(Pager<EventList> pager,String eventListId,String nodeId,Date startDate,Date endDate,String staffId);
+	
+	/**
+	 * 获取我被请求协助的事件
+	 * @param pager
+	 * @param userId
+	 * @return
+	 */
+	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish);
+	
+	public Pager<EventList>  historyEventList(Pager<EventList> pager,String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String stieName,String operator,String status,String eventId,Date startDate,Date endDate,String departmentId);
+	
+	public Pager<EventList>  report(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ,String employeeId,Boolean isOrder,String sortBy ,Boolean isSpecial,Boolean isUrgent);
+
+	public EventList findOneByNodeId(String nodeId);
+	
+	Pager<EventList> appList(Pager<EventList> pager, Boolean isFinish, Boolean isUrgent, String eventId, String nodeName,
+			String eventName, Date startDate, Date endDate,String currentHandleUser);
+
+	public Integer toMeNoFiledCount(String userId);
+
+	public Integer todaySpecialCount(Date startDate,Date endDate);
+
+	public Integer todayUrgentCount(Date startDate,Date endDate);
+
+	public Integer todayOrdinaryCount(Date startDate,Date endDate);
+
+	public List<Map<String,Object>> currentMonthCount(Date startDate, Date endDate);
+
+	public List<Map<String,Object>> currentMonthCount(Date startDate, Date endDate,Boolean isConsole);
+
+	/**
+	 *
+	 * @param where
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public List<Map<String,Object>> yearTypeCount(String where, Date startDate, Date endDate);
+>>>>>>> refs/heads/master
 }

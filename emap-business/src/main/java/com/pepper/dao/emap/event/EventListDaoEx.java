@@ -2,6 +2,7 @@ package com.pepper.dao.emap.event;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.pepper.core.Pager;
 import com.pepper.model.emap.event.EventList;
@@ -27,7 +28,7 @@ public interface EventListDaoEx {
 	 * @param pager
 	 * @return
 	 */
-	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom);
+	public Pager<EventList> transferList(Pager<EventList> pager,String dispatchFrom,String eventId,Boolean isUrgent,String nodeName,String eventName,Date startDate,Date endDate);
 	
 	/**
 	 *  查询打卡记录
@@ -48,7 +49,25 @@ public interface EventListDaoEx {
 	 */
 	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish);
 	
+<<<<<<< HEAD
 	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent);
 	
 	public EventList findOneByNodeId(String nodeId);
+=======
+	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent,String eventId, String departmentId);
+	
+	public EventList findFirstByNodeId(String nodeId);
+
+	Pager<EventList> appList(Pager<EventList> pager, Boolean isFinish, Boolean isUrgent, String eventId, String nodeName,
+			String eventName, Date startDate, Date endDate,String currentHandleUser);
+
+	/**
+	 *
+	 * @param where
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	public List<Map<String,Object>> yearTypeCount(String where, Date startDate, Date endDate);
+>>>>>>> refs/heads/master
 }

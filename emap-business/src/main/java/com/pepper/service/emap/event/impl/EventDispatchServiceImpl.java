@@ -1,5 +1,7 @@
 package com.pepper.service.emap.event.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
@@ -18,6 +20,16 @@ public class EventDispatchServiceImpl extends BaseServiceImpl<EventDispatch> imp
 	@Override
 	public EventDispatch findEventDispatch(String eventId,String operator) {
 		return eventDispatchDao.findFirstByEventListIdAndOperatorOrderByCreateDateDesc(eventId,operator);
+	}
+
+	@Override
+	public EventDispatch findEventDispatch(String eventId, String operator, Boolean isEmployeeTransfer) {
+		return eventDispatchDao.findFirstByEventListIdAndOperatorAndIsEmployeeTransferOrderByCreateDateDesc(eventId, operator, isEmployeeTransfer);
+	}
+
+	@Override
+	public List<EventDispatch> findEventDispatch(String eventListId) {
+		return eventDispatchDao.findByEventListIdOrderByCreateDateDesc(eventListId);
 	}
 
 }

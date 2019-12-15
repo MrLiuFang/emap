@@ -82,6 +82,7 @@
 			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 		
+<<<<<<< HEAD
 		
 		<dependency>
 		    <groupId>net.sf.jasperreports</groupId>
@@ -123,6 +124,13 @@
 		    <artifactId>yahei</artifactId>
 		    <version>1</version>
 		</dependency>
+=======
+<!--		<dependency>-->
+<!--		    <groupId>com.pepper</groupId>-->
+<!--		    <artifactId>MicrosoftYaHei</artifactId>-->
+<!--		    <version>1</version>-->
+<!--		</dependency>-->
+>>>>>>> refs/heads/master
 		<!-- <dependency>
 		    <groupId>com.itextpdf</groupId>
 		    <artifactId>itextpdf</artifactId>

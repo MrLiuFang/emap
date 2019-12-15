@@ -168,8 +168,11 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object list(String code, String name, String source, String sourceCode, String mapId, String nodeTypeId,
 			String siteId, String buildId, String floor, String hasXY, String keyWord) {
+<<<<<<< HEAD
 
 //		systemLogService.log("get node list", this.request.getRequestURL().toString());
+=======
+>>>>>>> refs/heads/master
 		return getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord,
 				false);
 	}

@@ -89,7 +89,33 @@ public class EventList extends BaseModel  {
 	
 	@Column(name ="video")
 	private String video;
+<<<<<<< HEAD
 	
+=======
+
+	@Column(name ="is_Console")
+	private Boolean isConsole;
+
+	@Column(name ="filed_date")
+	private Date filedDate;
+
+	public Boolean getConsole() {
+		return isConsole;
+	}
+
+	public void setConsole(Boolean console) {
+		isConsole = console;
+	}
+
+	public Date getFiledDate() {
+		return filedDate;
+	}
+
+	public void setFiledDate(Date filedDate) {
+		this.filedDate = filedDate;
+	}
+
+>>>>>>> refs/heads/master
 	public String getEventDate() {
 		return eventDate;
 	}

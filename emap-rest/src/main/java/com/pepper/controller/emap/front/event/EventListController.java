@@ -52,6 +52,7 @@ import com.pepper.model.emap.vo.ActionListVo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
 import com.pepper.model.emap.vo.DepartmentVo1;
+import com.pepper.model.emap.vo.EventDispatchVo;
 import com.pepper.model.emap.vo.EventListVo;
 import com.pepper.model.emap.vo.HelpListVo;
 import com.pepper.model.emap.vo.MapVo;
@@ -181,6 +182,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Authorize(authorizeResources = false)
 	public Object list(Boolean isUrgent,String id) {
 		Pager<EventList> pager = new Pager<EventList>();
+		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
+		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		pager = eventListService.List(pager,isUrgent);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -199,6 +202,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
+		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
@@ -249,7 +253,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/forMe/handle")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
+<<<<<<< HEAD
 	public Object eventForMeHandle(Boolean isHandle,String id,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss" ) Date startDate,@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss" ) Date endDate) {
+=======
+	public Object eventForMeHandle(Boolean isHandle,String id,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endDate) {
+>>>>>>> refs/heads/master
 //		systemLogService.log("event for me handle", this.request.getRequestURL().toString());
 		return eventForMeEx(true,id,startDate,endDate);
 	}
@@ -257,9 +265,15 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/forMe/noHandle")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
+<<<<<<< HEAD
 	public Object eventForMeNoHandle(Boolean isHandle,String id) {
 //		systemLogService.log("event for me no handle", this.request.getRequestURL().toString());
 		return eventForMeEx(false,id,null,null);
+=======
+	public Object eventForMeNoHandle(Boolean isHandle,String id,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date endDate) {
+//		systemLogService.log("event for me no handle", this.request.getRequestURL().toString());
+		return eventForMeEx(false,id,startDate,endDate);
+>>>>>>> refs/heads/master
 	}
 	
 	private Pager<EventList> eventForMeEx(Boolean isHandle,String id, Date startDate, Date endDate){
@@ -281,6 +295,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(endDate!=null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
 		}
+<<<<<<< HEAD
+=======
+		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
+>>>>>>> refs/heads/master
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
@@ -340,13 +358,47 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				departmentGroupV1.setUser(listAdminUserVo);
 				listDepartmentGroupV1.add(departmentGroupV1);
 			}
+			listDepartmentGroupV1.add(setDepartmentManager(department.getId()));
+			listDepartmentGroupV1.add(setNoDepartment());
 			departmentVo1.setDepartmentGroup(listDepartmentGroupV1);
 			returnList.add(departmentVo1);
-			
 		}
 		resultData.setData("department", returnList);
 		return resultData;
 	}
+	
+	private DepartmentGroupVo1 setDepartmentManager(String departmentId) {
+		List<AdminUser> listAdminUser  = adminUserService.findByDepartmentId(departmentId, true);
+//		listAdminUser.addAll(adminUserService.findEmployeeUserNotInDepartment());
+		DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+		departmentGroupV1.setName("未分組");
+		List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+		for(AdminUser adminUser : listAdminUser) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(adminUser, adminUserVo);
+			adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+			listAdminUserVo.add(adminUserVo);
+		}
+		departmentGroupV1.setUser(listAdminUserVo);
+		return departmentGroupV1;
+	}
+
+	private DepartmentGroupVo1 setNoDepartment() {
+		List<AdminUser> listAdminUser  = adminUserService.findEmployeeUserNotInDepartment();
+		DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+		departmentGroupV1.setName("无部门");
+		List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+		for(AdminUser adminUser : listAdminUser) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(adminUser, adminUserVo);
+			adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+			listAdminUserVo.add(adminUserVo);
+		}
+		departmentGroupV1.setUser(listAdminUserVo);
+		return departmentGroupV1;
+	}
+
+
 	
 //	
 	
@@ -414,8 +466,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		
 		AdminUser adminuser =  (AdminUser) this.getCurrentUser();
 		EventDispatch eventDispatch = new EventDispatch();
+		eventDispatch.setDepartmentId(adminUserService.findById(eventList.getCurrentHandleUser()).getDepartmentId());
 		eventDispatch.setEventId(eventList.getEventId());
 		eventDispatch.setEventListId(eventList.getId());
+		eventDispatch.setContent(map.get("content")==null?"":map.get("content").toString());
 		eventDispatch.setOperator(map.get("employeeId").toString());
 		eventDispatch.setDispatchFrom(adminuser.getId());
 		eventDispatch.setTitle(eventList.getEventName());
@@ -468,9 +522,16 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/historyEventList")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
+<<<<<<< HEAD
 	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ){
 		Pager<EventList> pager = new Pager<EventList>();
 		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status);
+=======
+	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+		, String departmentId){
+		Pager<EventList> pager = new Pager<EventList>();
+		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
+>>>>>>> refs/heads/master
 		
 		pager.setData("historyEvent",  convertHistoryEventList(pager.getResults()));
 		pager.setResults(null);
@@ -516,6 +577,44 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			List<EventMessage> listEventMessage= this.eventMessageService.findEventMessage(eventListVo.getId());
 			eventListVo.setEventMessage(listEventMessage);
 		}
+<<<<<<< HEAD
+=======
+	}
+	
+	@RequestMapping("/workbench/eventDispatch")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object eventDispatch(String eventId) throws IOException {
+		ResultData resultData = new ResultData();
+		List<EventDispatch> list = this.eventDispatchService.findEventDispatch(eventId);
+		List<EventDispatchVo> returnList = new ArrayList<EventDispatchVo>();
+		for(EventDispatch eventDispatch : list)  {
+			EventDispatchVo eventDispatchVo = new EventDispatchVo();
+			BeanUtils.copyProperties(eventDispatch, eventDispatchVo);
+			eventDispatchVo.setImageUrl1(this.fileService.getUrl(eventDispatch.getImage1()));
+			eventDispatchVo.setImageUrl2(this.fileService.getUrl(eventDispatch.getImage2()));
+			eventDispatchVo.setImageUrl3(this.fileService.getUrl(eventDispatch.getImage3()));
+			eventDispatchVo.setVoiceUrl1(this.fileService.getUrl(eventDispatch.getVoice1()));
+			eventDispatchVo.setVideoUrl(this.fileService.getUrl(eventDispatch.getVideo()));
+			if(StringUtils.hasText(eventDispatch.getOperator())) {
+				AdminUser operatorUser = this.adminUserService.findById(eventDispatch.getOperator());
+				if(operatorUser!=null) {
+					eventDispatchVo.setOperatorName(operatorUser.getName());
+					eventDispatchVo.setOperatorHeadPortraitUrl(this.fileService.getUrl(operatorUser.getHeadPortrait()));
+				}
+			}
+			if(StringUtils.hasText(eventDispatch.getDispatchFrom())) {
+				AdminUser dispatchFromUser = this.adminUserService.findById(eventDispatch.getDispatchFrom());
+				if(dispatchFromUser!=null) {
+					eventDispatchVo.setDispatchFromName(dispatchFromUser.getName());
+					eventDispatchVo.setDispatchFromHeadPortraitUrl(this.fileService.getUrl(dispatchFromUser.getHeadPortrait()));
+				}
+			}
+			returnList.add(eventDispatchVo);
+		}
+		resultData.setData("eventDispatch", returnList);
+		return resultData;
+>>>>>>> refs/heads/master
 	}
 	
 	@RequestMapping("/workbench/actionList")

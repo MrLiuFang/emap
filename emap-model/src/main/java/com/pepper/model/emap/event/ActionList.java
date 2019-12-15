@@ -26,6 +26,9 @@ public class ActionList extends BaseModel {
 	@Column(name ="task_id")
 	private String taskId;
 	
+	@Column(name ="department_id")
+	private String departmentId;
+	
 	@Column(name ="event_id")
 	private String eventId;
 	
@@ -100,6 +103,14 @@ public class ActionList extends BaseModel {
 	
 
 	
+	public String getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(String departmentId) {
+		this.departmentId = departmentId;
+	}
+
 	public String getEventListId() {
 		return eventListId;
 	}

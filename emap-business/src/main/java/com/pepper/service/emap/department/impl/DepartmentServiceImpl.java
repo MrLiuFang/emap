@@ -28,6 +28,10 @@ public class DepartmentServiceImpl extends BaseServiceImpl<Department> implement
 
 	@Override
 	public Department findDepartment(String name) {
+<<<<<<< HEAD
 		return departmentDao.findOneByName(name);
+=======
+		return departmentDao.findFirstByName(name);
+>>>>>>> refs/heads/master
 	}
 }

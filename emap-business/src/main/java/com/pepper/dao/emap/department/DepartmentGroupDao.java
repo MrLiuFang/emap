@@ -14,6 +14,8 @@ public interface DepartmentGroupDao extends BaseDao<DepartmentGroup>{
 	
 	public DepartmentGroup findOneByCode(String code);
 	
+	public DepartmentGroup findFirstByCode(String code);
+	
 	public List<DepartmentGroup> findByDepartmentIdAndName(String departmentId,String name);
 	
 	public List<DepartmentGroup> findByDepartmentIdAndCode(String departmentId,String code);
