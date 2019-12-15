@@ -32,6 +32,9 @@ public class HelpList extends BaseModel {
 	
 	@Column(name = "help_message")
 	private String helpMessage;
+	
+	@Column(name = "is_delete")
+	private Boolean isDelete;
 
 	public String getCode() {
 		return code;
@@ -73,6 +76,11 @@ public class HelpList extends BaseModel {
 		this.helpMessage = helpMessage;
 	}
 
-	
-	
+	public Boolean getIsDelete() {
+		return isDelete;
+	}
+
+	public void setIsDelete(Boolean isDelete) {
+		this.isDelete = isDelete;
+	}	
 }

@@ -1,9 +1,9 @@
 package com.pepper.model.emap.vo;
 
 import java.util.List;
+import java.util.Map;
 
 import com.pepper.model.emap.event.ActionList;
-import com.pepper.model.emap.event.EventList;
 
 public class ActionListVo extends ActionList {
 
@@ -20,11 +20,15 @@ public class ActionListVo extends ActionList {
 	
 	private String voiceUrl1;
 	
+	private String videoUrl;
+	
 	private List<HelpListVo> helpList;
 	
 	private AdminUserVo employee;
 
 	private EventListVo eventList;
+	
+	private List<Map<String,Object>> assist;
 
 	public String getImageUrl1() {
 		return imageUrl1;
@@ -95,4 +99,25 @@ public class ActionListVo extends ActionList {
 		this.eventList = eventList;
 	}
 
+
+	public List<Map<String, Object>> getAssist() {
+		return assist;
+	}
+
+
+	public void setAssist(List<Map<String, Object>> assist) {
+		this.assist = assist;
+	}
+
+
+	public String getVideoUrl() {
+		return videoUrl;
+	}
+
+
+	public void setVideoUrl(String videoUrl) {
+		this.videoUrl = videoUrl;
+	}
+
+	
 }

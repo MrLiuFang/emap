@@ -72,12 +72,46 @@ public class EventList extends BaseModel  {
 	@Column(name ="is_special")
 	private Boolean isSpecial;
 	
+	@Column(name ="is_urgent")
+	private Boolean isUrgent;
+	
 	@Column(name ="is_not_found_employee")
 	private Boolean isNotFoundEmployee;
 	
 	@Column(name ="is_not_found_event_rule")
 	private Boolean isNotFoundEventRule;
 	
+	@Column(name = "id_card")
+	private String idCard;
+	
+	@Column(name ="is_unable_finish")
+	private Boolean isUnableFinish;
+	
+	@Column(name ="video")
+	private String video;
+
+	@Column(name ="is_Console")
+	private Boolean isConsole;
+
+	@Column(name ="filed_date")
+	private Date filedDate;
+
+	public Boolean getConsole() {
+		return isConsole;
+	}
+
+	public void setConsole(Boolean console) {
+		isConsole = console;
+	}
+
+	public Date getFiledDate() {
+		return filedDate;
+	}
+
+	public void setFiledDate(Date filedDate) {
+		this.filedDate = filedDate;
+	}
+
 	public String getEventDate() {
 		return eventDate;
 	}
@@ -228,6 +262,38 @@ public class EventList extends BaseModel  {
 
 	public void setIsNotFoundEventRule(Boolean isNotFoundEventRule) {
 		this.isNotFoundEventRule = isNotFoundEventRule;
+	}
+
+	public String getIdCard() {
+		return idCard;
+	}
+
+	public void setIdCard(String idCard) {
+		this.idCard = idCard;
+	}
+
+	public Boolean getIsUnableFinish() {
+		return isUnableFinish;
+	}
+
+	public void setIsUnableFinish(Boolean isUnableFinish) {
+		this.isUnableFinish = isUnableFinish;
+	}
+
+	public Boolean getIsUrgent() {
+		return isUrgent;
+	}
+
+	public void setIsUrgent(Boolean isUrgent) {
+		this.isUrgent = isUrgent;
+	}
+
+	public String getVideo() {
+		return video;
+	}
+
+	public void setVideo(String video) {
+		this.video = video;
 	}
 	
 	

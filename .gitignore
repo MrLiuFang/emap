@@ -1,16 +1,14 @@
 .project
+.idea
 .settings
 target
 .classpath
 *.log
 .DS_Store
-.iml
+*.iml
 .factorypath
 # Compiled class file
 *.class
-
-# Log file
-*.log
 
 # BlueJ files
 *.ctxt

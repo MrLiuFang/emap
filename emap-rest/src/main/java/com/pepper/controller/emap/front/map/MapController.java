@@ -1,17 +1,30 @@
 package com.pepper.controller.emap.front.map;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,6 +32,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -56,6 +71,188 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private SystemLogService systemLogService;
+	
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public void export(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+//		systemLogService.log("map export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("map.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<com.pepper.model.emap.map.Map> pager = getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
+		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("區域編碼", "areaCode"));
+		excelColumn.add(ExcelColumn.build("區域名稱", "areaName"));
+		excelColumn.add(ExcelColumn.build("建築名稱", "build.code"));
+		excelColumn.add(ExcelColumn.build("樓層", "floor"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("map"), outputStream, excelColumn);
+	}
+	
+	@RequestMapping(value = "/import")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<com.pepper.model.emap.map.Map> list = new ArrayList<com.pepper.model.emap.map.Map>();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
+	        
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setMessage("数据错误！");
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				com.pepper.model.emap.map.Map map = new com.pepper.model.emap.map.Map();
+				map.setCode(getCellValue(row.getCell(0)).toString());
+				map.setName(getCellValue(row.getCell(1)).toString());
+				map.setAreaCode(getCellValue(row.getCell(2)).toString());
+				map.setAreaName(getCellValue(row.getCell(3)).toString());
+				map.setFloor(getCellValue(row.getCell(5)).toString());
+				String build = getCellValue(row.getCell(4)).toString();
+				if (StringUtils.hasText(map.getCode())&&mapService.findByCode(map.getCode()) == null) {
+					BuildingInfo buildingInfo = this.buildingInfoService.findByCode(build);
+					if(buildingInfo!=null) {
+						map.setBuildId(buildingInfo.getId());
+//						list.add(map);
+					}else {
+						continue;
+					}
+				}
+				
+				if (StringUtils.hasText(map.getCode())) {
+					com.pepper.model.emap.map.Map oldMap = mapService.findByCode(map.getCode());
+					if(Objects.nonNull(oldMap)) {
+						String isDelete = getCellValue(row.getCell(6)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							mapService.deleteById(oldMap.getId());
+							continue;
+						}else {
+							map.setId(oldMap.getId());
+							mapService.update(map);
+							continue;
+						}
+					}
+					list.add(map);
+				}
+	        }
+			this.mapService.saveAll(list);
+		}
+//		systemLogService.log("import map");
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("areaCode")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(3)).toString().equals("areaName")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(4)).toString().equals("buildCode")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(5)).toString().equals("floor")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(6)).toString().equals("isDelete")) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = "";
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
+	
+	private Pager<com.pepper.model.emap.map.Map> getPager(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId, Boolean isExport) {
+		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
+		if(StringUtils.hasText(code)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
+		}
+		if(StringUtils.hasText(name)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
+		}
+		if(StringUtils.hasText(areaCode)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaCode",areaCode );
+		}
+		if(StringUtils.hasText(areaName)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaName",areaName );
+		}
+		
+		if(StringUtils.hasText(buildId)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",buildId );
+		}
+		if(StringUtils.hasText(keyWord)) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&code&areaName&areaCode",keyWord );
+//			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",keyWord );
+		}
+		pager = mapService.findNavigator(pager);
+		
+		List<com.pepper.model.emap.map.Map> list = pager.getResults();
+		List<MapVo> returnList = new ArrayList<MapVo>();
+		for(com.pepper.model.emap.map.Map entity : list) {
+			
+			returnList.add(convertMapVo(entity));
+		}
+		pager.setData("map",returnList);
+		pager.setResults(null);
+		return pager;
+	}
 
 	private void addMapImageUrl(String mapId, String data) throws IOException {
 		mapImageUrlService.deleteByMapId(mapId);
@@ -82,36 +279,10 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String code,String name,String areaCode,String areaName,String buildId) {
-		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
-		if(StringUtils.hasText(code)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_code",code );
-		}
-		if(StringUtils.hasText(name)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
-		}
-		if(StringUtils.hasText(areaCode)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaCode",areaCode );
-		}
-		if(StringUtils.hasText(areaName)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaName",areaName );
-		}
+	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) {
 		
-		if(StringUtils.hasText(buildId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",buildId );
-		}
-		pager = mapService.findNavigator(pager);
-		
-		List<com.pepper.model.emap.map.Map> list = pager.getResults();
-		List<MapVo> returnList = new ArrayList<MapVo>();
-		for(com.pepper.model.emap.map.Map entity : list) {
-			
-			returnList.add(convertMapVo(entity));
-		}
-		pager.setData("map",returnList);
-		pager.setResults(null);
-		systemLogService.log("get map list", this.request.getRequestURL().toString());
-		return pager;
+//		systemLogService.log("get map list", this.request.getRequestURL().toString());
+		return getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,false);
 	}
 
 	@SuppressWarnings("unchecked")

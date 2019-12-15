@@ -23,14 +23,14 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 	private NodeDao nodeDao;
 
 	@Override
-	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY) {
-		return nodeDao.findNavigator(pager, code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor,hasXY);
+	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) {
+		return nodeDao.findNavigator(pager, code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor,hasXY, keyWord);
 	}
 		
 
 	@Override
 	public Node findBySourceCode(String sourceCode) {
-		return nodeDao.findBySourceCode(sourceCode);
+		return nodeDao.findFirstBySourceCode(sourceCode);
 	}
 
 	@Override
@@ -41,7 +41,18 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 
 	@Override
 	public Node findByCode(String code) {
-		return nodeDao.findByCode(code);
+		return nodeDao.findFirstByCode(code);
+	}
+
+
+	@Override
+	public Node findByName(String name) {
+		return nodeDao.findFirstByName(name);
+	}
+	
+	@Override
+	public List<Node> findByNameLike(String name) {
+		return nodeDao.findByNameLike("%"+name+"%");
 	}
 
 	

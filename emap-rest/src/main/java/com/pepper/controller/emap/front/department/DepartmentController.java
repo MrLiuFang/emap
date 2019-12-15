@@ -1,20 +1,37 @@
 package com.pepper.controller.emap.front.department;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -22,7 +39,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.department.Department;
-import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.DepartmentVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.department.DepartmentGroupService;
@@ -42,11 +59,135 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 	@Reference
 	private SystemLogService systemLogService;
 	
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public void export(String name,String code,String keyWord) throws IOException,
+			IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+//		systemLogService.log("department export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("department.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<Department> pager = getPager(code, name, keyWord, true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("編碼", "code"));
+		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("department"), outputStream, excelColumn);
+	}
+	
+	@RequestMapping(value = "/import")
+//	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object importStaff(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException {
+		ResultData resultData = new ResultData();
+		Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
+		List<Department> list = new ArrayList<Department>();
+		for (String fileName : files.keySet()) {
+			MultipartFile file = files.get(fileName);
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
+	        
+	        Sheet sheet = wookbook.getSheetAt(0);
+	        Row rowHead = sheet.getRow(0);
+			int totalRowNum = sheet.getLastRowNum();
+			if(!check(sheet.getRow(0))) {
+				resultData.setMessage("数据错误！");
+				return resultData;
+			}
+			for(int i = 1 ; i <= totalRowNum ; i++)
+	        {
+				Row row = sheet.getRow(i);
+				Department department = new Department();
+				department.setCode(getCellValue(row.getCell(0)).toString());
+				department.setName(getCellValue(row.getCell(1)).toString());
+				
+				if (StringUtils.hasText(department.getCode())) {
+					Department oldDepartment = departmentService.findByCode(department.getCode());
+					if(Objects.nonNull(oldDepartment)) {
+						String isDelete = getCellValue(row.getCell(2)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							departmentService.deleteById(oldDepartment.getId());
+							continue;
+						}else {
+							department.setId(oldDepartment.getId());
+							departmentService.update(department);
+							continue;
+						}
+					}
+					list.add(department);
+				}
+				
+	        }
+			this.departmentService.saveAll(list);
+		}
+		systemLogService.log("import department");
+		return resultData;
+	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
+	
+	private Boolean check(Row row) {
+		if(!getCellValue(row.getCell(0)).toString().equals("code")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(1)).toString().equals("name")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(2)).toString().equals("isDelete")) {
+			return false;
+		}
+		return true;
+	}
+	
+	private Object getCellValue(Cell cell) {
+		if(cell == null) {
+			return "";
+		}
+		Object object = "";
+		switch (cell.getCellType()) {
+		case STRING :
+			object = cell.getStringCellValue();
+			break;
+		case NUMERIC :
+			object = cell.getNumericCellValue();
+			break;
+		case BOOLEAN :
+			object = cell.getBooleanCellValue();
+			break;
+		default:
+			break;
+		}
+		return object;
+	}
+	
 	@RequestMapping(value = "/list")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object list(String name,String code,String keyWord) {
+		
+//		systemLogService.log("get department list", this.request.getRequestURL().toString());
+		return getPager(name, code, keyWord, false);
+	}
+	
+	private Pager<Department> getPager(String name,String code,String keyWord, Boolean isExport) {
 		Pager<Department> pager = new Pager<Department>();
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
+		}
 		if(StringUtils.hasText(name)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_name",name );
 		}
@@ -55,12 +196,11 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		}
 		
 		if(StringUtils.hasText(keyWord)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.ORLIKE+"_code&name",keyWord );
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_code&name",keyWord );
 		}
 		pager = departmentService.findNavigator(pager);
 		pager.setData("department",pager.getResults());
 		pager.setResults(null);
-		systemLogService.log("get department list", this.request.getRequestURL().toString());
 		return pager;
 	}
 
@@ -176,7 +316,7 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		BeanUtils.copyProperties(department, departmentVo);
 		departmentVo.setDepartmentGroup(departmentGroupService.findByDepartmentId(department.getId()));
 		resultData.setData("department",departmentVo);
-		systemLogService.log("get department info", this.request.getRequestURL().toString());
+//		systemLogService.log("get department info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

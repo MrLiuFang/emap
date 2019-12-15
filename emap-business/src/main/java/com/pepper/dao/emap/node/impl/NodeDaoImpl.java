@@ -3,11 +3,11 @@ package com.pepper.dao.emap.node.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseDao;
-import com.pepper.core.base.curd.DaoExImpl;
 import com.pepper.dao.emap.node.NodeDaoEx;
 import com.pepper.model.emap.node.Node;
 
@@ -16,11 +16,13 @@ import com.pepper.model.emap.node.Node;
  * @author Mr.Liu
  *
  */
-public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
+public class NodeDaoImpl implements NodeDaoEx<Node> {
 
+	@Autowired
+	private BaseDao<Node> baseDao;
+	
 	@Override
 	public Pager<Node> findNavigator(Pager<Node> pager,Map<String, Object> parameter) {
-		BaseDao<Node>  baseDao = this.getPepperSimpleJpaRepository(this.getClass());
 		StringBuffer jpql = new StringBuffer("from Node where id =:id");
 		parameter = new HashMap<String, Object>();
 		parameter.put("id", "value");
@@ -30,7 +32,7 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 
 	@Override
 	public Pager<Node> findNavigator(Pager<Node> pager, String code, String name, String source, String sourceCode,
-			String mapId, String nodeTypeId, String siteId, String buildId, String floor,String hasXY) {
+			String mapId, String nodeTypeId, String siteId, String buildId, String floor,String hasXY,String keyWord) {
 		StringBuffer jpql = new StringBuffer(" select n from Node n left join Map m on n.mapId = m.id left join BuildingInfo b on m.buildId = b.id left join SiteInfo s on s.id = b.siteInfoId where 1=1 ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		if(StringUtils.hasText(code)) {
@@ -75,9 +77,14 @@ public class NodeDaoImpl extends DaoExImpl<Node> implements NodeDaoEx<Node> {
 			jpql.append(" and ( n.x is null or n.x = ''  or n.y is null or n.y = '' ) ");
 		}
 		
+		if(StringUtils.hasText(keyWord)) {
+//			jpql.append(" and ( n.code  like :keyWord or n.name  like :keyWord or n.source  like :keyWord or n.sourceCode  like :keyWord )");
+			jpql.append(" and n.name like :keyWord ");
+			searchParameter.put("keyWord", "%"+keyWord+"%");
+		}
+		jpql.append(" order by n.code ");
 //		jpql.append(" and n.x is not null and n.x <> ''  and n.y is not null and n.y <> '' ");
 		
-		BaseDao<Node>  baseDao = this.getPepperSimpleJpaRepository(this.getClass());
 		return baseDao.findNavigator(pager, jpql.toString(),searchParameter );
 	}
 

@@ -22,6 +22,9 @@ public class Screen extends BaseModel {
 	@Column(name = "building_id")
 	private String buildingId;
 	
+	@Column(name = "code")
+	private String code;
+	
 	@Column(name = "site_id")
 	private String siteId;
 	
@@ -51,4 +54,14 @@ public class Screen extends BaseModel {
 	public void setRefreshFrequency(Integer refreshFrequency) {
 		this.refreshFrequency = refreshFrequency;
 	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+	
+	
 }

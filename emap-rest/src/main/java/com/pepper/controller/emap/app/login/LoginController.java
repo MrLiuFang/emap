@@ -1,5 +1,7 @@
 package com.pepper.controller.emap.app.login;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -119,32 +121,51 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 			resultData.setCode(1000004);
 			return resultData;
 		}
-		Role role = roleService.findByUserId(userReal.getId());
-		if (role == null) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000005);
-			return resultData;
+		List<Role> roleList = roleService.findByUserId1(userReal.getId());
+		Boolean isEmployee = false;
+		for(Role role : roleList  ){
+//			if (role == null) {
+//				resultData.setMessage(Internationalization.getMessageInternationalization(1000005));
+//				resultData.setStatus(Status.LOGIN_FAIL.getKey());
+//				resultData.setCode(1000005);
+//				return resultData;
+//			}
+			if(role.getIsDefault()&&role.getCode().equals("EMPLOYEE_ROLE")) {
+				isEmployee = true;
+			}
+			if(role.getIsDefault()&&!role.getCode().equals("EMPLOYEE_ROLE")) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
+				resultData.setCode(1000008);
+				return resultData;
+			}
 		}
 		
-		if(!role.getCode().equals("EMPLOYEE_ROLE")) {
+		if(!isEmployee) {
 			resultData.setMessage(Internationalization.getMessageInternationalization(1000008));
 			resultData.setCode(1000008);
 			return resultData;
 		}
 		
-		
-		if (com.pepper.common.emuns.Status.DISABLE.equals(role.getStatus())) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000006));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000006);
-			return resultData;
+		if(userReal.getIsNeverExpire()!=null && !userReal.getIsNeverExpire()) {
+			if(userReal.getUpdatePasswordDate()!=null) {
+				if((LocalDate.now().toEpochDay() - userReal.getUpdatePasswordDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())>=30) {
+					resultData.setMessage(Internationalization.getMessageInternationalization(1000009));
+					resultData.setStatus(Status.LOGIN_FAIL.getKey());
+					resultData.setCode(1000009);
+					return resultData;
+				}
+			}
 		}
-		if(!role.getCode().equals("EMPLOYEE_ROLE")) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(1000007));
-			resultData.setStatus(Status.LOGIN_FAIL.getKey());
-			resultData.setCode(1000007);
-			return resultData;
+		
+		if(userReal.getAutomaticLogOutDate()!=null && userReal.getIsNeverExpire()!=null &&!userReal.getIsNeverExpire()) {
+			if(userReal.getUpdatePasswordDate()!=null) {
+				if((LocalDate.now().toEpochDay() - userReal.getAutomaticLogOutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())>=0) {
+					resultData.setMessage(Internationalization.getMessageInternationalization(1000010));
+					resultData.setStatus(Status.LOGIN_FAIL.getKey());
+					resultData.setCode(1000010);
+					return resultData;
+				}
+			}
 		}
 
 		// 更新用户的最后登录时间
@@ -153,10 +174,12 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		adminUserService.updateLoginTime(userReal.getId());
 		
 		// 获取用户所有资源，并让其处于登录状态。
-		List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
-		String token = setLoginInfo(userReal, resourceList);
+		//List<String> resourceList = roleService.queryUserAllResources(userReal.getId());
+		String token = setLoginInfo(userReal, null);
+		resultData.setData("userInfo", userReal);
 		resultData.setData("token", token);
-		resultData.setData("role", role);
+		resultData.setData("role", roleList);
+		resultData.setData("isManager", userReal.getIsManager());
 		resultData.setData("department", departmentService.findById(userReal.getDepartmentId()));
 		resultData.setData("departmentGroup", departmentGroupService.findById(userReal.getDepartmentGroupId()));
 		if(map.containsKey("language")) {
@@ -170,13 +193,14 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 
 	private String setLoginInfo(AdminUser user, List<String> resourceList) {
 		String token = UUID.randomUUID().toString();
-
+		String oldToken = valueOperationsService.get(user.getId() + GlobalConstant.AUTHORIZE_TOKEN);
+		appAuthorize.deleteAuthorizeInfo(oldToken);
 		// 记录用户登录状态
 		appAuthorize.setAuthorizeInfo(user.getId(), token);
 		// 先删除以前的权限资源
-		appAuthorize.deleteUserResources(user.getId());
+//		appAuthorize.deleteUserResources(user.getId());
 		// 设置权限资源
-		appAuthorize.setUserResources(resourceList, user.getId());
+		//appAuthorize.setUserResources(resourceList, user.getId());
 		// 将当前用户信息保存到redis
 		appAuthorize.setCurrentUser(user.getId(), user);
 
@@ -191,12 +215,12 @@ public class LoginController extends BaseControllerImpl implements BaseControlle
 		/**
 		 * 将用户资源放到redis中，用于jsp的鉴权标签
 		 */
-		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
-		if (authMenuCode != null && authMenuCode.size() > 0) {
-			String[] authMenuCodeArr = new String[authMenuCode.size()];
-			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
-					authMenuCode.toArray(authMenuCodeArr));
-		}
+//		List<String> authMenuCode = roleService.queryUserAllMenuCode(user.getId());
+//		if (authMenuCode != null && authMenuCode.size() > 0) {
+//			String[] authMenuCodeArr = new String[authMenuCode.size()];
+//			setOperationsService.add(GlobalConstant.USER_RESOURCE_CODE + user.getId(),
+//					authMenuCode.toArray(authMenuCodeArr));
+//		}
 
 		return token;
 	}

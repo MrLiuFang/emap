@@ -19,4 +19,10 @@ public interface SiteInfoDao  extends BaseDao<SiteInfo> {
 	 * @return
 	 */
 	public List<SiteInfo> findByName(String name);
+	
+	/**
+	 * @param code
+	 * @return
+	 */
+	public SiteInfo findFirstByName(String name);
 }

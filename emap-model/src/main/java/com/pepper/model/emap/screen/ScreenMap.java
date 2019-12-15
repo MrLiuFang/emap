@@ -25,6 +25,8 @@ public class ScreenMap extends BaseModel {
 	@Column(name = "map_id",nullable=false)
 	private String mapId;
 	
+	@Column(name = "refresh_frequency")
+	private Integer refreshFrequency;
 
 	public String getMapId() {
 		return mapId;
@@ -40,6 +42,14 @@ public class ScreenMap extends BaseModel {
 
 	public void setScreenId(String screenId) {
 		this.screenId = screenId;
+	}
+
+	public Integer getRefreshFrequency() {
+		return refreshFrequency;
+	}
+
+	public void setRefreshFrequency(Integer refreshFrequency) {
+		this.refreshFrequency = refreshFrequency;
 	}
 	
 }

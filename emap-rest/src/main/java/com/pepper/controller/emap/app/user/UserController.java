@@ -26,8 +26,11 @@ import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.event.EventListAssist;
+import com.pepper.model.emap.vo.AdminUserEventAssistVo;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.DepartmentGroupVo1;
+import com.pepper.model.emap.vo.DepartmentGroupVo2;
 import com.pepper.model.emap.vo.DepartmentVo1;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
@@ -67,25 +70,32 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private DepartmentGroupService departmentGroupService;
 	
+	@Reference
+	private com.pepper.service.emap.event.EventListAssistService eventListAssistService;
+	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object getUserInfo() {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		if(adminUser!=null) {
+			adminUser = this.adminUserService.findById(adminUser.getId());
+		}else {
+			return resultData;
+		}
 		adminUser.setPassword("");
 		AdminUserVo  adminUserVo = new AdminUserVo();
 		BeanUtils.copyProperties(adminUser, adminUserVo);
 		adminUserVo.setPassword("");
-		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
-		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+		adminUserVo.setRole(roleService.findByUserId1(adminUser.getId()));
 		if(StringUtils.hasText(adminUser.getDepartmentId())) {
 			adminUserVo.setDepartment(departmentService.findById(adminUser.getDepartmentId()));
 		}
 		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
 		resultData.setData("user", adminUserVo);
 		
-		systemLogService.log("app get user info", this.request.getRequestURL().toString());
+//		systemLogService.log("app get user info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -109,25 +119,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object departmentList() {
-//		ResultData resultData = new ResultData();
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
-//		currentUser = adminUserService.findById(currentUser.getId());
-//		List<AdminUser> list = adminUserService.findByDepartmentId(currentUser.getDepartmentId(),currentUser.getId());
-//		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
-//		for(AdminUser user : list) {
-//			AdminUserVo adminUserVo = new AdminUserVo();
-//			BeanUtils.copyProperties(user, adminUserVo);
-//			if(StringUtils.hasText(user.getHeadPortrait())) {
-//				adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
-//			}
-//			adminUserVo.setPassword("");
-//			returnList.add(adminUserVo);
-//		}
-//		resultData.setData("user", returnList);
-//		
-//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
-//		return resultData;
-		
 		ResultData resultData = new ResultData();
 		if(!StringUtils.hasText(currentUser.getDepartmentId())) {
 			return resultData;
@@ -135,7 +127,14 @@ public class UserController extends BaseControllerImpl implements BaseController
 		Department department =  departmentService.findById(currentUser.getDepartmentId());
 		if(department==null) {
 			return resultData;
-		}
+		}		
+		resultData.setData("user", convertDepartmentVo1(department));
+//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	private DepartmentVo1 convertDepartmentVo1(Department department) {
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		DepartmentVo1 departmentVo1 = new DepartmentVo1();
 		BeanUtils.copyProperties(department, departmentVo1);
 		List<DepartmentGroup> listDepartmentGroup = departmentGroupService.findByDepartmentId(department.getId());
@@ -154,10 +153,41 @@ public class UserController extends BaseControllerImpl implements BaseController
 			departmentGroupV1.setUser(listAdminUserVo);
 			listDepartmentGroupV1.add(departmentGroupV1);
 		}
+		listDepartmentGroupV1.add(setDepartmentManager(department.getId()));
+//		listDepartmentGroupV1.add(setNoDepartment());
 		departmentVo1.setDepartmentGroup(listDepartmentGroupV1);
-			
-		resultData.setData("user", departmentVo1);
-		return resultData;
+		return departmentVo1;
+	}
+	
+	private DepartmentGroupVo1 setDepartmentManager(String departmentId) {
+		List<AdminUser> listAdminUser  = adminUserService.findByDepartmentId(departmentId, true);
+//		listAdminUser.addAll(adminUserService.findEmployeeUserNotInDepartment());
+		DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+		departmentGroupV1.setName("未分組");
+		List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+		for(AdminUser adminUser : listAdminUser) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(adminUser, adminUserVo);
+			adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+			listAdminUserVo.add(adminUserVo);
+		}
+		departmentGroupV1.setUser(listAdminUserVo);
+		return departmentGroupV1;
+	}
+
+	private DepartmentGroupVo1 setNoDepartment() {
+		List<AdminUser> listAdminUser  = adminUserService.findEmployeeUserNotInDepartment();
+		DepartmentGroupVo1 departmentGroupV1 = new DepartmentGroupVo1();
+		departmentGroupV1.setName("无部门");
+		List<AdminUserVo> listAdminUserVo = new ArrayList<AdminUserVo>();
+		for(AdminUser adminUser : listAdminUser) {
+			AdminUserVo adminUserVo = new AdminUserVo();
+			BeanUtils.copyProperties(adminUser, adminUserVo);
+			adminUserVo.setHeadPortraitUrl(this.fileService.getUrl(adminUser.getHeadPortrait()));
+			listAdminUserVo.add(adminUserVo);
+		}
+		departmentGroupV1.setUser(listAdminUserVo);
+		return departmentGroupV1;
 	}
 	
 	@RequestMapping(value = "/bindDeviceId")
@@ -167,8 +197,34 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		valueOperationsService.set("userDeviceId_"+currentUser.getId(), map.get("deviceId"));
 		
-		systemLogService.log("app bind device id", this.request.getRequestURL().toString());
+//		systemLogService.log("app bind device id", this.request.getRequestURL().toString());
 		return new ResultData();
-	} 
+	}
+	
+	@RequestMapping(value = "/department/user")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object departmentUser(String eventListId) {
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
+		ResultData resultData = new ResultData();
+		if(!StringUtils.hasText(currentUser.getDepartmentId())) {
+			return resultData;
+		}
+		Department department =  departmentService.findById(currentUser.getDepartmentId());
+		if(department==null) {
+			return resultData;
+		}
+		
+		
+		DepartmentVo1 departmentVo1 = convertDepartmentVo1(department);
+		for(DepartmentGroupVo1 departmentGroupVo1  : departmentVo1.getDepartmentGroup()) {
+			for(AdminUserVo adminUser : departmentGroupVo1.getUser()) {
+				adminUser.setIsRequestAssist(this.eventListAssistService.findEventListAssist(eventListId, adminUser.getId(),currentUser.getId(),null)==null?false:true);
+			}
+		}
+		resultData.setData("user", departmentVo1);
+//		systemLogService.log("app get department user list", this.request.getRequestURL().toString());
+		return resultData;
+	}
 	
 }

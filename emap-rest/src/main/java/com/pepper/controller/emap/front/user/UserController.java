@@ -1,13 +1,21 @@
 package com.pepper.controller.emap.front.user;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import javax.servlet.ServletOutputStream;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -24,19 +32,27 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 
 import com.pepper.common.emuns.Status;
 import com.pepper.controller.emap.core.ResultData;
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
+import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
+import com.pepper.model.console.role.RoleVo;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
+import com.pepper.model.emap.screen.Screen;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.AdminUserVo;
+import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
+import com.pepper.service.console.menu.MenuService;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.console.role.RoleUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
@@ -81,51 +97,84 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@Reference
 	private SystemLogService systemLogService;
 	
+	@Reference
+	private MenuService menuService;
+	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object getUserInfo() {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		if(adminUser!=null) {
+			adminUser = this.adminUserService.findById(adminUser.getId());
+		}else {
+			return resultData;
+		}
 		adminUser.setPassword("");
 		AdminUserVo  adminUserVo = new AdminUserVo();
 		BeanUtils.copyProperties(adminUser, adminUserVo);
 		adminUserVo.setPassword("");
-		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
-		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
+//		RoleUser roleUser = roleUserService.findByUserId(adminUser.getId());
+//		adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
 		if(StringUtils.hasText(adminUser.getDepartmentId())) {
 			adminUserVo.setDepartment(departmentService.findById(adminUser.getDepartmentId()));
 		}
 		adminUserVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
 		resultData.setData("user", adminUserVo);
-		systemLogService.log("get user info", this.request.getRequestURL().toString());
+		List<Role> roleList = roleService.findByUserId1(adminUser.getId());
+		List<RoleVo> returnListRole = new ArrayList<RoleVo>();
+		for(Role role : roleList) {
+			RoleVo roleVo = new RoleVo();
+			BeanUtils.copyProperties(role, roleVo);
+			roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
+			returnListRole.add(roleVo);
+		}
+		resultData.setData("role", returnListRole);
+//		systemLogService.log("get user info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
-	@RequestMapping(value = "/list")
-	@Authorize(authorizeResources = false)
+	@RequestMapping(value = "/export")
+//	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId) {
+	public void export(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,Status status,String keyWord,String roleCode,Boolean isManager) throws IOException, IllegalArgumentException,
+			IllegalAccessException, NoSuchFieldException, SecurityException {
+//		systemLogService.log("user export", this.request.getRequestURL().toString());
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("user.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, status,roleCode,isManager,true);
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("賬號", "account"));
+		excelColumn.add(ExcelColumn.build("姓名", "name"));
+		excelColumn.add(ExcelColumn.build("郵箱", "email"));
+		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
+		excelColumn.add(ExcelColumn.build("昵稱", "nickName"));
+		excelColumn.add(ExcelColumn.build("角色", "role.code"));
+		excelColumn.add(ExcelColumn.build("部門", "department.code"));
+		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.code"));
+		excelColumn.add(ExcelColumn.build("是否管理员", "isManager"));
+		excelColumn.add(ExcelColumn.build("工號", "userNo"));
+		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
+	}
+
+	private Pager<AdminUser> getPager(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode,Boolean isManager, Boolean isExport) {
 		Pager<AdminUser> pager = new Pager<AdminUser>();
-		
-		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId);
-		Role role = null;
-		for (AdminUser u : pager.getResults()) {
-			role = roleService.findByUserId(u.getId());
-			if (role!=null) {
-				u.setCreateUser(role.getName());
-			}
+		if (Objects.equals(isExport, true)) {
+			pager.setPageNo(1);
+			pager.setPageSize(Integer.MAX_VALUE);
 		}
+		pager = adminUserService.findAdminUser(pager,account, mobile, email, name, departmentId, departmentGroupId, roleId,isWork,status,roleCode, isManager,keyWord);
+		
 		List<AdminUser> list = pager.getResults();
 		List<AdminUserVo> returnList = new ArrayList<AdminUserVo>();
 		for(AdminUser user : list) {
 			AdminUserVo  adminUserVo = new AdminUserVo();
 			BeanUtils.copyProperties(user, adminUserVo);
 			adminUserVo.setPassword("");
-			RoleUser roleUser = roleUserService.findByUserId(user.getId());
-			if(roleUser!=null) {
-				adminUserVo.setRole(roleService.findById(roleUser.getRoleId()));
-			}
+			
 			if(StringUtils.hasText(user.getDepartmentId())) {
 				adminUserVo.setDepartment(departmentService.findById(user.getDepartmentId()));
 			}
@@ -133,18 +182,29 @@ public class UserController extends BaseControllerImpl implements BaseController
 				adminUserVo.setDepartmentGroup(departmentGroupService.findById(user.getDepartmentGroupId()));
 			}
 			adminUserVo.setHeadPortraitUrl(fileService.getUrl(user.getHeadPortrait()));
+			
+			List<Role> roleList = roleService.findByUserId1(user.getId());
+			adminUserVo.setRole(roleList);
 			returnList.add(adminUserVo);
 		}
 		pager.setData("user",returnList);
 		pager.setResults(null);
-		systemLogService.log("get user list", this.request.getRequestURL().toString());
 		return pager;
+	}
+	
+	@RequestMapping(value = "/list")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object list(String account,String mobile,String email,String name,String departmentId,String departmentGroupId,String roleId,Boolean isWork,String userNo,String keyWord,Status status,String roleCode,Boolean isManager ) {
+		
+//		systemLogService.log("get user list", this.request.getRequestURL().toString());
+		return getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord,status, roleCode,isManager,false);
 	}
 	
 	@RequestMapping(value = "/add")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object add(@RequestBody Map<String,Object> map) {
+	public Object add(@RequestBody Map<String,Object> map) throws ParseException {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
@@ -154,30 +214,62 @@ public class UserController extends BaseControllerImpl implements BaseController
 			resultData.setCode(3000001);
 			return resultData;
 		}
-				
-		adminUser.setStatus(Status.NORMAL);
-		adminUser.setUserType(UserType.EMPLOYEE);
+		
+		if(!StringUtils.hasText(adminUser.getName())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(3000002));
+			resultData.setCode(3000002);
+			return resultData;
+		}
+		
+		if(map.containsKey("status")) {
+			adminUser.setStatus(Status.valueOf(map.get("status").toString()));
+		}
+		if(map.containsKey("automaticLogOutDate")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			adminUser.setAutomaticLogOutDate(sdf.parse(map.get("automaticLogOutDate").toString()));
+		}
 		adminUser.setCreateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
 		adminUser.setCreateUser(user.getId());
 		adminUser.setPassword(Md5Util.encryptPassword(adminUser.getPassword().toUpperCase(),adminUser.getAccount()));
-		adminUser.setStatus(Status.NORMAL);
 		adminUser.setUserType(UserType.EMPLOYEE);
 		adminUser.setIsWork(false);
-		adminUserService.saveUser(adminUser, map.get("roleId").toString());
-		systemLogService.log("get user add", this.request.getRequestURL().toString());
+		adminUser.setStatus(Status.NORMAL);
+		adminUser.setUpdatePasswordDate(new Date());
+		adminUser = adminUserService.saveUser(adminUser, null);
+		if(map.containsKey("roleId")) {
+			saveUserRole((List<String>)map.get("roleId"),adminUser.getId());
+		}
+		systemLogService.log("user add", this.request.getRequestURL().toString());
 		return resultData;
+	}
+	
+	private void saveUserRole(List<String> role,String userId) {
+		this.roleUserService.deleteRoleUserByUserId(userId);
+		for(String roleId : role) {
+			RoleUser roleUser = new RoleUser();
+			roleUser.setRoleId(roleId);
+			roleUser.setUserId(userId);
+			this.roleUserService.save(roleUser);
+		}
 	}
 	
 	@RequestMapping(value = "/update")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public Object update(@RequestBody Map<String,Object> map) {
+	public Object update(@RequestBody Map<String,Object> map) throws ParseException {
 		ResultData resultData = new ResultData();
 		AdminUser adminUser = new AdminUser();
 		MapToBeanUtil.convert(adminUser, map);
 		if(map.get("departmentGroupId")==null) {
 			adminUser.setDepartmentGroupId("");
+		}
+		if(map.containsKey("status")) {
+			adminUser.setStatus(Status.valueOf(map.get("status").toString()));
+		}
+		if(map.containsKey("automaticLogOutDate")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			adminUser.setAutomaticLogOutDate(sdf.parse(map.get("automaticLogOutDate").toString()));
 		}
 		adminUser.setUpdateDate(new Date());
 		AdminUser user = (AdminUser) this.getCurrentUser();
@@ -186,7 +278,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AdminUser old = adminUserService.findById(adminUser.getId());
 		adminUser.setPassword(old.getPassword());
 		adminUser.setAccount(old.getAccount());
-		adminUserService.updateUser(adminUser, map.get("roleId").toString());
+		if(!StringUtils.hasText(adminUser.getName())) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(3000002));
+			resultData.setCode(3000002);
+			return resultData;
+		}
+		adminUserService.updateUser(adminUser, null);
+		if(map.containsKey("roleId")) {
+			saveUserRole((List<String>)map.get("roleId"),adminUser.getId());
+		}
 		systemLogService.log("get user update", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -196,16 +296,25 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object toEdit( String userId) {
 		ResultData resultData = new ResultData();
-		RoleUser roleUser = roleUserService.findByUserId(userId);
 		AdminUser adminUser = adminUserService.findById(userId);
 		if(adminUser!=null) {
 			adminUser.setPassword("");
 			resultData.setData("user",adminUser);
-			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
+//			resultData.setData("userRole", roleService.findById(roleUser.getRoleId()));
 			resultData.setData("department", departmentService.findById(adminUser.getDepartmentId()));
 			resultData.setData("departmentGroup",departmentGroupService.findById(adminUser.getDepartmentGroupId()));
+			List<Role> roleList = roleService.findByUserId1(adminUser.getId());
+			List<RoleVo> returnListRole = new ArrayList<RoleVo>();
+			for(Role role : roleList) {
+				RoleVo roleVo = new RoleVo();
+				BeanUtils.copyProperties(role, roleVo);
+				roleVo.setMenu(this.menuService.queryAllMenuByRoleId(role.getId()));
+				returnListRole.add(roleVo);
+			}
+			resultData.setData("role", returnListRole);
 		}
-		systemLogService.log("get user to edit", this.request.getRequestURL().toString());
+		
+//		systemLogService.log("get user to edit", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	
@@ -221,21 +330,35 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return resultData;
 		}
 		
-		Role role = roleService.findByUserId(adminUser.getId());
-		if (role == null) {
+		if(adminUser==null||!adminUser.getIsWork()) {
+			resultData.setMessage(Internationalization.getMessageInternationalization(4000013));
+			resultData.setCode(4000013);
+			return resultData;
+		}
+		
+		List<Role> roleList = roleService.findByUserId1(adminUser.getId());
+		
+		if (roleList == null|| roleList.size()<=0) {
 			resultData.setCode(4000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(4000001));
 			return resultData;
 		}
-		
-		if(role.getCode().equals("EMPLOYEE_ROLE")) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(4000002));
-			resultData.setCode(4000002);
-			return resultData;
+		for(Role role : roleList) {
+			if(role.getCode().equals("EMPLOYEE_ROLE")) {
+				resultData.setMessage(Internationalization.getMessageInternationalization(4000002));
+				resultData.setCode(4000002);
+				return resultData;
+			}
 		}
+		
 		
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		eventListService.handover(adminUser.getId(), currentUser.getId());
+		if(currentUser!=null) {
+			currentUser = this.adminUserService.findById(currentUser.getId());
+			currentUser.setIsWork(false);
+			this.adminUserService.update(currentUser);
+		}
 		systemLogService.log("work handover", this.request.getRequestURL().toString());
 		return resultData;
 	}
@@ -250,7 +373,15 @@ public class UserController extends BaseControllerImpl implements BaseController
 		List<Map<String,AdminUser>> list = new ArrayList<Map<String,AdminUser>>();
 		for (String fileName : files.keySet()) {
 			MultipartFile file = files.get(fileName);
-			Workbook wookbook = new XSSFWorkbook(file.getInputStream());
+			Workbook wookbook = null;
+	        try {
+	        	if(isExcel2003(fileName)){
+	        		wookbook = new HSSFWorkbook(file.getInputStream());
+	        	}else if(isExcel2007(fileName)){
+	        		wookbook = new XSSFWorkbook(file.getInputStream());
+	        	}
+	        } catch (IOException e) {
+	        }
 	        Sheet sheet = wookbook.getSheetAt(0);
 	        Row rowHead = sheet.getRow(0);
 			int totalRowNum = sheet.getLastRowNum();
@@ -315,72 +446,106 @@ public class UserController extends BaseControllerImpl implements BaseController
 					return resultData;
 				}
 				
-				if(this.adminUserService.findByAccount(adminUser.getAccount())!=null) {
-					resultData.setCode(4000007);
-					resultData.setMessage(Internationalization.getMessageInternationalization(4000007).replace("{1}", String.valueOf(i)).replace("{2}",adminUser.getAccount()));
-					return resultData;
-				}
+//				if(this.adminUserService.findByAccount(adminUser.getAccount())!=null) {
+//					resultData.setCode(4000007);
+//					resultData.setMessage(Internationalization.getMessageInternationalization(4000007).replace("{1}", String.valueOf(i)).replace("{2}",adminUser.getAccount()));
+//					return resultData;
+//				}
 				
 				
 				String roleName = getCellValue(row.getCell(5)).toString();
-				Role role = this.roleService.findByName(roleName);
+				Role role = this.roleService.findByCode(roleName);
 				if(role==null) {
 					resultData.setCode(4000008);
 					resultData.setMessage(Internationalization.getMessageInternationalization(4000008).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
 				
-				if(role.getCode().equals("EMPLOYEE_ROLE")) {
-					String departmentName= getCellValue(row.getCell(6)).toString();
-					String departmentGroupName= getCellValue(row.getCell(7)).toString();
-					String isManager= getCellValue(row.getCell(8)).toString();
-					if(StringUtils.hasText(isManager)&&!(isManager.toLowerCase().equals("true")||isManager.toLowerCase().equals("false"))) {
-						resultData.setCode(4000009);
-						resultData.setMessage(Internationalization.getMessageInternationalization(4000009).replace("{1}", String.valueOf(i)));
-						return resultData;
-					}
-					if(!StringUtils.hasText(departmentName)) {
-						resultData.setCode(4000010);
-						resultData.setMessage(Internationalization.getMessageInternationalization(4000010).replace("{1}", String.valueOf(i)));
-						return resultData;
-					}else {
-						List<Department> listDepartment = this.departmentService.findByName(departmentName);
-						if(listDepartment.size()!=1) {
-							resultData.setCode(4000011);
-							resultData.setMessage(Internationalization.getMessageInternationalization(4000011).replace("{1}", String.valueOf(i)));
-							return resultData;
+//				if(role.getCode().equals("EMPLOYEE_ROLE")) {
+//					String departmentName= getCellValue(row.getCell(6)).toString();
+//					String departmentGroupName= getCellValue(row.getCell(7)).toString();
+//					String isManager= getCellValue(row.getCell(8)).toString();
+//					if(StringUtils.hasText(isManager)&&!(isManager.toLowerCase().equals("true")||isManager.toLowerCase().equals("false"))) {
+//						resultData.setCode(4000009);
+//						resultData.setMessage(Internationalization.getMessageInternationalization(4000009).replace("{1}", String.valueOf(i)));
+//						return resultData;
+//					}
+//					if(!StringUtils.hasText(departmentName)) {
+//						resultData.setCode(4000010);
+//						resultData.setMessage(Internationalization.getMessageInternationalization(4000010).replace("{1}", String.valueOf(i)));
+//						return resultData;
+//					}else {
+//						Department department = this.departmentService.findByCode(departmentName);
+//						if(Objects.isNull(department)) {
+//							resultData.setCode(4000011);
+//							resultData.setMessage(Internationalization.getMessageInternationalization(4000011).replace("{1}", String.valueOf(i)));
+//							return resultData;
+//						}else {
+//							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndCode(department.getId(), departmentGroupName);
+//							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
+//								resultData.setCode(4000012);
+//								resultData.setMessage(Internationalization.getMessageInternationalization(4000012).replace("{1}", String.valueOf(i)));
+//								return resultData;
+//							}else {
+//								adminUser.setDepartmentId(department.getId());
+//								adminUser.setDepartmentGroupId(listDepartmentGroup.size()==1?listDepartmentGroup.get(0).getId():null);
+//								adminUser.setIsManager(Boolean.valueOf(StringUtils.hasText(isManager)?isManager.toLowerCase():"false"));
+//							}
+//						}
+//					}
+//				}
+
+				adminUser.setUserNo(getCellValue(row.getCell(9)).toString());
+				if (StringUtils.hasText(adminUser.getAccount())) {
+					AdminUser oldAdminUser = adminUserService.findByAccount(adminUser.getAccount());
+					if(Objects.nonNull(oldAdminUser)) {
+						String isDelete = getCellValue(row.getCell(10)).toString();
+						if(Objects.equals(isDelete.trim(), "是")) {
+							adminUserService.deleteById(oldAdminUser.getId());
+							continue;
 						}else {
-							Department department = listDepartment.get(0);
-							List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentIdAndName(department.getId(), departmentGroupName);
-							if(StringUtils.hasText(departmentGroupName)&& listDepartmentGroup.size()!=1) {
-								resultData.setCode(4000012);
-								resultData.setMessage(Internationalization.getMessageInternationalization(4000012).replace("{1}", String.valueOf(i)));
-								return resultData;
-							}else {
-								adminUser.setDepartmentId(department.getId());
-								adminUser.setDepartmentGroupId(listDepartmentGroup.size()==1?listDepartmentGroup.get(0).getId():null);
-								adminUser.setIsManager(Boolean.valueOf(StringUtils.hasText(isManager)?isManager.toLowerCase():"false"));
+							adminUser.setId(oldAdminUser.getId());
+							RoleUser roleUsers = roleUserService.findRoleUserByUserId(adminUser.getId());
+							if(Objects.nonNull(roleUsers)) {
+								roleUserService.delete(roleUsers);
 							}
+							RoleUser roleUser = new RoleUser();
+							roleUser.setCreateDate(new Date());
+							roleUser.setCreateUser(adminUser.getCreateUser());
+							roleUser.setRoleId( role.getId());
+							roleUser.setUserId(adminUser.getId());
+							roleUserService.save(roleUser);
+							adminUserService.update(adminUser);
+							continue;
 						}
 					}
+					String roleId = role.getId();
+					Map<String,AdminUser> map = new HashMap<String, AdminUser>();
+					map.put(roleId, adminUser);
+					list.add(map);
 				}
 				
-				String roleId = role.getId();
-				Map<String,AdminUser> map = new HashMap<String, AdminUser>();
-				map.put(roleId, adminUser);
-				list.add(map);
+				
 	        }
 			for(Map<String,AdminUser> map : list) {
 				for (String key : map.keySet()) {
+					
 					adminUserService.saveUser(map.get(key), key);
 				}
 				
 			}
 			
 		}
-		systemLogService.log("user import", this.request.getRequestURL().toString());
+//		systemLogService.log("user import");
 		return resultData;
 	}
+	
+	private  boolean isExcel2003(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xls");
+    }
+	private  boolean isExcel2007(String filePath){
+        return StringUtils.hasText(filePath) && filePath.endsWith(".xlsx");
+    }
 	
 	private Boolean check(Row row) {
 		if(!getCellValue(row.getCell(0)).toString().equals("account")) {
@@ -398,16 +563,22 @@ public class UserController extends BaseControllerImpl implements BaseController
 		if(!getCellValue(row.getCell(4)).toString().equals("nickName")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(5)).toString().equals("role")) {
+		if(!getCellValue(row.getCell(5)).toString().equals("roleCode")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(6)).toString().equals("department")) {
+		if(!getCellValue(row.getCell(6)).toString().equals("departmentCode")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(7)).toString().equals("departmentGroup")) {
+		if(!getCellValue(row.getCell(7)).toString().equals("departmentGroupCode")) {
 			return false;
 		}
 		if(!getCellValue(row.getCell(8)).toString().equals("isManager")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(9)).toString().equals("userNo")) {
+			return false;
+		}
+		if(!getCellValue(row.getCell(10)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;
@@ -428,6 +599,22 @@ public class UserController extends BaseControllerImpl implements BaseController
 		adminUserService.update(adminUser);
 		jdkValueOperationsService.set(adminUser.getId(), adminUser);
 		systemLogService.log("user update head portrait", this.request.getRequestURL().toString());
+		return resultData;
+	}
+	
+	@RequestMapping(value = "/work")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object work(@RequestBody java.util.Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		adminUser = adminUserService.findById(adminUser.getId());
+		if(map.containsKey("work")) {
+			adminUser.setIsWork(Boolean.valueOf(map.get("work").toString()));
+			adminUserService.update(adminUser);
+		}
+		
+		systemLogService.log("app user work", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

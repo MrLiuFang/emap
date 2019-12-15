@@ -14,5 +14,5 @@ public interface NodeTypeService extends BaseService<NodeType> {
 
 	public NodeType findByCode(String code);
 	
-	public List<NodeType> findByName(String name);
+	public NodeType findByName(String name);
 }

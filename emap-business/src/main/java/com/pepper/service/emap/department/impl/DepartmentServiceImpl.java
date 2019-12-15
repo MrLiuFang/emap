@@ -25,4 +25,9 @@ public class DepartmentServiceImpl extends BaseServiceImpl<Department> implement
 	public List<Department> findByName(String name) {
 		return departmentDao.findByName(name);
 	}
+
+	@Override
+	public Department findDepartment(String name) {
+		return departmentDao.findFirstByName(name);
+	}
 }

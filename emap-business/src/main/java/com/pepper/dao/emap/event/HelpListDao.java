@@ -29,4 +29,6 @@ public interface HelpListDao extends BaseDao<HelpList> {
 	 * @return
 	 */
 	public List<HelpList> findByNodeTypeIdAndIdIn(String nodeTypeId, String... id) ;
+	
+	public HelpList findFirstByCode(String code) ;
 }

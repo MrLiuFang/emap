@@ -18,6 +18,10 @@ public class NodeTypeVo extends NodeType {
 	private String workingIconUrl;
 	
 	private String stopIconUrl;
+	
+	private String processingIconUrl;
+	
+	
 
 	public String getWorkingIconUrl() {
 		return workingIconUrl;
@@ -33,6 +37,14 @@ public class NodeTypeVo extends NodeType {
 
 	public void setStopIconUrl(String stopIconUrl) {
 		this.stopIconUrl = stopIconUrl;
+	}
+
+	public String getProcessingIconUrl() {
+		return processingIconUrl;
+	}
+
+	public void setProcessingIconUrl(String processingIconUrl) {
+		this.processingIconUrl = processingIconUrl;
 	}
 	
 	

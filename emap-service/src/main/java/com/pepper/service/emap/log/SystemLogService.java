@@ -7,7 +7,7 @@ import com.pepper.model.emap.log.SystemLog;
 public interface SystemLogService extends BaseService<SystemLog> {
 
 	public void log(String actionName,String url);
-	
+	public void log(String actionName);
 	public void log(String actionName,String url,String data);
 	
 	public void log(String actionName,String url,AdminUser adminUser);

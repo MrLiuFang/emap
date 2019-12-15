@@ -26,6 +26,9 @@ public class ActionList extends BaseModel {
 	@Column(name ="task_id")
 	private String taskId;
 	
+	@Column(name ="department_id")
+	private String departmentId;
+	
 	@Column(name ="event_id")
 	private String eventId;
 	
@@ -77,6 +80,9 @@ public class ActionList extends BaseModel {
 	@Column(name ="voice1")
 	private String voice1;
 	
+	@Column(name ="video")
+	private String video;
+	
 	@Column(name ="help_id")
 	private String helpId;
 	
@@ -85,8 +91,26 @@ public class ActionList extends BaseModel {
 	
 	@Column(name ="operatorcontent")
 	private String operatorContent;
+	
+//	@Column(name ="is_assist")
+//	private Boolean isAssist;
+//	
+//	@Column(name ="event_list_assist_id")
+//	private String eventListAssistId;
+	
+	@Column(name ="is_unable_finish")
+	private Boolean isUnableFinish;
+	
 
 	
+	public String getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(String departmentId) {
+		this.departmentId = departmentId;
+	}
+
 	public String getEventListId() {
 		return eventListId;
 	}
@@ -263,6 +287,38 @@ public class ActionList extends BaseModel {
 
 	public void setFinishDate(Date finishDate) {
 		this.finishDate = finishDate;
+	}
+
+//	public Boolean getIsAssist() {
+//		return isAssist;
+//	}
+//
+//	public void setIsAssist(Boolean isAssist) {
+//		this.isAssist = isAssist;
+//	}
+//
+//	public String getEventListAssistId() {
+//		return eventListAssistId;
+//	}
+//
+//	public void setEventListAssistId(String eventListAssistId) {
+//		this.eventListAssistId = eventListAssistId;
+//	}
+
+	public Boolean getIsUnableFinish() {
+		return isUnableFinish;
+	}
+
+	public void setIsUnableFinish(Boolean isUnableFinish) {
+		this.isUnableFinish = isUnableFinish;
+	}
+
+	public String getVideo() {
+		return video;
+	}
+
+	public void setVideo(String video) {
+		this.video = video;
 	}
 	
 	

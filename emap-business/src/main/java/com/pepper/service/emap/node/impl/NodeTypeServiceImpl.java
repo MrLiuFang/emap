@@ -23,12 +23,12 @@ public class NodeTypeServiceImpl extends BaseServiceImpl<NodeType> implements No
 
 	@Override
 	public NodeType findByCode(String code) {
-		return nodeTypeDao.findByCode(code);
+		return nodeTypeDao.findFirstByCode(code);
 	}
 
 	@Override
-	public List<NodeType> findByName(String name) {
-		return nodeTypeDao.findByName(name);
+	public NodeType findByName(String name) {
+		return nodeTypeDao.findFirstByName(name);
 	}
 
 }

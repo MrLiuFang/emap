@@ -2,12 +2,10 @@ package com.pepper.controller.emap.util;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;

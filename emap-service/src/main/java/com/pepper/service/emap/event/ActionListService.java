@@ -7,7 +7,11 @@ import com.pepper.model.emap.event.ActionList;
 
 public interface ActionListService extends BaseService<ActionList> {
 
-	public ActionList findByEventId(String eventId); 
+	public List<ActionList> findByEventId(String eventId); 
+	
+//	public ActionList findActionList(String eventListAssistId);
 	
 	public List<ActionList> findByEventListId(String eventListId); 
+	
+	public List<ActionList> findActionList(String eventListId); 
 }

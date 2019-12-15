@@ -9,5 +9,5 @@ public interface NodeDaoEx<T> {
 
 	Pager<Node> findNavigator(Pager<Node> pager,Map<String, Object> parameter);
 	
-	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY) ;
+	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) ;
 }

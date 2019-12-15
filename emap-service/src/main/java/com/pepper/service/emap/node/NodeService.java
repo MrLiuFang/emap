@@ -21,7 +21,7 @@ public interface NodeService extends BaseService<Node> {
 	 * @param parameter
 	 * @return
 	 */
-	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY);
+	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord);
 	
 	/**
 	 * 
@@ -43,4 +43,8 @@ public interface NodeService extends BaseService<Node> {
 	 * @return
 	 */
 	public Node findByCode(String code);
+	
+	public Node findByName(String name);
+
+	List<Node> findByNameLike(String name);
 }

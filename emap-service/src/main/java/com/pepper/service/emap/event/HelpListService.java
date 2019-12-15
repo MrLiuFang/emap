@@ -20,6 +20,8 @@ public interface HelpListService extends BaseService<HelpList> {
 	 */
 	public List<HelpList> findByNodeTypeId(String nodeTypeId);
 	
+	public HelpList findByCode(String code);
+	
 	List<HelpList> findByNodeTypeIdAndWarningLevelGreaterThanEqual(String nodeTypeId,int warningLevel);
 	
 	public List<HelpList> findByNodeTypeIdAndWarningLevel(String nodeTypeId,int warningLevel) ;

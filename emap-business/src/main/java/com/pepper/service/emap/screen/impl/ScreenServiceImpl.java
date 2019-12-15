@@ -1,5 +1,7 @@
 package com.pepper.service.emap.screen.impl;
 
+import javax.annotation.Resource;
+
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 
@@ -11,7 +13,12 @@ import com.pepper.service.emap.screen.ScreenService;
 @Service(interfaceClass=ScreenService.class)
 public class ScreenServiceImpl extends BaseServiceImpl<Screen> implements ScreenService {
 
-	@Reference
+	@Resource
 	private ScreenDao screenDao;
+
+	@Override
+	public Screen findByCode(String code) {
+		return screenDao.findFirstByCode(code);
+	}
 
 }

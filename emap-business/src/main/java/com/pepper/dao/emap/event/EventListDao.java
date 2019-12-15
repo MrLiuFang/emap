@@ -1,6 +1,8 @@
 package com.pepper.dao.emap.event;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +40,22 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	@Modifying
 	@Query(" update EventList set operator = ?1 where  operator=?2 and status <> 'P' ")
 	public void handover(String handoverUserId, String currentUserId);
-	
 
+	public Integer countByCurrentHandleUserAndStatusNot(String userId,String status);
+
+	@Query("select  count(t1.id)  from EventList t1  where t1.isSpecial is true  and t1.createDate>= ?1 and t1.createDate<= ?2 ")
+	public Integer todaySpecialCount(Date startDate,Date endDate);
+
+	@Query("select  count(t1.id)  from EventList t1  where t1.isUrgent is true  and t1.createDate>= ?1 and t1.createDate<= ?2 ")
+	public Integer todayUrgentCount(Date startDate,Date endDate);
+
+	@Query("select  count(t1.id)  from EventList t1  where t1.isUrgent is null and t1.isSpecial is null  and t1.createDate>= ?1 and t1.createDate<= ?2 ")
+	public Integer todayOrdinaryCount(Date startDate,Date endDate);
+
+	@Query("select t3.name as name,  count(t1.id) as count from EventList t1 join Node t2 on t1.sourceCode = t2.sourceCode " +
+			" join NodeType t3 on t2.nodeTypeId = t3.id   where   t1.createDate>= ?1 and t1.createDate<= ?2 group by t3.name ")
+	public List<Map<String,Object>> currentMonthCount(Date startDate,Date endDate);
+
+	@Query("select '人工申報' as name,  count(t1.id) as count from EventList t1  where   t1.createDate>= ?1 and t1.createDate<= ?2 and t1.isConsole is true ")
+	public List<Map<String,Object>> currentMonthIsConsoleCount(Date startDate,Date endDate);
 }

@@ -13,6 +13,10 @@ public interface DepartmentGroupService extends BaseService<DepartmentGroup> {
 	public void deleteByDepartmentId(String departmentId);
 	
 	public List<DepartmentGroup> findByDepartmentId(String departmentId);
+	
+	public DepartmentGroup findByCode(String code);
 
 	public List<DepartmentGroup> findByDepartmentIdAndName(String departmentId,String name);
+	
+	public List<DepartmentGroup> findByDepartmentIdAndCode(String departmentId, String code);
 }

@@ -78,6 +78,7 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 			NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
 			BeanUtils.copyProperties(nodeType, nodeTypeVo);
 			nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
+			nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
 			nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
 			nodeVo.setNodeType(nodeTypeVo);
 			nearbyNodeVo.setNode(nodeVo);
@@ -104,7 +105,7 @@ public class NearbyNodeController extends BaseControllerImpl  implements BaseCon
 			nearbyNodeVo.setNearbyNode(listNodeVo);
 		}
 		resultData.setData(nearbyNodeVo);
-		systemLogService.log("get nearby node list", this.request.getRequestURL().toString());
+//		systemLogService.log("get nearby node list", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

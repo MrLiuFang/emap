@@ -27,4 +27,9 @@ public class SiteInfoServiceImpl extends BaseServiceImpl<SiteInfo> implements Si
 		return siteInfoDao.findByName(name);
 	}
 
+	@Override
+	public SiteInfo findSiteInfo(String name) {
+		return siteInfoDao.findFirstByName(name);
+	}
+
 }

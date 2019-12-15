@@ -19,7 +19,7 @@
 
 	<modules>
 		<module>emap-business</module>
-		<module>emap-init-data</module>
+<!--		<module>emap-init-data</module>-->
 		<module>emap-model</module>
 		<module>emap-run</module>
 		<module>emap-service</module>
