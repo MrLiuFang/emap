@@ -81,6 +81,39 @@ public class EventRule extends BaseModel {
 //	@Column(name = "urgent_warning_level",nullable=false)
 //	private Integer urgentWarningLevel;
 
+	@Column(name = "send_sms_warning_level")
+	private Integer sendSmsWarningLevel;
+
+	@Column(name = "send_email_warning_level")
+	private Integer sendEmailWarningLevel;
+
+	@Column(name = "send_message_warning_level")
+	private Integer sendMessageWarningLevel;
+
+	public Integer getSendSmsWarningLevel() {
+		return sendSmsWarningLevel;
+	}
+
+	public void setSendSmsWarningLevel(Integer sendSmsWarningLevel) {
+		this.sendSmsWarningLevel = sendSmsWarningLevel;
+	}
+
+	public Integer getSendEmailWarningLevel() {
+		return sendEmailWarningLevel;
+	}
+
+	public void setSendEmailWarningLevel(Integer sendEmailWarningLevel) {
+		this.sendEmailWarningLevel = sendEmailWarningLevel;
+	}
+
+	public Integer getSendMessageWarningLevel() {
+		return sendMessageWarningLevel;
+	}
+
+	public void setSendMessageWarningLevel(Integer sendMessageWarningLevel) {
+		this.sendMessageWarningLevel = sendMessageWarningLevel;
+	}
+
 	public String getNodeId() {
 		return nodeId;
 	}

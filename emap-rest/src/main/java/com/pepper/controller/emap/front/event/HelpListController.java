@@ -78,11 +78,11 @@ public class HelpListController extends BaseControllerImpl implements BaseContro
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<HelpList> pager = getPager(code, name, nodeTypeId, warningLevel, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.code"));
-		excelColumn.add(ExcelColumn.build("緊急級別", "warningLevel"));
-		excelColumn.add(ExcelColumn.build("幫助内容", "helpMessage"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("nodeType", "nodeType.code"));
+		excelColumn.add(ExcelColumn.build("warningLevel", "warningLevel"));
+		excelColumn.add(ExcelColumn.build("helpMessage", "helpMessage"));
 		
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("help"), outputStream, excelColumn);
 	}

@@ -52,8 +52,8 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	@Query("select  count(t1.id)  from EventList t1  where t1.isUrgent is null and t1.isSpecial is null  and t1.createDate>= ?1 and t1.createDate<= ?2 ")
 	public Integer todayOrdinaryCount(Date startDate,Date endDate);
 
-	@Query("select t3.name as name,  count(t1.id) as count from EventList t1 join Node t2 on t1.sourceCode = t2.sourceCode " +
-			" join NodeType t3 on t2.nodeTypeId = t3.id   where   t1.createDate>= ?1 and t1.createDate<= ?2 group by t3.name ")
+	@Query("select t4.name as name,  count(t1.id) as count from EventList t1 join Node t2 on t1.sourceCode = t2.sourceCode " +
+			" join NodeType t3 on t2.nodeTypeId = t3.id join NodeClassify t4 on t3.nodeClassifyId = t4.id  where   t1.createDate>= ?1 and t1.createDate<= ?2 group by t3.name ")
 	public List<Map<String,Object>> currentMonthCount(Date startDate,Date endDate);
 
 	@Query("select '人工申報' as name,  count(t1.id) as count from EventList t1  where   t1.createDate>= ?1 and t1.createDate<= ?2 and t1.isConsole is true ")

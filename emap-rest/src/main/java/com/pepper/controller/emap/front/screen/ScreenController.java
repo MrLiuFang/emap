@@ -98,10 +98,10 @@ public class ScreenController extends BaseControllerImpl implements BaseControll
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Screen> pager = getPager(buildingId, siteId, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("城區", "site.code"));
-		excelColumn.add(ExcelColumn.build("建築", "build.code"));
-		excelColumn.add(ExcelColumn.build("刷新頻率", "refreshFrequency"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("buildCode", "build.code"));
+		excelColumn.add(ExcelColumn.build("siteCode", "site.code"));
+		excelColumn.add(ExcelColumn.build("refreshFrequency", "refreshFrequency"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("screen"), outputStream, excelColumn);
 	}
 

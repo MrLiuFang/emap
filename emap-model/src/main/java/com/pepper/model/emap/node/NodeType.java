@@ -7,7 +7,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pepper.core.base.BaseModel;
-import com.pepper.model.emap.enums.Classify;
 
 @Entity()
 @Table(name = "t_node_type_info")
@@ -37,9 +36,20 @@ public class NodeType extends BaseModel {
 	@Column(name = "is_lock")
 	private Boolean isLock;
 	
-	@Column(name = "classify")
-	private Classify classify;
-	
+//	@Column(name = "classify")
+//	private Classify classify;
+
+	@Column(name = "node_classify_id")
+	private String nodeClassifyId;
+
+	public String getNodeClassifyId() {
+		return nodeClassifyId;
+	}
+
+	public void setNodeClassifyId(String nodeClassifyId) {
+		this.nodeClassifyId = nodeClassifyId;
+	}
+
 	public Boolean getIsLock() {
 		return isLock;
 	}
@@ -88,13 +98,13 @@ public class NodeType extends BaseModel {
 		this.processingIcon = processingIcon;
 	}
 
-	public Classify getClassify() {
-		return classify;
-	}
-
-	public void setClassify(Classify classify) {
-		this.classify = classify;
-	}
+//	public Classify getClassify() {
+//		return classify;
+//	}
+//
+//	public void setClassify(Classify classify) {
+//		this.classify = classify;
+//	}
 	
 	
 }

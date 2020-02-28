@@ -66,12 +66,12 @@ public class SubsystemController extends BaseControllerImpl implements BaseContr
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Subsystem> pager = getPager( name,code,nodeCode,isOnLine, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("地址", "address"));
-		excelColumn.add(ExcelColumn.build("端口", "prot"));
-		excelColumn.add(ExcelColumn.build("是否關聯本系統", "isRelation"));
-		excelColumn.add(ExcelColumn.build("设备編碼", "nodeCode"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("address", "address"));
+		excelColumn.add(ExcelColumn.build("prot", "prot"));
+		excelColumn.add(ExcelColumn.build("isRelation", "isRelation"));
+		excelColumn.add(ExcelColumn.build("nodeCode", "nodeCode"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("subsystem"), outputStream, excelColumn);
 	}
 

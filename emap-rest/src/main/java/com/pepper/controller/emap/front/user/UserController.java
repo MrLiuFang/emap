@@ -147,16 +147,16 @@ public class UserController extends BaseControllerImpl implements BaseController
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<AdminUser> pager = getPager(account, mobile, email, name, departmentId, departmentGroupId, roleId, isWork, userNo,keyWord, status,roleCode,isManager,true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("賬號", "account"));
-		excelColumn.add(ExcelColumn.build("姓名", "name"));
-		excelColumn.add(ExcelColumn.build("郵箱", "email"));
-		excelColumn.add(ExcelColumn.build("手機號碼", "mobile"));
-		excelColumn.add(ExcelColumn.build("昵稱", "nickName"));
-		excelColumn.add(ExcelColumn.build("角色", "role.code"));
-		excelColumn.add(ExcelColumn.build("部門", "department.code"));
-		excelColumn.add(ExcelColumn.build("部門組", "departmentGroup.code"));
-		excelColumn.add(ExcelColumn.build("是否管理员", "isManager"));
-		excelColumn.add(ExcelColumn.build("工號", "userNo"));
+		excelColumn.add(ExcelColumn.build("account", "account"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("email", "email"));
+		excelColumn.add(ExcelColumn.build("email", "mobile"));
+		excelColumn.add(ExcelColumn.build("nickName", "nickName"));
+		excelColumn.add(ExcelColumn.build("roleCode", "role.code"));
+		excelColumn.add(ExcelColumn.build("departmentCode", "department.code"));
+		excelColumn.add(ExcelColumn.build("departmentGroupCode", "departmentGroup.code"));
+		excelColumn.add(ExcelColumn.build("isManager", "isManager"));
+		excelColumn.add(ExcelColumn.build("userNo", "userNo"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("user"), outputStream, excelColumn);
 	}
 

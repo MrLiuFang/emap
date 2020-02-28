@@ -72,9 +72,9 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<BuildingInfo> pager = getPager(code, name, siteId, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("城區", "site.code"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("siteCode", "site.code"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("build"), outputStream, excelColumn);
 	}
 	

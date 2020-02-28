@@ -91,9 +91,9 @@ public class RoleController  extends BaseControllerImpl implements BaseControlle
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Role> pager = getPager(isDefault, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("角色名稱", "name"));
-		excelColumn.add(ExcelColumn.build("角色編碼", "code"));
-		excelColumn.add(ExcelColumn.build("是否主角色", "isDefault"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("isDefault", "isDefault"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("role"), outputStream, excelColumn);
 	}
 	

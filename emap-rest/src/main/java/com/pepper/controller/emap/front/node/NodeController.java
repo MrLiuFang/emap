@@ -117,20 +117,21 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		Pager<Node> pager = getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY,
 				keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("來源名稱", "source"));
-		excelColumn.add(ExcelColumn.build("來源編碼", "sourceCode"));
-		excelColumn.add(ExcelColumn.build("地圖", "map.code"));
-		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.code"));
-		excelColumn.add(ExcelColumn.build("坐標x", "x"));
-		excelColumn.add(ExcelColumn.build("坐標y", "y"));
-		excelColumn.add(ExcelColumn.build("外部鏈接", "externalLink"));
-		excelColumn.add(ExcelColumn.build("告警級別", "warningLevel"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("source", "source"));
+		excelColumn.add(ExcelColumn.build("sourceCode", "sourceCode"));
+		excelColumn.add(ExcelColumn.build("map", "map.code"));
+		excelColumn.add(ExcelColumn.build("nodeTypeCode", "nodeType.code"));
+		excelColumn.add(ExcelColumn.build("x", "x"));
+		excelColumn.add(ExcelColumn.build("y", "y"));
+		excelColumn.add(ExcelColumn.build("ip", "ip"));
+		excelColumn.add(ExcelColumn.build("externalLink", "externalLink"));
+		excelColumn.add(ExcelColumn.build("warningLevel", "warningLevel"));
 		excelColumn.add(ExcelColumn.build("hasPtz", "hasPtz"));
 		excelColumn.add(ExcelColumn.build("userName", "userName"));
 		excelColumn.add(ExcelColumn.build("password", "password"));
-		excelColumn.add(ExcelColumn.build("systemID", "systemID"));
+		excelColumn.add(ExcelColumn.build("systemId", "systemID"));
 		excelColumn.add(ExcelColumn.build("windowsUser", "windowsUser"));
 		excelColumn.add(ExcelColumn.build("windowsPass", "windowsPass"));
 		excelColumn.add(ExcelColumn.build("domainName", "domainName"));
@@ -138,7 +139,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("paneIp", "paneIp"));
 		excelColumn.add(ExcelColumn.build("readerId", "readerId"));
 		excelColumn.add(ExcelColumn.build("readerIo", "readerIo"));
-		excelColumn.add(ExcelColumn.build("備注", "remark"));
+		excelColumn.add(ExcelColumn.build("remark", "remark"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("node"), outputStream, excelColumn);
 	}
 

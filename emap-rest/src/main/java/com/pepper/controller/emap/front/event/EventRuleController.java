@@ -88,20 +88,20 @@ public class EventRuleController extends BaseControllerImpl implements BaseContr
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<EventRule> pager = getPager(nodeId, nodeTypeId,warningLevel, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("設備", "node.name"));
-		excelColumn.add(ExcelColumn.build("設備類型", "nodeType.name"));
-		excelColumn.add(ExcelColumn.build("告警級別", "warningLevel"));
-		excelColumn.add(ExcelColumn.build("超時時長", "timeOut"));
-		excelColumn.add(ExcelColumn.build("自動派單開始時間", "fromDateTime"));
-		excelColumn.add(ExcelColumn.build("自動派單結束時間", "toDateTime"));
-		excelColumn.add(ExcelColumn.build("部門", "department.name"));
-		excelColumn.add(ExcelColumn.build("特級告警級別", "specialWarningLevel"));
-		excelColumn.add(ExcelColumn.build("特級處理部門", "specialDepartment.name"));
-		excelColumn.add(ExcelColumn.build("接受短信號碼", "sMSReceiver"));
-		excelColumn.add(ExcelColumn.build("電郵地址", "emailAccount"));
-		excelColumn.add(ExcelColumn.build("短信内容", "sMSContent"));
-		excelColumn.add(ExcelColumn.build("電郵標題", "emailTitle"));
-		excelColumn.add(ExcelColumn.build("電郵内容", "emailContent"));
+		excelColumn.add(ExcelColumn.build("node", "node.name"));
+		excelColumn.add(ExcelColumn.build("nodeType", "nodeType.name"));
+		excelColumn.add(ExcelColumn.build("warningLevel", "warningLevel"));
+		excelColumn.add(ExcelColumn.build("timeOut", "timeOut"));
+		excelColumn.add(ExcelColumn.build("fromDateTime", "fromDateTime"));
+		excelColumn.add(ExcelColumn.build("toDateTime", "toDateTime"));
+		excelColumn.add(ExcelColumn.build("department", "department.name"));
+		excelColumn.add(ExcelColumn.build("specialWarningLevel", "specialWarningLevel"));
+		excelColumn.add(ExcelColumn.build("specialDepartment", "specialDepartment.name"));
+		excelColumn.add(ExcelColumn.build("sMSReceiver", "sMSReceiver"));
+		excelColumn.add(ExcelColumn.build("emailAccount", "emailAccount"));
+		excelColumn.add(ExcelColumn.build("sMSContent", "sMSContent"));
+		excelColumn.add(ExcelColumn.build("emailTitle", "emailTitle"));
+		excelColumn.add(ExcelColumn.build("emailContent", "emailContent"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("eventRule"), outputStream, excelColumn);
 	}
 

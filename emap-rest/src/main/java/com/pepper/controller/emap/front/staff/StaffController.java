@@ -82,14 +82,14 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Staff> pager = getPager(name, email, siteId, idCard,status,staffType,userNo,sex, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("姓名", "name"));
-		excelColumn.add(ExcelColumn.build("郵箱", "email"));
-		excelColumn.add(ExcelColumn.build("ID卡", "idCard"));
-		excelColumn.add(ExcelColumn.build("城區", "site.code"));
-		excelColumn.add(ExcelColumn.build("工號", "userNo"));
-		excelColumn.add(ExcelColumn.build("狀態", "status"));
-		excelColumn.add(ExcelColumn.build("類型", "staffType"));
-		excelColumn.add(ExcelColumn.build("性別", "sex"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("email", "email"));
+		excelColumn.add(ExcelColumn.build("idCard", "idCard"));
+		excelColumn.add(ExcelColumn.build("siteCode", "site.code"));
+		excelColumn.add(ExcelColumn.build("userNo", "userNo"));
+		excelColumn.add(ExcelColumn.build("status", "status"));
+		excelColumn.add(ExcelColumn.build("staffType", "staffType"));
+		excelColumn.add(ExcelColumn.build("sex", "sex"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("staff"), outputStream, excelColumn);
 	}
 	

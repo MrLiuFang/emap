@@ -851,7 +851,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
             FileInputStream io = new FileInputStream(target);
             byte b[] = new byte[(int) target.length()];
             io.read(b);
-            String fileId = fileService.addFile(b, "1.mp3");
+            String fileId = fileService.addFile(b, "1.mp3","");
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("id", fileId);
             map.put("url", fileService.getUrl(fileId));

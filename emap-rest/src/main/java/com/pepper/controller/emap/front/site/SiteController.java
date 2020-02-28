@@ -67,8 +67,8 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<SiteInfo> pager = getPager(code, name, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("site"), outputStream, excelColumn);
 	}
 
@@ -245,7 +245,6 @@ public class SiteController  extends BaseControllerImpl implements BaseControlle
 	public Object toEdit(String id) {
 		ResultData resultData = new ResultData();
 		resultData.setData("site",siteInfoService.findById(id));
-		systemLogService.log("get site info", this.request.getRequestURL().toString());
 		return resultData;
 	}
 	

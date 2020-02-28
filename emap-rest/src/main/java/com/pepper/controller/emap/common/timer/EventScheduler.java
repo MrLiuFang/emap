@@ -132,40 +132,13 @@ public class EventScheduler {
 	
 	private void eventRule(EventList eventList,EventRule eventRule) {		
 		try {
-			
+			//特级
 			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
 					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent());
 					eventList.setIsSpecial(true);
 					eventListService.update(eventList);
-					
-					EventMessage eventMessage = new EventMessage();
-					
-					eventMessage.setEventId(eventList.getEventId());
-					eventMessage.setEventListId(eventList.getId());
-					eventMessage.setUserId(user.getId());
-					eventMessage.setUserName(user.getName());
-					
-					if(StringUtils.hasText(eventRule.getEmailAccount())) {
-						eventMessage.setType(1);
-						eventMessage.setEmail(eventRule.getEmailAccount());
-						eventMessage.setTitle(eventRule.getEmailTitle());
-						eventMessage.setMessage(eventRule.getEmailContent());
-						eventMessageService.save(eventMessage);
-					}
-					
-					if(StringUtils.hasText(eventRule.getsMSReceiver())) {
-						eventMessage.setType(2);
-						Department department = this.departmentService.findById(eventRule.getSpecialDepartmentId());
-						eventMessage.setMessage(eventList.getEventDate()+ "/" + (Objects.nonNull(department)?department.getName():"") + "/"+ eventList.getEventName() + "/"+ eventRule.getsMSContent());
-						String[] mobile = eventRule.getsMSReceiver().split(";");
-						for(String str : mobile) {
-							eventMessage.setMobile(str);
-							eventMessageService.save(eventMessage);
-							eventMessage.setId(null);
-						}						
-					}
-					
+					send(eventList,eventRule,user);
 					return ;
 				}else {
 					eventList.setIsNotFoundEmployee(true);
@@ -175,6 +148,7 @@ public class EventScheduler {
 			}
 			eventList.setIsSpecial(false);
 			eventListService.update(eventList);
+
 			if(StringUtils.hasText(eventRule.getFromDateTime())&&StringUtils.hasText(eventRule.getToDateTime())) {
 				Integer from =  Integer.valueOf( eventRule.getFromDateTime().replaceFirst("^0*", "").replace(":", ""));
 				Integer to =  Integer.valueOf( eventRule.getToDateTime().replaceFirst("^0*", "").replace(":", ""));
@@ -182,24 +156,28 @@ public class EventScheduler {
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 				if(to<from) {
 					if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-						assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+						send(eventList,eventRule,user);
 						return ;
 					}
 				}else {
 					if(time>=from&&time<=to) {
-						assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+						send(eventList,eventRule,user);
 						return ;
 					}
 				}
 			}
-			
+			//紧急
 			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
-				assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+				send(eventList,eventRule,user);
 				return ;
 			}
 			
 			if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-				assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+				send(eventList,eventRule,user);
 				return ;
 			}
 			
@@ -207,6 +185,65 @@ public class EventScheduler {
 			
 		}catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void send(EventList eventList,EventRule eventRule,AdminUser user){
+		EventMessage eventMessage = new EventMessage();
+		eventMessage.setEventId(eventList.getEventId());
+		eventMessage.setEventListId(eventList.getId());
+		if(Objects.nonNull(user)) {
+			eventMessage.setUserId(user.getId());
+			eventMessage.setUserName(user.getName());
+		}
+
+		if(eventRule.getSendEmailWarningLevel()==1 && !eventList.getIsUrgent()){
+			sendEmail(eventMessage,eventRule);
+		}
+
+		if(eventRule.getSendEmailWarningLevel()==2 && eventList.getIsUrgent() && !eventList.getIsSpecial()){
+			sendEmail(eventMessage,eventRule);
+		}
+
+		if(eventRule.getSendEmailWarningLevel()==3 && eventList.getIsSpecial()){
+			sendEmail(eventMessage,eventRule);
+		}
+
+		if(eventRule.getSendSmsWarningLevel()==1 && !eventList.getIsUrgent()){
+			sendSms(eventMessage,eventRule,eventList);
+		}
+
+		if(eventRule.getSendSmsWarningLevel()==2 && eventList.getIsUrgent() && !eventList.getIsSpecial()){
+			sendSms(eventMessage,eventRule,eventList);
+		}
+
+		if(eventRule.getSendSmsWarningLevel()==3 && eventList.getIsSpecial()){
+			sendSms(eventMessage,eventRule,eventList);
+		}
+
+	}
+
+	private void sendSms(EventMessage eventMessage,EventRule eventRule, EventList eventList){
+		if(StringUtils.hasText(eventRule.getsMSReceiver())) {
+			eventMessage.setType(2);
+			Department department = this.departmentService.findById(eventRule.getSpecialDepartmentId());
+			eventMessage.setMessage(eventList.getEventDate()+ "/" + (Objects.nonNull(department)?department.getName():"") + "/"+ eventList.getEventName() + "/"+ eventRule.getsMSContent());
+			String[] mobile = eventRule.getsMSReceiver().split(";");
+			for(String str : mobile) {
+				eventMessage.setMobile(str);
+				eventMessageService.save(eventMessage);
+				eventMessage.setId(null);
+			}
+		}
+	}
+
+	private void sendEmail(EventMessage eventMessage,EventRule eventRule){
+		if(StringUtils.hasText(eventRule.getEmailAccount())) {
+			eventMessage.setType(1);
+			eventMessage.setEmail(eventRule.getEmailAccount());
+			eventMessage.setTitle(eventRule.getEmailTitle());
+			eventMessage.setMessage(eventRule.getEmailContent());
+			eventMessageService.save(eventMessage);
 		}
 	}
 	

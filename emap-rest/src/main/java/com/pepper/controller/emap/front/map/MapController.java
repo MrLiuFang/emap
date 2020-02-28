@@ -84,12 +84,12 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<com.pepper.model.emap.map.Map> pager = getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("區域編碼", "areaCode"));
-		excelColumn.add(ExcelColumn.build("區域名稱", "areaName"));
-		excelColumn.add(ExcelColumn.build("建築名稱", "build.code"));
-		excelColumn.add(ExcelColumn.build("樓層", "floor"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("areaCode", "areaCode"));
+		excelColumn.add(ExcelColumn.build("areaName", "areaName"));
+		excelColumn.add(ExcelColumn.build("buildCode", "build.code"));
+		excelColumn.add(ExcelColumn.build("floor", "floor"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("map"), outputStream, excelColumn);
 	}
 	

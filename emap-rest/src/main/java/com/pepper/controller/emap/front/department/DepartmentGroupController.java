@@ -76,11 +76,11 @@ public class DepartmentGroupController extends BaseControllerImpl implements Bas
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<DepartmentGroup> pager = getPager(code,departmentId, name, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("部門", "department.code"));
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
-		excelColumn.add(ExcelColumn.build("開始時間", "startTime"));
-		excelColumn.add(ExcelColumn.build("結束時間", "endTime"));
+		excelColumn.add(ExcelColumn.build("department", "department.code"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
+		excelColumn.add(ExcelColumn.build("startTime", "startTime"));
+		excelColumn.add(ExcelColumn.build("endTime", "endTime"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("departmentGroup"), outputStream, excelColumn);
 	}
 	

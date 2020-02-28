@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pepper.common.emuns.Status;
@@ -13,6 +14,7 @@ import com.pepper.core.base.BaseModel;
 @Entity()
 @Table(name = "t_node_info")
 @DynamicUpdate(true)
+@DynamicInsert
 public class Node extends BaseModel {
 
 	/**
@@ -103,6 +105,39 @@ public class Node extends BaseModel {
 
 	@Column(name = "remark")
 	private String remark;
+
+	@Column(name = "extra",length = 1000)
+	private String extra;
+
+	@Column(name = "is_door")
+	private Boolean isDoor;
+
+	@Column(name = "is_camera")
+	private Boolean isCamera;
+
+	public Boolean getIsDoor() {
+		return isDoor;
+	}
+
+	public void setIsDoor(Boolean isDoor) {
+		this.isDoor = isDoor;
+	}
+
+	public Boolean getIsCamera() {
+		return isCamera;
+	}
+
+	public void setIsCamera(Boolean isCamera) {
+		this.isCamera = isCamera;
+	}
+
+	public String getExtra() {
+		return extra;
+	}
+
+	public void setExtra(String extra) {
+		this.extra = extra;
+	}
 
 	public String getCode() {
 		return code;

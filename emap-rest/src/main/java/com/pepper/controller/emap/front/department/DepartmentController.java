@@ -71,8 +71,8 @@ public class DepartmentController  extends BaseControllerImpl implements BaseCon
 		ServletOutputStream outputStream = response.getOutputStream();
 		Pager<Department> pager = getPager(code, name, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("編碼", "code"));
-		excelColumn.add(ExcelColumn.build("名稱", "name"));
+		excelColumn.add(ExcelColumn.build("code", "code"));
+		excelColumn.add(ExcelColumn.build("name", "name"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("department"), outputStream, excelColumn);
 	}
 	

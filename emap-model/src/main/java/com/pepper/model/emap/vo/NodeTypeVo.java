@@ -1,5 +1,6 @@
 package com.pepper.model.emap.vo;
 
+import com.pepper.model.emap.node.NodeClassify;
 import com.pepper.model.emap.node.NodeType;
 
 /**
@@ -20,8 +21,16 @@ public class NodeTypeVo extends NodeType {
 	private String stopIconUrl;
 	
 	private String processingIconUrl;
-	
-	
+
+	private com.pepper.model.emap.node.NodeClassify nodeClassify;
+
+	public NodeClassify getNodeClassify() {
+		return nodeClassify;
+	}
+
+	public void setNodeClassify(NodeClassify nodeClassify) {
+		this.nodeClassify = nodeClassify;
+	}
 
 	public String getWorkingIconUrl() {
 		return workingIconUrl;
