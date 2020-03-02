@@ -26,6 +26,9 @@ public class MapImageUrl extends BaseModel {
 	
 	@Column(name = "url",length= 1000)
 	private String url;
+
+	@Column(name = "level")
+	private Integer level;
 	
 	@Column(name = "ratate")
 	private Double ratate;
@@ -83,7 +86,12 @@ public class MapImageUrl extends BaseModel {
 	public void setOffsetY(Double offsetY) {
 		this.offsetY = offsetY;
 	}
-	
-	
 
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
 }
