@@ -28,6 +28,9 @@ public class ScreenMap extends BaseModel {
 	@Column(name = "refresh_frequency")
 	private Integer refreshFrequency;
 
+	@Column(name = "level")
+	private Integer level;
+
 	public String getMapId() {
 		return mapId;
 	}
@@ -51,5 +54,12 @@ public class ScreenMap extends BaseModel {
 	public void setRefreshFrequency(Integer refreshFrequency) {
 		this.refreshFrequency = refreshFrequency;
 	}
-	
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
 }

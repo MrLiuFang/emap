@@ -42,6 +42,9 @@ public class Map extends BaseModel {
 	
 	@Column(name = "max_level")
 	private Integer maxLevel;
+
+	@Column(name = "level")
+	private Integer level;
 	
 	@Column(name = "is_world_map")
 	private Boolean isWorldMap;
@@ -147,6 +150,12 @@ public class Map extends BaseModel {
 	public void setY(String y) {
 		this.y = y;
 	}
-	
-	
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
 }
