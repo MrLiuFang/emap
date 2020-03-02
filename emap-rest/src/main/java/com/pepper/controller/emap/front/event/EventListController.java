@@ -288,6 +288,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
+		List<Node> listNode =  this.nodeService.findAll();
+		List<String> sourceCode = new ArrayList<>();
+		listNode.forEach(node ->{
+			sourceCode.add(node.getSourceCode());
+		});
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_sourceCode", sourceCode);
 		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
