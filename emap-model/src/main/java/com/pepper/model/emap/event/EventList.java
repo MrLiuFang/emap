@@ -96,6 +96,17 @@ public class EventList extends BaseModel  {
 	@Column(name ="filed_date")
 	private Date filedDate;
 
+	@Column(name ="filed_user_no")
+	private String filedUserNo;
+
+	public String getFiledUserNo() {
+		return filedUserNo;
+	}
+
+	public void setFiledUserNo(String filedUserNo) {
+		this.filedUserNo = filedUserNo;
+	}
+
 	public Boolean getConsole() {
 		return isConsole;
 	}

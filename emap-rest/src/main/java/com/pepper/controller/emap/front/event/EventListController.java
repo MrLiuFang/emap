@@ -12,10 +12,15 @@ import java.util.Objects;
 
 import javax.annotation.Resource;
 
+import com.pepper.core.ResultEnum;
+import com.pepper.model.console.role.Role;
+import com.pepper.service.console.role.RoleService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -145,9 +150,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	
 	@Reference
 	private EventMessageService eventMessageService;
-	
 
-	
+	@Reference
+	private RoleService roleService;
+
 	@RequestMapping(value = "/add")
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
@@ -738,6 +744,21 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			if(map.containsKey("video")) {
 				eventList.setVideo(Objects.isNull(map.get("video"))?"":map.get("video").toString());
 			}
+			if(map.containsKey("filedUserNo")){
+				String filedUserNo = String.valueOf(map.get("filedUserNo"));
+				if(!StringUtils.hasText(filedUserNo)){
+					resultData.setCode(Status.FAIL.getKey());
+					resultData.setMessage("工号不存在！");
+					return resultData;
+				}
+				AdminUser user = this.adminUserService.findByUserNo(filedUserNo);
+				if(Objects.isNull(user)){
+					resultData.setCode(Status.FAIL.getKey());
+					resultData.setMessage("工号不存在！");
+					return resultData;
+				}
+				eventList.setFiledUserNo(filedUserNo);
+			}
 			eventList.setFiledContent(map.containsKey("filedContent")?Objects.isNull(map.get("filedContent"))?"":map.get("filedContent").toString():"");
 			eventListService.update(eventList);
 			sendEmail(eventList);
@@ -911,7 +932,47 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		resultData.setData("count", actionListService.count());
 		return resultData;
 	}
-	
+
+	@RequestMapping("/workbench/automatic/filed")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object automaticFiled(@RequestBody Map<String,Object> map) {
+		ResultData resultData = new ResultData();
+		Boolean automaticFiled = map.containsKey("automaticFiled")?Boolean.valueOf(String.valueOf(map.get("automaticFiled"))) :false;
+		String account = String.valueOf(map.get("account"));
+		String password = String.valueOf(map.get("password"));
+		AdminUser user = adminUserService.findByAccountAndPassword(account, password);
+		if(Objects.isNull(user)){
+			resultData.setCode(Status.FAIL.getKey());
+			resultData.setMessage("该账号不存在");
+			return resultData;
+		}
+		List<Role> list = roleService.findByUserId1(user.getId());
+		Boolean b = false;
+		for (Role role : list){
+			if(role.getCode().equals("ADMIN_ROLE")){
+				b = true;
+			}
+		}
+		if(!b){
+			resultData.setCode(Status.FAIL.getKey());
+			resultData.setMessage("该账号角色非ADMIN_ROLE！");
+			return resultData;
+		}
+		valueOperationsService.set("automaticFiled",String.valueOf(automaticFiled));
+		return resultData;
+	}
+
+	@RequestMapping("/workbench/automatic/filed/info")
+	@ResponseBody
+	@Authorize(authorizeResources = false)
+	public Object automaticFiledInfo() {
+		ResultData resultData = new ResultData();
+		Boolean automaticFiled = Boolean.valueOf(valueOperationsService.get("automaticFiled"));
+		resultData.setData("automaticFiled",automaticFiled);
+		return resultData;
+	}
+
 	
 		
 	private List<EventListVo> convertVo(List<EventList> list){

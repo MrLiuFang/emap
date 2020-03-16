@@ -30,6 +30,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
+	public List<EventList> findByStatusNot(String status) {
+		return eventListDao.findByStatusNot(status);
+	}
+
+	@Override
 	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
 		return eventListDao.List(pager,isUrgent);
 	}

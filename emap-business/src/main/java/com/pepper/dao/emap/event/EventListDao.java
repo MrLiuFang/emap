@@ -21,6 +21,8 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	 * @return
 	 */
 	public List<EventList> findByStatusOrStatus(String status,String status1);
+
+	public List<EventList> findByStatusNot(String status);
 	
 	/**
 	 * 查询历史事件
