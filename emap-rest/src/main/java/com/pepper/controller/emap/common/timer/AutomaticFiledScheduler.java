@@ -41,7 +41,7 @@ public class AutomaticFiledScheduler {
         if(!automaticFiled){
             return ;
         }
-        String sutomaticFiled = environment.getProperty("scheduler.automatic.filed", "1");
+        String sutomaticFiled = environment.getProperty("scheduler.automatic.filed", "60");
         List<EventList> list = eventListService.findByStatusNot("P");
         for(EventList eventList : list){
             Long time = new Date().getTime()-eventList.getCreateDate().getTime();

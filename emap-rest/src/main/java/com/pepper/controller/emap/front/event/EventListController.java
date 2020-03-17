@@ -746,17 +746,17 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			}
 			if(map.containsKey("filedUserNo")){
 				String filedUserNo = String.valueOf(map.get("filedUserNo"));
-				if(!StringUtils.hasText(filedUserNo)){
-					resultData.setCode(Status.FAIL.getKey());
-					resultData.setMessage("工号不存在！");
-					return resultData;
-				}
-				AdminUser user = this.adminUserService.findByUserNo(filedUserNo);
-				if(Objects.isNull(user)){
-					resultData.setCode(Status.FAIL.getKey());
-					resultData.setMessage("工号不存在！");
-					return resultData;
-				}
+//				if(!StringUtils.hasText(filedUserNo)){
+//					resultData.setCode(Status.FAIL.getKey());
+//					resultData.setMessage("工号不存在！");
+//					return resultData;
+//				}
+//				AdminUser user = this.adminUserService.findByUserNo(filedUserNo);
+//				if(Objects.isNull(user)){
+//					resultData.setCode(Status.FAIL.getKey());
+//					resultData.setMessage("工号不存在！");
+//					return resultData;
+//				}
 				eventList.setFiledUserNo(filedUserNo);
 			}
 			eventList.setFiledContent(map.containsKey("filedContent")?Objects.isNull(map.get("filedContent"))?"":map.get("filedContent").toString():"");
