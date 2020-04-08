@@ -742,6 +742,9 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		}
 
 		NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
+		if(Objects.isNull(nodeType)){
+			return nodeVo;
+		}
 		NodeTypeVo nodeTypeVo = new NodeTypeVo();
 		BeanUtils.copyProperties(nodeType, nodeTypeVo);
 		nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
