@@ -750,7 +750,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		Report report = this.reportService.findById(id);
 		String fileId = report.getFile();
 		com.pepper.model.file.File file = this.fileService.getFile(fileId);
-		File reportFile = new File("D:"+file.getUrl());
+		File reportFile = new File( file.getUrl().indexOf("D:")>-1?file.getUrl():("D:"+file.getUrl()));
 //		File reportFile = new File(file.getUrl());
 		Map<String,Object> parameters = new HashMap<String,Object>();
 		List<ReportParameter> list = this.reportParameterService.findReportParameter(report.getId());
