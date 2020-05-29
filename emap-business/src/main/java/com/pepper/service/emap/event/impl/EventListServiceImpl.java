@@ -127,4 +127,9 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	public List<Map<String, Object>> yearTypeCount(String where, Date startDate, Date endDate) {
 		return eventListDao.yearTypeCount(where,startDate,endDate);
 	}
+
+	@Override
+	public int delete(Date createDate) {
+		return eventListDao.deleteByCreateDateGreaterThanEqual(createDate);
+	}
 }

@@ -9,10 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 
+import com.pepper.model.emap.map.MapImageUrl;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -21,7 +23,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -103,8 +107,11 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	@Reference
 	private EventListService eventListService;
 
+	@Autowired
+	private RedisTemplate redisTemplate;
+
 	@RequestMapping(value = "/export")
-//	@Authorize(authorizeResources = false)
+	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public void export(String code, String name, String source, String sourceCode, String mapId, String nodeTypeId,
 			String siteId, String buildId, String floor, String hasXY, String keyWord) throws IOException,
@@ -121,7 +128,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("name", "name"));
 		excelColumn.add(ExcelColumn.build("source", "source"));
 		excelColumn.add(ExcelColumn.build("sourceCode", "sourceCode"));
-		excelColumn.add(ExcelColumn.build("map", "map.code"));
+		excelColumn.add(ExcelColumn.build("map_code", "map.code"));
 		excelColumn.add(ExcelColumn.build("nodeTypeCode", "nodeType.code"));
 		excelColumn.add(ExcelColumn.build("x", "x"));
 		excelColumn.add(ExcelColumn.build("y", "y"));
@@ -577,7 +584,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		if (!getCellValue(row.getCell(3)).toString().equals("sourceCode")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(4)).toString().equals("map")) {
+		if (!getCellValue(row.getCell(4)).toString().equals("map_code")) {
 			return false;
 		}
 		if (!getCellValue(row.getCell(5)).toString().equals("nodeTypeCode")) {
@@ -731,6 +738,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	 * @param node
 	 * @return
 	 */
+
 	private NodeVo convertNodeVo(Node node) {
 		if (node == null) {
 			return null;
@@ -740,35 +748,103 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		if (node.getStatus() != null) {
 			nodeVo.setStatusCode(node.getStatus().getName());
 		}
-
-		NodeType nodeType = nodeTypeService.findById(node.getNodeTypeId());
-		if(Objects.isNull(nodeType)){
-			return nodeVo;
+		NodeType nodeType = null;
+		Object nodeTypeCache = this.redisTemplate.opsForValue().get("nodeType:"+node.getNodeTypeId());
+		if(Objects.nonNull(nodeTypeCache)){
+			nodeType = (NodeType) nodeTypeCache;
+		}else{
+			nodeType = nodeTypeService.findById(node.getNodeTypeId());
+			if(Objects.isNull(nodeType)){
+				return nodeVo;
+			}
+			redisTemplate.opsForValue().set("nodeType:"+node.getNodeTypeId(),nodeType,1, TimeUnit.MINUTES);
 		}
+
 		NodeTypeVo nodeTypeVo = new NodeTypeVo();
 		BeanUtils.copyProperties(nodeType, nodeTypeVo);
-		nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
-		nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
-		nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+		String workingIcon = "";
+		Object workingIconCache = this.redisTemplate.opsForValue().get("workingIcon:"+nodeType.getWorkingIcon());
+		if(Objects.nonNull(workingIconCache)){
+			workingIcon = (String) workingIconCache;
+		}else{
+			workingIcon = fileService.getUrl(nodeType.getWorkingIcon());
+			redisTemplate.opsForValue().set("workingIcon:"+nodeType.getWorkingIcon(),workingIcon,1, TimeUnit.MINUTES);
+		}
+		nodeTypeVo.setWorkingIconUrl(workingIcon);
+
+		String processingIcon = "";
+		Object processingIconCache = this.redisTemplate.opsForValue().get("processingIcon:"+nodeType.getProcessingIcon());
+		if(Objects.nonNull(processingIconCache)){
+			processingIcon = (String) processingIconCache;
+		}else{
+			processingIcon = fileService.getUrl(nodeType.getProcessingIcon());
+			redisTemplate.opsForValue().set("processingIcon:"+nodeType.getProcessingIcon(),processingIcon,1, TimeUnit.MINUTES);
+		}
+		nodeTypeVo.setProcessingIconUrl(processingIcon);
+
+		String stopIcon = "";
+		Object stopIconCache = this.redisTemplate.opsForValue().get("stopIcon:"+nodeType.getStopIcon());
+		if(Objects.nonNull(stopIconCache)){
+			stopIcon = (String) stopIconCache;
+		}else{
+			stopIcon = fileService.getUrl(nodeType.getStopIcon());
+			redisTemplate.opsForValue().set("stopIcon:"+nodeType.getStopIcon(),stopIcon,1, TimeUnit.MINUTES);
+		}
+		nodeTypeVo.setStopIconUrl(stopIcon);
 		nodeVo.setNodeType(nodeTypeVo);
 
-		com.pepper.model.emap.map.Map entity = mapService.findById(node.getMapId());
-		if (entity == null) {
-			return nodeVo;
+		com.pepper.model.emap.map.Map entity = null;
+		Object mapCache = this.redisTemplate.opsForValue().get("map:"+node.getMapId());
+		if(Objects.nonNull(mapCache)){
+			entity = (com.pepper.model.emap.map.Map) mapCache;
+		}else{
+			entity = mapService.findById(node.getMapId());
+			if (entity == null) {
+				return nodeVo;
+			}
+			redisTemplate.opsForValue().set("map:"+node.getMapId(),entity,1, TimeUnit.MINUTES);
 		}
+
 		MapVo mapVo = new MapVo();
 		BeanUtils.copyProperties(entity, mapVo);
-		mapVo.setMapImageUrl(mapImageUrlService.findByMapId(entity.getId()));
-		BuildingInfo buildingInfo = buildingInfoService.findById(entity.getBuildId());
-		if (buildingInfo == null) {
-			return nodeVo;
+		List<MapImageUrl> mapImageUrl = new ArrayList<>();
+		Object mapImageUrlCache = this.redisTemplate.opsForValue().get("mapImageUrl:"+entity.getId());
+		if(Objects.nonNull(mapImageUrlCache)){
+			mapImageUrl = (List<MapImageUrl>) mapImageUrlCache;
+		}else{
+			mapImageUrl = mapImageUrlService.findByMapId(entity.getId());
+			redisTemplate.opsForValue().set("mapImageUrl:"+entity.getId(),mapImageUrl,1, TimeUnit.MINUTES);
 		}
+		mapVo.setMapImageUrl(mapImageUrl);
+
+
+		BuildingInfo buildingInfo =null;
+		Object buildingInfoCache = this.redisTemplate.opsForValue().get("buildingInfo:"+entity.getBuildId());
+		if(Objects.nonNull(buildingInfoCache)){
+			buildingInfo = (BuildingInfo) buildingInfoCache;
+		}else{
+			buildingInfo = buildingInfoService.findById(entity.getBuildId());
+			if (buildingInfo == null) {
+				return nodeVo;
+			}
+			redisTemplate.opsForValue().set("buildingInfo:"+entity.getBuildId(),buildingInfo,1, TimeUnit.MINUTES);
+		}
+
 		BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
 		BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
-		SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
-		if (siteInfo == null) {
-			return nodeVo;
+
+		SiteInfo siteInfo =null;
+		Object siteInfoCache = this.redisTemplate.opsForValue().get("siteInfo:"+buildingInfo.getSiteInfoId());
+		if(Objects.nonNull(siteInfoCache)){
+			siteInfo = (SiteInfo) siteInfoCache;
+		}else{
+			siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
+			if (siteInfo == null) {
+				return nodeVo;
+			}
+			redisTemplate.opsForValue().set("siteInfo:"+buildingInfo.getSiteInfoId(),siteInfo,1, TimeUnit.MINUTES);
 		}
+
 		buildingInfoVo.setSite(siteInfo);
 		mapVo.setBuild(buildingInfoVo);
 		nodeVo.setMap(mapVo);
