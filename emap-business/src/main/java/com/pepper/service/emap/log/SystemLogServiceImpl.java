@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -146,8 +147,12 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 	    }
 		this.save(systemLog);
 	}
-	
-	
+
+	@Override
+	public int delete(Date createDate) {
+		return systemLogDao.deleteByCreateDateGreaterThanEqual(createDate);
+	}
+
 
 	private String binaryReader(HttpServletRequest request) {
 		

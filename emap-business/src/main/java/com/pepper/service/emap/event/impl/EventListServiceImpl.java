@@ -30,6 +30,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
+	public List<EventList> findByStatusNot(String status) {
+		return eventListDao.findByStatusNot(status);
+	}
+
+	@Override
 	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
 		return eventListDao.List(pager,isUrgent);
 	}
@@ -121,5 +126,10 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public List<Map<String, Object>> yearTypeCount(String where, Date startDate, Date endDate) {
 		return eventListDao.yearTypeCount(where,startDate,endDate);
+	}
+
+	@Override
+	public int delete(Date createDate) {
+		return eventListDao.deleteByCreateDateGreaterThanEqual(createDate);
 	}
 }

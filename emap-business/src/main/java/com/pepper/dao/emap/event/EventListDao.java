@@ -21,6 +21,8 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	 * @return
 	 */
 	public List<EventList> findByStatusOrStatus(String status,String status1);
+
+	public List<EventList> findByStatusNot(String status);
 	
 	/**
 	 * 查询历史事件
@@ -58,4 +60,6 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 
 	@Query("select '人工申報' as name,  count(t1.id) as count from EventList t1  where   t1.createDate>= ?1 and t1.createDate<= ?2 and t1.isConsole is true ")
 	public List<Map<String,Object>> currentMonthIsConsoleCount(Date startDate,Date endDate);
+
+	public Integer deleteByCreateDateGreaterThanEqual(Date createDate);
 }

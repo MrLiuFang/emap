@@ -4,6 +4,8 @@ import com.pepper.core.base.BaseService;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.log.SystemLog;
 
+import java.util.Date;
+
 public interface SystemLogService extends BaseService<SystemLog> {
 
 	public void log(String actionName,String url);
@@ -11,4 +13,6 @@ public interface SystemLogService extends BaseService<SystemLog> {
 	public void log(String actionName,String url,String data);
 	
 	public void log(String actionName,String url,AdminUser adminUser);
+
+	public int delete(Date createDate);
 }

@@ -21,7 +21,8 @@ public interface EventListService extends BaseService<EventList> {
 	 * @return
 	 */
 	public List<EventList> findByStatusOrStatus(String status,String status1);
-	
+
+	public List<EventList> findByStatusNot(String status);
 	/**
 	 * 
 	 * @param pager
@@ -103,4 +104,6 @@ public interface EventListService extends BaseService<EventList> {
 	 * @return
 	 */
 	public List<Map<String,Object>> yearTypeCount(String where, Date startDate, Date endDate);
+
+	public int delete(Date createDate);
 }
