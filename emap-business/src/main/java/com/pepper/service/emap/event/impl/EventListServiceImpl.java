@@ -130,6 +130,6 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 
 	@Override
 	public int delete(Date createDate) {
-		return eventListDao.deleteByCreateDateGreaterThanEqual(createDate);
+		return eventListDao.deleteByCreateDateLessThanEqual(createDate);
 	}
 }
