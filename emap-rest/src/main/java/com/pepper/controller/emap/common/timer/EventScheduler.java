@@ -184,7 +184,7 @@ public class EventScheduler {
 			
 			
 		}catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 	}
 
