@@ -150,7 +150,7 @@ public class SystemLogServiceImpl extends BaseServiceImpl<SystemLog> implements 
 
 	@Override
 	public int delete(Date createDate) {
-		return systemLogDao.deleteByCreateDateGreaterThanEqual(createDate);
+		return systemLogDao.deleteByCreateDateLessThanEqual(createDate);
 	}
 
 
