@@ -6,5 +6,5 @@ import com.pepper.model.emap.log.SystemLog;
 import java.util.Date;
 
 public interface SystemLogDao extends BaseDao<SystemLog> {
-    public Integer deleteByCreateDateGreaterThanEqual(Date createDate);
+    public Integer deleteByCreateDateLessThanEqual(Date createDate);
 }
