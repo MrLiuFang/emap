@@ -34,7 +34,7 @@ public class CleanScheduler {
     @Reference
     private SchedulerService schedulerService;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0/1 * * ?")
     public void scheduled() {
         List<Scheduler> list =  schedulerService.findAll();
         int day = list.size()>0?list.get(0).getDay():0;

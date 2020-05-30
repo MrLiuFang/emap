@@ -105,5 +105,6 @@ public interface EventListService extends BaseService<EventList> {
 	 */
 	public List<Map<String,Object>> yearTypeCount(String where, Date startDate, Date endDate);
 
+	@Transactional(propagation=Propagation.REQUIRED)
 	public int delete(Date createDate);
 }
