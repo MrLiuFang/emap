@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @ClassName CleanScheduler
@@ -38,14 +39,14 @@ public class CleanScheduler {
     public void scheduled() {
         List<Scheduler> list =  schedulerService.findAll();
         int cleanEventDay = list.size()>0?list.get(0).getCleanEventDay():0;
-        if(cleanEventDay>=0){
+        if(Objects.nonNull(cleanEventDay) && cleanEventDay>=0){
             Calendar calendar = new GregorianCalendar();
             calendar.add(calendar.DATE,cleanEventDay*-1);
             eventListService.delete(calendar.getTime());
         }
 
         int cleanLogDay = list.size()>0?list.get(0).getCleanLogDay():0;
-        if(cleanLogDay>=0){
+        if(Objects.nonNull(cleanLogDay) && cleanLogDay>=0){
             Calendar calendar = new GregorianCalendar();
             calendar.add(calendar.DATE,cleanLogDay*-1);
             systemLogService.delete(calendar.getTime());
