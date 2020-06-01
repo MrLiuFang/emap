@@ -36,7 +36,8 @@ public class SchedulerController extends BaseControllerImpl implements BaseContr
     public Object getScheuler(){
         ResultData resultData = new ResultData();
         List<Scheduler> list =  schedulerService.findAll();
-        resultData.setData("day",list.size()>0?list.get(0).getDay():0);
+        resultData.setData("cleanEventDay",list.size()>0?list.get(0).getCleanEventDay():0);
+        resultData.setData("cleanLogDay",list.size()>0?list.get(0).getCleanLogDay():0);
         return resultData;
     }
     @RequestMapping(value = "/update")

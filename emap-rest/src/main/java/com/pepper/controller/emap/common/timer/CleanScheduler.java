@@ -37,13 +37,18 @@ public class CleanScheduler {
     @Scheduled(cron = "0 0 0/1 * * ?")
     public void scheduled() {
         List<Scheduler> list =  schedulerService.findAll();
-        int day = list.size()>0?list.get(0).getDay():0;
-        if(day<=0){
-            return;
+        int cleanEventDay = list.size()>0?list.get(0).getCleanEventDay():0;
+        if(cleanEventDay>=0){
+            Calendar calendar = new GregorianCalendar();
+            calendar.add(calendar.DATE,cleanEventDay*-1);
+            eventListService.delete(calendar.getTime());
         }
-        Calendar calendar = new GregorianCalendar();
-        calendar.add(calendar.DATE,day*-1);
-        eventListService.delete(calendar.getTime());
-        systemLogService.delete(calendar.getTime());
+
+        int cleanLogDay = list.size()>0?list.get(0).getCleanLogDay():0;
+        if(cleanLogDay>=0){
+            Calendar calendar = new GregorianCalendar();
+            calendar.add(calendar.DATE,cleanLogDay*-1);
+            systemLogService.delete(calendar.getTime());
+        }
     }
 }

@@ -17,13 +17,23 @@ import javax.persistence.Table;
 @DynamicUpdate(true)
 public class Scheduler extends BaseModel {
 
-    private Integer day;
+    private Integer cleanEventDay;
 
-    public Integer getDay() {
-        return day;
+    private Integer cleanLogDay;
+
+    public Integer getCleanEventDay() {
+        return cleanEventDay;
     }
 
-    public void setDay(Integer day) {
-        this.day = day;
+    public void setCleanEventDay(Integer cleanEventDay) {
+        this.cleanEventDay = cleanEventDay;
+    }
+
+    public Integer getCleanLogDay() {
+        return cleanLogDay;
+    }
+
+    public void setCleanLogDay(Integer cleanLogDay) {
+        this.cleanLogDay = cleanLogDay;
     }
 }
