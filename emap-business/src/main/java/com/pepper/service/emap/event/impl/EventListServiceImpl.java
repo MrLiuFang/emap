@@ -132,4 +132,9 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	public int delete(Date createDate) {
 		return eventListDao.deleteByCreateDateLessThanEqual(createDate);
 	}
+
+	@Override
+	public List<String> userNode(String userId) {
+		return eventListDao.userNode(userId);
+	}
 }

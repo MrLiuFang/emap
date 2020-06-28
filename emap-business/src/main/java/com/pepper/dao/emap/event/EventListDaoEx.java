@@ -64,4 +64,6 @@ public interface EventListDaoEx {
 	 * @return
 	 */
 	public List<Map<String,Object>> yearTypeCount(String where, Date startDate, Date endDate);
+
+	public List<String> userNode(String userId);
 }

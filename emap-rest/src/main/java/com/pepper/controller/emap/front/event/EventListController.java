@@ -16,6 +16,7 @@ import com.pepper.core.ResultEnum;
 import com.pepper.model.console.role.Role;
 import com.pepper.service.console.role.RoleService;
 import org.apache.dubbo.config.annotation.Reference;
+import org.omg.PortableInterceptor.USER_EXCEPTION;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
@@ -191,6 +192,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
+		String userId = ((AdminUser)this.getCurrentUser()).getId();
+		List<String> sourceCode= eventListService.userNode(userId);
+		pager.getJpqlParameter().getSearchParameter().put(SearchConstant.IN+"_sourceCode", sourceCode);
 		pager = eventListService.List(pager,isUrgent);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -211,6 +215,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
+		String userId = ((AdminUser)this.getCurrentUser()).getId();
+		List<String> sourceCode= eventListService.userNode(userId);
+		pager.getJpqlParameter().getSearchParameter().put(SearchConstant.IN+"_sourceCode", sourceCode);
 		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
@@ -277,6 +284,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_operator", currentUser.getId());
+
 		//处理中
 		if(isHandle) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_status", new String[] {"A","B"});
@@ -294,12 +302,14 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
 		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
-		List<Node> listNode =  this.nodeService.findAll();
-		List<String> sourceCode = new ArrayList<>();
-		listNode.forEach(node ->{
-			sourceCode.add(node.getSourceCode());
-		});
-		pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_sourceCode", sourceCode);
+//		List<Node> listNode =  this.nodeService.findAll();
+//		List<String> sourceCode = new ArrayList<>();
+//		listNode.forEach(node ->{
+//			sourceCode.add(node.getSourceCode());
+//		});
+		String userId = ((AdminUser)this.getCurrentUser()).getId();
+		List<String> sourceCode= eventListService.userNode(userId);
+		pager.getJpqlParameter().getSearchParameter().put(SearchConstant.IN+"_sourceCode", sourceCode);
 		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);

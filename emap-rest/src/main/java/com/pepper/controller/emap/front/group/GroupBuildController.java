@@ -59,9 +59,11 @@ public class GroupBuildController extends BaseControllerImpl implements BaseCont
     @RequestMapping("/add")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object add(@RequestBody GroupBuild groupBuild){
+    public Object add(@RequestBody List<GroupBuild> list){
         ResultData resultData = new ResultData();
-        this.groupBuildService.save(groupBuild);
+        list.forEach(groupBuild -> {
+            this.groupBuildService.save(groupBuild);
+        });
         systemLogService.log("groupBuild add", this.request.getRequestURL().toString());
         return resultData;
     }
