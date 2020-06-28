@@ -1,5 +1,6 @@
 package com.pepper.service.emap.group;
 
+import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.group.GroupUserDao;
 import com.pepper.model.emap.group.GroupUser;
@@ -16,4 +17,14 @@ public class GroupUserServiceImpl extends BaseServiceImpl<GroupUser> implements 
 
     @Autowired
     private GroupUserDao groupUserDao;
+
+    @Override
+    public int delete(String groupId) {
+        return groupUserDao.deleteByUserId(groupId);
+    }
+
+    @Override
+    public Pager<GroupUser> query(Pager<GroupUser> pager, String groupId, String userId, Boolean isOperator, Boolean isLeader, String account, String name, String mobile) {
+        return groupUserDao.query(pager,groupId,userId,isOperator,isLeader,account,name,mobile);
+    }
 }

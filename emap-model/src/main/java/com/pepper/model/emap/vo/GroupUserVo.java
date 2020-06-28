@@ -12,15 +12,15 @@ import com.pepper.model.emap.group.GroupUser;
  */
 public class GroupUserVo extends GroupUser  {
 
-    private AdminUser adminUser;
+    private AdminUserEventAssistVo adminUser;
 
     private Group group;
 
-    public AdminUser getAdminUser() {
+    public AdminUserEventAssistVo getAdminUser() {
         return adminUser;
     }
 
-    public void setAdminUser(AdminUser adminUser) {
+    public void setAdminUser(AdminUserEventAssistVo adminUser) {
         this.adminUser = adminUser;
     }
 

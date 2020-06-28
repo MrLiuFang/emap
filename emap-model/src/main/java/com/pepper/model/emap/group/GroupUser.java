@@ -22,6 +22,8 @@ public class GroupUser extends BaseModel {
 
     private Boolean isLeader;
 
+    private Boolean isOperator;
+
     public String getGroupId() {
         return groupId;
     }
@@ -44,5 +46,13 @@ public class GroupUser extends BaseModel {
 
     public void setLeader(Boolean leader) {
         isLeader = leader;
+    }
+
+    public Boolean getOperator() {
+        return isOperator;
+    }
+
+    public void setOperator(Boolean operator) {
+        isOperator = operator;
     }
 }

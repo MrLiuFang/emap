@@ -12,15 +12,15 @@ import com.pepper.model.emap.group.GroupUser;
  */
 public class GroupBuildVo extends GroupBuild {
 
-    private BuildingInfo buildingInfo;
+    private BuildingInfoVo buildingInfo;
 
     private Group group;
 
-    public BuildingInfo getBuildingInfo() {
+    public BuildingInfoVo getBuildingInfo() {
         return buildingInfo;
     }
 
-    public void setBuildingInfo(BuildingInfo buildingInfo) {
+    public void setBuildingInfo(BuildingInfoVo buildingInfo) {
         this.buildingInfo = buildingInfo;
     }
 

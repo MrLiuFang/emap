@@ -8,14 +8,18 @@ import com.pepper.core.ResultData;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.group.Group;
 import com.pepper.model.emap.group.GroupBuild;
+import com.pepper.model.emap.site.SiteInfo;
+import com.pepper.model.emap.vo.BuildingInfoVo;
 import com.pepper.model.emap.vo.GroupBuildVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.building.BuildingInfoService;
 import com.pepper.service.emap.group.GroupBuildService;
 import com.pepper.service.emap.group.GroupService;
 import com.pepper.service.emap.log.SystemLogService;
+import com.pepper.service.emap.site.SiteInfoService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
@@ -49,6 +53,9 @@ public class GroupBuildController extends BaseControllerImpl implements BaseCont
     @Reference
     private SystemLogService systemLogService;
 
+    @Reference
+    private SiteInfoService siteInfoService;
+
     @RequestMapping("/add")
     @Authorize(authorizeResources = false)
     @ResponseBody
@@ -62,15 +69,9 @@ public class GroupBuildController extends BaseControllerImpl implements BaseCont
     @RequestMapping(value = "/list")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object list(String groupId,String buildId) {
+    public Object list(String buildId, String groupId, String name, String code) {
         Pager<GroupBuild> pager = new Pager<GroupBuild>();
-        if(StringUtils.hasText(groupId)) {
-            pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_groupId",groupId );
-        }
-        if(StringUtils.hasText(buildId)) {
-            pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",groupId );
-        }
-        pager = groupBuildService.findNavigator(pager);
+        pager = groupBuildService.query(pager,buildId,groupId,name,code);
         pager.setData("groupBuild",convertVo(pager.getResults()));
         pager.setResults(null);
         return pager;
@@ -125,7 +126,12 @@ public class GroupBuildController extends BaseControllerImpl implements BaseCont
         GroupBuildVo groupBuildVo = new GroupBuildVo();
         BeanUtils.copyProperties(groupBuild,groupBuildVo);
         groupBuildVo.setGroup(groupService.findById(groupBuild.getGroupId()));
-        groupBuildVo.setBuildingInfo(this.buildingInfoService.findById(groupBuild.getBuildId()));
+        BuildingInfo buildingInfo = this.buildingInfoService.findById(groupBuild.getBuildId());
+        BuildingInfoVo buildingInfoVo = new BuildingInfoVo();
+        BeanUtils.copyProperties(buildingInfo, buildingInfoVo);
+        SiteInfo siteInfo = siteInfoService.findById(buildingInfo.getSiteInfoId());
+        buildingInfoVo.setSite(siteInfo);
+        groupBuildVo.setBuildingInfo(buildingInfoVo);
         return groupBuildVo;
     }
 

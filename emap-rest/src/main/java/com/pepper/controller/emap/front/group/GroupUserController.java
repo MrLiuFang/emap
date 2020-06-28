@@ -8,8 +8,11 @@ import com.pepper.core.ResultData;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.dto.GroupUserDto;
 import com.pepper.model.emap.group.GroupBuild;
 import com.pepper.model.emap.group.GroupUser;
+import com.pepper.model.emap.vo.AdminUserEventAssistVo;
 import com.pepper.model.emap.vo.GroupBuildVo;
 import com.pepper.model.emap.vo.GroupUserVo;
 import com.pepper.service.authentication.aop.Authorize;
@@ -19,6 +22,7 @@ import com.pepper.service.emap.group.GroupBuildService;
 import com.pepper.service.emap.group.GroupService;
 import com.pepper.service.emap.group.GroupUserService;
 import com.pepper.service.emap.log.SystemLogService;
+import com.pepper.service.file.FileService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.zookeeper.server.admin.AdminServer;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @description:
@@ -53,12 +59,28 @@ public class GroupUserController extends BaseControllerImpl implements BaseContr
     @Reference
     private SystemLogService systemLogService;
 
+    @Reference
+    private FileService fileService;
+
     @RequestMapping("/add")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object add(@RequestBody GroupUser groupUser){
+    public Object add(@RequestBody GroupUserDto groupUserDto){
         ResultData resultData = new ResultData();
-        this.groupUserService.save(groupUser);
+
+        List<Map<String,Object>> userIds = groupUserDto.getUsers();
+        userIds.forEach(map ->{
+            GroupUser groupUser= new GroupUser();
+            BeanUtils.copyProperties(groupUserDto,groupUser);
+            String userId= String.valueOf(map.get("userId"));
+//            groupUserService.delete(userId);
+            groupUser.setUserId(userId);
+//            Boolean isOperator = Boolean.valueOf(map.get("isOperator").toString());
+//            Boolean isLeader = Boolean.valueOf(map.get("isLeader").toString());
+//            groupUser.setOperator(isOperator);
+//            groupUser.setLeader(isLeader);
+            this.groupUserService.save(groupUser);
+        });
         systemLogService.log("groupUser add", this.request.getRequestURL().toString());
         return resultData;
     }
@@ -66,15 +88,9 @@ public class GroupUserController extends BaseControllerImpl implements BaseContr
     @RequestMapping(value = "/list")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object list(String groupId, String userId) {
+    public Object list(String groupId, String userId,Boolean isOperator,Boolean isLeader,String account,String name,String mobile) {
         Pager<GroupUser> pager = new Pager<GroupUser>();
-        if(StringUtils.hasText(groupId)) {
-            pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_groupId",groupId );
-        }
-        if(StringUtils.hasText(userId)) {
-            pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_userId",userId );
-        }
-        pager = groupUserService.findNavigator(pager);
+        pager = groupUserService.query(pager,groupId,userId,isOperator,isLeader,account,name,mobile);
         pager.setData("groupUser",convertVo(pager.getResults()));
         pager.setResults(null);
         return pager;
@@ -85,6 +101,7 @@ public class GroupUserController extends BaseControllerImpl implements BaseContr
     @ResponseBody
     public Object update(@RequestBody GroupUser groupUser ) throws IOException {
         ResultData resultData = new ResultData();
+//        groupUserService.delete(groupUser.getUserId());
         groupUserService.update(groupUser);
         systemLogService.log("groupUser update", this.request.getRequestURL().toString());
         return resultData;
@@ -96,7 +113,6 @@ public class GroupUserController extends BaseControllerImpl implements BaseContr
     public Object toEdit(String id) {
         com.pepper.controller.emap.core.ResultData resultData = new com.pepper.controller.emap.core.ResultData();
         resultData.setData("groupUser",convertVo(this.groupUserService.findById(id)));
-//        systemLogService.log("get groupBuild info", this.request.getRequestURL().toString());
         return resultData;
     }
 
@@ -129,15 +145,25 @@ public class GroupUserController extends BaseControllerImpl implements BaseContr
         GroupUserVo groupUserVo = new GroupUserVo();
         BeanUtils.copyProperties(groupUser,groupUserVo);
         groupUserVo.setGroup(groupService.findById(groupUser.getGroupId()));
-        groupUserVo.setAdminUser(adminUserService.findById(groupUser.getUserId()));
+        groupUserVo.setAdminUser(convterVo(adminUserService.findById(groupUser.getUserId())));
         return groupUserVo;
     }
 
     private List<GroupUserVo> convertVo(List<GroupUser> list){
         List<GroupUserVo> returnList = new ArrayList<GroupUserVo>();
         for (GroupUser groupUser : list){
+            if(Objects.isNull(groupUser)){
+                continue;
+            }
             returnList.add(convertVo(groupUser));
         }
         return returnList;
+    }
+
+    private AdminUserEventAssistVo convterVo(AdminUser adminUser){
+        AdminUserEventAssistVo adminUserEventAssistVo = new AdminUserEventAssistVo();
+        BeanUtils.copyProperties(adminUser,adminUserEventAssistVo);
+        adminUserEventAssistVo.setHeadPortraitUrl(fileService.getUrl(adminUser.getHeadPortrait()));
+        return adminUserEventAssistVo;
     }
 }

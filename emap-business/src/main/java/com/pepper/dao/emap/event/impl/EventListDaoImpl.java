@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.google.protobuf.StringValue;
 import org.hibernate.jdbc.ReturningWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -420,4 +421,20 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		return this.jdbcTemplate.queryForList(sql,pararms.toArray());
 	}
 
+	public List<String> userNode(String userId){
+		StringBuffer jqpl = new StringBuffer();
+		jqpl.append(" select distinct t1.sourceCode from Node join Map t2 on t1.mapId = t2.id ");
+		jqpl.append(" join BuildingInfo t3 on t2.buildId = t3.id ");
+		jqpl.append(" join GroupBuild t4 on t3.id = t4.buildId ");
+		jqpl.append(" join GroupUser t5 on t4.groupId = t5.groupId ");
+//		jqpl.append(" where t5.userId = :userId  ");
+		Map<String,Object> searchParameter = new HashMap<String, Object>();
+//		searchParameter.put("searchParameter",userId);
+		List<Map<String,Object>> list = this.baseDao.findToMap(jqpl.toString(),searchParameter);
+		List<String> renturList = new ArrayList<String>();
+		for(Map<String,Object> map : list){
+			renturList.add(String.valueOf(map.get("source_code")));
+		}
+		return renturList;
+	}
 }
