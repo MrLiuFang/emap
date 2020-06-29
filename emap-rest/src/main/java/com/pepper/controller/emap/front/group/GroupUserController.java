@@ -79,6 +79,7 @@ public class GroupUserController extends BaseControllerImpl implements BaseContr
 //            Boolean isLeader = Boolean.valueOf(map.get("isLeader").toString());
 //            groupUser.setOperator(isOperator);
 //            groupUser.setLeader(isLeader);
+            groupUserService.delete(groupUser.getGroupId(),userId);
             this.groupUserService.save(groupUser);
         });
         systemLogService.log("groupUser add", this.request.getRequestURL().toString());

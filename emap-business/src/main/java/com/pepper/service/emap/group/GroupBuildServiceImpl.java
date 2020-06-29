@@ -22,4 +22,9 @@ public class GroupBuildServiceImpl extends BaseServiceImpl<GroupBuild> implement
     public Pager<GroupBuild> query(Pager<GroupBuild> pager, String buildId, String groupId, String name, String code) {
         return groupBuildDao.query(pager,buildId,groupId,name,code);
     }
+
+    @Override
+    public int delete(String groupId, String buildId) {
+        return groupBuildDao.deleteByGroupIdAndBuildId(groupId,buildId);
+    }
 }

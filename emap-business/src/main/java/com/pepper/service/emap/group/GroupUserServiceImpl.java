@@ -19,8 +19,8 @@ public class GroupUserServiceImpl extends BaseServiceImpl<GroupUser> implements 
     private GroupUserDao groupUserDao;
 
     @Override
-    public int delete(String groupId) {
-        return groupUserDao.deleteByUserId(groupId);
+    public int delete(String groupId,String userId) {
+        return groupUserDao.deleteByGroupIdAndUserId(groupId,userId);
     }
 
     @Override

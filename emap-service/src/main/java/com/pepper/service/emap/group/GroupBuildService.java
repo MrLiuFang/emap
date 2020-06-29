@@ -4,6 +4,7 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.group.GroupBuild;
 import com.pepper.model.emap.log.SystemLog;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @description:
@@ -13,4 +14,7 @@ import com.pepper.model.emap.log.SystemLog;
 public interface GroupBuildService extends BaseService<GroupBuild> {
 
     public Pager<GroupBuild> query(Pager<GroupBuild> pager, String buildId, String groupId, String name, String code);
+
+    @Transactional
+    public int delete(String groupId,String buildId);
 }

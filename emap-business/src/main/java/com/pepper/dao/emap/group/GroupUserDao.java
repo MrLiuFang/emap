@@ -13,4 +13,6 @@ public interface GroupUserDao extends BaseDao<GroupUser> ,GroupUserDaoEx {
     public int deleteByGroupId(String groupId);
 
     public int deleteByUserId(String userId);
+
+    public int deleteByGroupIdAndUserId(String groupId,String userId);
 }

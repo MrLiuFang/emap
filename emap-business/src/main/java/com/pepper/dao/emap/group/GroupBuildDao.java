@@ -9,4 +9,7 @@ import com.pepper.model.emap.group.GroupBuild;
  * @create: 2020-06-24 11:04
  */
 public interface GroupBuildDao extends BaseDao<GroupBuild> ,GroupBuildDaoEx {
+
+    public int deleteByGroupIdAndBuildId(String groupId,String buildId);
+
 }

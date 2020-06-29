@@ -9,6 +9,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.building.BuildingInfo;
+import com.pepper.model.emap.dto.GroupBuildDto;
 import com.pepper.model.emap.group.Group;
 import com.pepper.model.emap.group.GroupBuild;
 import com.pepper.model.emap.site.SiteInfo;
@@ -59,10 +60,14 @@ public class GroupBuildController extends BaseControllerImpl implements BaseCont
     @RequestMapping("/add")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object add(@RequestBody List<GroupBuild> list){
+    public Object add(@RequestBody GroupBuildDto groupBuildDto){
         ResultData resultData = new ResultData();
-        list.forEach(groupBuild -> {
-            this.groupBuildService.save(groupBuild);
+        groupBuildDto.getBuildIds().forEach(buildId -> {
+            groupBuildService.delete(groupBuildDto.getGroupId(),buildId);
+            GroupBuild groupBuild = new GroupBuild();
+            groupBuild.setBuildId(buildId);
+            groupBuild.setGroupId(groupBuildDto.getGroupId());
+            groupBuildService.save(groupBuild);
         });
         systemLogService.log("groupBuild add", this.request.getRequestURL().toString());
         return resultData;

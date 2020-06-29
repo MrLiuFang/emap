@@ -12,8 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @create: 2020-06-24 10:47
  */
 public interface GroupUserService extends BaseService<GroupUser> {
+
     @Transactional
-    public int delete(String groupId);
+    public int delete(String groupId,String userId);
 
     public Pager<GroupUser> query(Pager<GroupUser> pager, String groupId, String userId, Boolean isOperator, Boolean isLeader, String account, String name, String mobile);
 }
