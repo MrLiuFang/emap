@@ -1,8 +1,6 @@
 package com.pepper.service.emap.event.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
@@ -135,6 +133,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 
 	@Override
 	public List<String> userNode(String userId) {
-		return eventListDao.userNode(userId);
+		List<String> list = eventListDao.userNode(userId);
+		if(Objects.isNull(list) || list.size()<=0) {
+			list = new ArrayList<String>();
+			list.add(UUID.randomUUID().toString());
+		}
+		return list;
 	}
 }

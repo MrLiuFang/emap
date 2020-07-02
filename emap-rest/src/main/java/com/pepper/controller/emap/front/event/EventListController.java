@@ -213,11 +213,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(StringUtils.hasText(id)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_id", id);
 		}
-		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
-		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		String userId = ((AdminUser)this.getCurrentUser()).getId();
 		List<String> sourceCode= eventListService.userNode(userId);
-		pager.getJpqlParameter().getSearchParameter().put(SearchConstant.IN+"_sourceCode", sourceCode);
+		pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_sourceCode", sourceCode);
+		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
+		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
 		pager = eventListService.findNavigator(pager);
 		List<EventList> list = pager.getResults();
 		pager.setResults(null);
