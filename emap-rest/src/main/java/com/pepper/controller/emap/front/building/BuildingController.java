@@ -10,6 +10,10 @@ import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
+import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.console.role.Role;
+import com.pepper.service.console.role.RoleService;
+import com.pepper.service.emap.group.GroupBuildService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -59,6 +63,12 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 
 	@Reference
 	private SystemLogService systemLogService;
+
+	@Reference
+	private GroupBuildService groupBuildService;
+
+	@Reference
+	private RoleService roleService;
 
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
@@ -213,6 +223,16 @@ public class BuildingController extends BaseControllerImpl implements BaseContro
 		}
 		if (StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE + "_siteInfoId&code&name", keyWord);
+		}
+
+		AdminUser adminUser = (AdminUser) this.getCurrentUser();
+		List <Role> roleList = roleService.findByUserId1(adminUser.getId());
+		for(Role role : roleList){
+			if(role.getCode().equals("Operator") || role.getCode().equals("OPERATOR_ROLE")){
+				List<String> id= groupBuildService.findBuildId(adminUser.getId());
+				pager.getJpqlParameter().setSearchParameter(SearchConstant.IN + "_id", id);
+				break;
+			}
 		}
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);

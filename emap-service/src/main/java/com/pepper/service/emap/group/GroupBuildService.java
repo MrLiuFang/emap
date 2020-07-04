@@ -4,7 +4,10 @@ import com.pepper.core.Pager;
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.group.GroupBuild;
 import com.pepper.model.emap.log.SystemLog;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @description:
@@ -17,4 +20,6 @@ public interface GroupBuildService extends BaseService<GroupBuild> {
 
     @Transactional
     public int delete(String groupId,String buildId);
+
+    public List<String> findBuildId(String userId);
 }

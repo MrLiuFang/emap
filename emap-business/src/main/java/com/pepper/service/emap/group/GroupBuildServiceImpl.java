@@ -7,6 +7,11 @@ import com.pepper.model.emap.group.GroupBuild;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 /**
  * @description:
  * @author: Mr.Liu
@@ -26,5 +31,15 @@ public class GroupBuildServiceImpl extends BaseServiceImpl<GroupBuild> implement
     @Override
     public int delete(String groupId, String buildId) {
         return groupBuildDao.deleteByGroupIdAndBuildId(groupId,buildId);
+    }
+
+    @Override
+    public List<String> findBuildId(String userId) {
+        List<String> list = groupBuildDao.findBuildIdByUserId(userId);
+        if(Objects.isNull(list) || list.size()<=0){
+            list = new ArrayList<String>();
+            list.add(UUID.randomUUID().toString());
+        }
+        return list;
     }
 }
