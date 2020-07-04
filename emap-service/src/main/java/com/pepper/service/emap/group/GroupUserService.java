@@ -6,6 +6,8 @@ import com.pepper.model.emap.group.Group;
 import com.pepper.model.emap.group.GroupUser;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @description:
  * @author: Mr.Liu
@@ -17,4 +19,6 @@ public interface GroupUserService extends BaseService<GroupUser> {
     public int delete(String groupId,String userId);
 
     public Pager<GroupUser> query(Pager<GroupUser> pager, String groupId, String userId, Boolean isOperator, Boolean isLeader, String account, String name, String mobile);
+
+    public List<GroupUser> findGroupUser(String userId);
 }

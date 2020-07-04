@@ -2,6 +2,9 @@ package com.pepper.dao.emap.group;
 
 import com.pepper.core.base.BaseDao;
 import com.pepper.model.emap.group.GroupUser;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 /**
  * @description:
@@ -15,4 +18,7 @@ public interface GroupUserDao extends BaseDao<GroupUser> ,GroupUserDaoEx {
     public int deleteByUserId(String userId);
 
     public int deleteByGroupIdAndUserId(String groupId,String userId);
+
+    public List<GroupUser> findByUserId(String userId);
+
 }

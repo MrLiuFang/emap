@@ -11,9 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.ServletOutputStream;
 
+import com.pepper.model.emap.group.GroupUser;
+import com.pepper.service.emap.group.GroupUserService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -38,18 +41,12 @@ import com.pepper.controller.emap.util.Internationalization;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
-import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.console.enums.UserType;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.console.role.RoleUser;
 import com.pepper.model.console.role.RoleVo;
-import com.pepper.model.emap.department.Department;
-import com.pepper.model.emap.department.DepartmentGroup;
-import com.pepper.model.emap.screen.Screen;
-import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.vo.AdminUserVo;
-import com.pepper.model.emap.vo.ScreenVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.console.menu.MenuService;
@@ -99,6 +96,9 @@ public class UserController extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private MenuService menuService;
+
+	@Reference
+	private GroupUserService groupUserService;
 	
 	@RequestMapping(value = "/getUserInfo")
 	@Authorize(authorizeResources = false)
@@ -323,10 +323,26 @@ public class UserController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object handover(@RequestBody Map<String,String> map) {
 		ResultData resultData = new ResultData();
+		AdminUser currentUser = (AdminUser) this.getCurrentUser();
 		AdminUser adminUser = adminUserService.findByAccountAndPassword(map.get("account"),map.get("password"));
 		if(adminUser==null) {
 			resultData.setCode(4000001);
 			resultData.setMessage(Internationalization.getMessageInternationalization(4000001));
+			return resultData;
+		}
+		List<GroupUser> list1 = groupUserService.findGroupUser(adminUser.getId());
+		List<GroupUser> list2 = groupUserService.findGroupUser(currentUser.getId());
+		AtomicReference<Boolean> b = new AtomicReference<Boolean>(false);
+		list1.forEach(groupUser1 -> {
+			list2.forEach(groupUser2 -> {
+				if(groupUser1.getGroupId() == groupUser2.getGroupId()){
+					b.set(true);
+				}
+			});
+		});
+		if(!b.get()){
+			resultData.setMessage(Internationalization.getMessageInternationalization(4000014));
+			resultData.setCode(4000014);
 			return resultData;
 		}
 		
@@ -352,7 +368,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		}
 		
 		
-		AdminUser currentUser = (AdminUser) this.getCurrentUser();
+
 		eventListService.handover(adminUser.getId(), currentUser.getId());
 		if(currentUser!=null) {
 			currentUser = this.adminUserService.findById(currentUser.getId());
