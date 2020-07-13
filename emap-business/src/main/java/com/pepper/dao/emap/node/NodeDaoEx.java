@@ -1,5 +1,6 @@
 package com.pepper.dao.emap.node;
 
+import java.util.List;
 import java.util.Map;
 
 import com.pepper.core.Pager;
@@ -9,5 +10,5 @@ public interface NodeDaoEx<T> {
 
 	Pager<Node> findNavigator(Pager<Node> pager,Map<String, Object> parameter);
 	
-	public Pager<Node> findNavigator(Pager<Node> pager,String code,String name,String source,String sourceCode,String mapId,String nodeTypeId,String siteId,String buildId,String floor,String hasXY,String keyWord) ;
+	public Pager<Node> findNavigator(Pager<Node> pager, String code, String name, String source, List<String> sourceCode, String mapId, String nodeTypeId, String siteId, String buildId, String floor, String hasXY, String keyWord) ;
 }

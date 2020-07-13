@@ -10,6 +10,10 @@ import java.util.Objects;
 
 import javax.servlet.ServletOutputStream;
 
+import com.pepper.model.console.admin.user.AdminUser;
+import com.pepper.model.emap.group.GroupUser;
+import com.pepper.service.emap.group.GroupBuildService;
+import com.pepper.service.emap.group.GroupUserService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -71,6 +75,12 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	
 	@Reference
 	private SystemLogService systemLogService;
+
+	@Reference
+	private GroupUserService groupUserService;
+
+	@Reference
+	private GroupBuildService groupBuildService;
 	
 	@RequestMapping(value = "/export")
 //	@Authorize(authorizeResources = false)
@@ -82,7 +92,11 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("map.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<com.pepper.model.emap.map.Map> pager = getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,true);
+		List<String> list = new ArrayList<String>();
+		if (StringUtils.hasText(buildId)){
+			list.add(buildId);
+		}
+		Pager<com.pepper.model.emap.map.Map> pager = getPager(code, name, areaCode, areaName,list,keyWord,siteId,true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("code", "code"));
 		excelColumn.add(ExcelColumn.build("name", "name"));
@@ -215,7 +229,7 @@ public class MapController  extends BaseControllerImpl implements BaseController
 		return object;
 	}
 	
-	private Pager<com.pepper.model.emap.map.Map> getPager(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId, Boolean isExport) {
+	private Pager<com.pepper.model.emap.map.Map> getPager(String code,String name,String areaCode,String areaName,List<String> buildId,String keyWord,String siteId, Boolean isExport) {
 		Pager<com.pepper.model.emap.map.Map> pager = new Pager<com.pepper.model.emap.map.Map>();
 		if (Objects.equals(isExport, true)) {
 			pager.setPageNo(1);
@@ -234,8 +248,8 @@ public class MapController  extends BaseControllerImpl implements BaseController
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LIKE+"_areaName",areaName );
 		}
 		
-		if(StringUtils.hasText(buildId)) {
-			pager.getJpqlParameter().setSearchParameter(SearchConstant.EQUAL+"_buildId",buildId );
+		if(Objects.nonNull(buildId) && buildId.size()>0) {
+			pager.getJpqlParameter().setSearchParameter(SearchConstant.IN+"_buildId",buildId );
 		}
 		if(StringUtils.hasText(keyWord)) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.OR_LIKE+"_name&code&areaName&areaCode",keyWord );
@@ -282,8 +296,28 @@ public class MapController  extends BaseControllerImpl implements BaseController
 	public Object list(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) {
 		
 //		systemLogService.log("get map list", this.request.getRequestURL().toString());
-		return getPager(code, name, areaCode, areaName,buildId,keyWord,siteId,false);
+		List<String> list = new ArrayList<String>();
+		if (StringUtils.hasText(buildId)){
+			list.add(buildId);
+		}
+		return getPager(code, name, areaCode, areaName, list,keyWord,siteId,false);
 	}
+
+	@RequestMapping(value = "/list/group")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object listGroup(String code,String name,String areaCode,String areaName,String buildId,String keyWord,String siteId) {
+		List<String> list = new ArrayList<String>();
+		if(StringUtils.hasText(buildId)){
+			list.add(buildId);
+		}else {
+			AdminUser adminUser = (AdminUser) this.getCurrentUser();
+			list = this.groupBuildService.findBuildId(adminUser.getId());
+		}
+		return getPager(code, name, areaCode, areaName,list,keyWord,siteId,false);
+	}
+
+
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/add")

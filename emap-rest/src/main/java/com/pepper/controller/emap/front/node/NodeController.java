@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 
+import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.map.MapImageUrl;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -121,7 +122,11 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("node.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
-		Pager<Node> pager = getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY,
+		List<String> list = new ArrayList<String>();
+		if(StringUtils.hasText(sourceCode)){
+			list.add(sourceCode);
+		}
+		Pager<Node> pager = getPager(code, name, source, list, mapId, nodeTypeId, siteId, buildId, floor, hasXY,
 				keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("code", "code"));
@@ -150,7 +155,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("node"), outputStream, excelColumn);
 	}
 
-	private Pager<Node> getPager(String code, String name, String source, String sourceCode, String mapId,
+	private Pager<Node> getPager(String code, String name,String source, List<String> sourceCode, String mapId,
 			String nodeTypeId, String siteId, String buildId, String floor, String hasXY, String keyWord,
 			Boolean isExport) {
 		Pager<Node> pager = new Pager<Node>();
@@ -176,7 +181,27 @@ public class NodeController extends BaseControllerImpl implements BaseController
 	@ResponseBody
 	public Object list(String code, String name, String source, String sourceCode, String mapId, String nodeTypeId,
 			String siteId, String buildId, String floor, String hasXY, String keyWord) {
-		return getPager(code, name, source, sourceCode, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord,
+		List<String> list = new ArrayList<String>();
+		if(StringUtils.hasText(sourceCode)){
+			list.add(sourceCode);
+		}
+		return getPager(code, name, source, list, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord,
+				false);
+	}
+
+	@RequestMapping(value = "/list/group")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public Object listGroup(String code, String name, String source, String sourceCode, String mapId, String nodeTypeId,
+					   String siteId, String buildId, String floor, String hasXY, String keyWord) {
+		List<String> list = new ArrayList<String>();
+		if(StringUtils.hasText(sourceCode)){
+			list.add(sourceCode);
+		}else {
+			AdminUser adminUser = (AdminUser) this.getCurrentUser();
+			list = eventListService.userNode(adminUser.getId());
+		}
+		return getPager(code, name, source, list, mapId, nodeTypeId, siteId, buildId, floor, hasXY, keyWord,
 				false);
 	}
 

@@ -1,7 +1,9 @@
 package com.pepper.dao.emap.node.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -31,8 +33,8 @@ public class NodeDaoImpl implements NodeDaoEx<Node> {
 	}
 
 	@Override
-	public Pager<Node> findNavigator(Pager<Node> pager, String code, String name, String source, String sourceCode,
-			String mapId, String nodeTypeId, String siteId, String buildId, String floor,String hasXY,String keyWord) {
+	public Pager<Node> findNavigator(Pager<Node> pager, String code, String name, String source, List<String> sourceCode,
+									 String mapId, String nodeTypeId, String siteId, String buildId, String floor, String hasXY, String keyWord) {
 		StringBuffer jpql = new StringBuffer(" select n from Node n left join Map m on n.mapId = m.id left join BuildingInfo b on m.buildId = b.id left join SiteInfo s on s.id = b.siteInfoId where 1=1 ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		if(StringUtils.hasText(code)) {
@@ -47,9 +49,9 @@ public class NodeDaoImpl implements NodeDaoEx<Node> {
 			jpql.append(" and n.source  like :source");
 			searchParameter.put("source", "%"+source+"%");
 		}
-		if(StringUtils.hasText(sourceCode)) {
-			jpql.append(" and n.sourceCode  like :sourceCode");
-			searchParameter.put("sourceCode", "%"+sourceCode+"%");
+		if(Objects.nonNull(sourceCode)&&sourceCode.size()>0) {
+			jpql.append(" and n.sourceCode in :sourceCode");
+			searchParameter.put("sourceCode", sourceCode);
 		}
 		if(StringUtils.hasText(mapId)) {
 			jpql.append(" and n.mapId = :mapId");
