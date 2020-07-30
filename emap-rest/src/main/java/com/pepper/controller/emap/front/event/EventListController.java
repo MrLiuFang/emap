@@ -179,7 +179,6 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setCreateDate(new Date());
 			eventList.setEventDate(dateFormat.format(eventList.getCreateDate()));
 		}
-		eventList.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
 		eventList.setStatus("W");
 		eventList = eventListService.save(eventList);
 		return resultData;
