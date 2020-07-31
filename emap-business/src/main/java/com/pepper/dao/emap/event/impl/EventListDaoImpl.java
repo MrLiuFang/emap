@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.google.protobuf.StringValue;
+import com.pepper.core.constant.SearchConstant;
 import org.hibernate.jdbc.ReturningWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,14 +33,15 @@ public class EventListDaoImpl  implements EventListDaoEx {
 	public Pager<EventList> List(Pager<EventList> pager, Boolean isUrgent) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
-		jpql.append(" from EventList t1 where id in ( ");
+		searchParameter.put("sourceCode",pager.getJpqlParameter().getSearchParameter().get(SearchConstant.IN+"_sourceCode"));
+		jpql.append(" from EventList t1 where t1.id in ( ");
 		jpql.append("  select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<");
 		jpql.append(" (select  er.warningLevel from EventRule er join Node n on er.nodeId=n.id where el.sourceCode=n.sourceCode and t1.id=el.id ) ) ");
 		jpql.append( " or id in ( ");
 		jpql.append(" select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<");
 		jpql.append(" (select  er.warningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode and t1.id=el.id )   ");
 		jpql.append(" and el.id not in (select t2.id from EventList t2 join Node t3 on t2.sourceCode = t3.sourceCode join EventRule t4 on t3.id = t4.nodeId where t2.status = 'N'  )   ");
-		jpql.append(" ) order by createDate desc   ");
+		jpql.append(" ) and t1.sourceCode in (:sourceCode) order by createDate desc   ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
 	
