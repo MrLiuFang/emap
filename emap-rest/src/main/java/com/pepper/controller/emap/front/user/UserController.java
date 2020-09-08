@@ -330,11 +330,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return resultData;
 		}
 		
-		if(adminUser==null||!adminUser.getIsWork()) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(4000013));
-			resultData.setCode(4000013);
-			return resultData;
-		}
+//		if(adminUser==null||!adminUser.getIsWork()) {
+//			resultData.setMessage(Internationalization.getMessageInternationalization(4000013));
+//			resultData.setCode(4000013);
+//			return resultData;
+//		}
 		
 		List<Role> roleList = roleService.findByUserId1(adminUser.getId());
 		
