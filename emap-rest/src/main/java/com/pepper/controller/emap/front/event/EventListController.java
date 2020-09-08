@@ -1,17 +1,15 @@
 package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 
+import com.pepper.controller.emap.util.ExcelColumn;
+import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.core.ResultEnum;
 import com.pepper.model.console.role.Role;
 import com.pepper.service.console.role.RoleService;
@@ -533,12 +531,43 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 		, String departmentId){
 		Pager<EventList> pager = new Pager<EventList>();
-		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
-		
-		pager.setData("historyEvent",  convertHistoryEventList(pager.getResults()));
+		List<EventListVo> list = list(event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId,pager);
+		pager.setData("historyEvent",  list);
 		pager.setResults(null);
 //		systemLogService.log("event historyEventList ", this.request.getRequestURL().toString());
 		return pager;
+	}
+
+	@RequestMapping(value = "/export")
+	@Authorize(authorizeResources = false)
+	@ResponseBody
+	public void export(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+		, String departmentId) throws IOException, IllegalAccessException {
+		Pager<EventList> pager = new Pager<EventList>();
+		pager.setPageSize(Integer.MAX_VALUE);
+		List<EventListVo> list = list(event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId,pager);
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("application/xlsx");
+		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("event.xlsx", "UTF-8"));
+		ServletOutputStream outputStream = response.getOutputStream();
+		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+		excelColumn.add(ExcelColumn.build("eventId", "eventId"));
+		excelColumn.add(ExcelColumn.build("eventName", "eventName"));
+		excelColumn.add(ExcelColumn.build("nodeName", "node.name"));
+		excelColumn.add(ExcelColumn.build("warningLevel", "warningLevel"));
+		excelColumn.add(ExcelColumn.build("createDate", "createDate"));
+		excelColumn.add(ExcelColumn.build("operatorName", "operatorVo.name"));
+		excelColumn.add(ExcelColumn.build("handleName", "currentHandleUserVo.name"));
+		excelColumn.add(ExcelColumn.build("status", "status"));
+		excelColumn.add(ExcelColumn.build("filedContent", "filedContent"));
+		new ExportExcelUtil().export(list, outputStream, excelColumn);
+	}
+
+	private List<EventListVo> list(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+			, String departmentId,Pager<EventList> pager){
+		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
+
+		return convertHistoryEventList(pager.getResults());
 	}
 	
 	

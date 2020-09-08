@@ -335,7 +335,7 @@ public class UserController extends BaseControllerImpl implements BaseController
 		AtomicReference<Boolean> b = new AtomicReference<Boolean>(false);
 		list1.forEach(groupUser1 -> {
 			list2.forEach(groupUser2 -> {
-				if(groupUser1.getGroupId() == groupUser2.getGroupId()){
+				if(groupUser1.getGroupId().equals(groupUser2.getGroupId())){
 					b.set(true);
 				}
 			});
@@ -346,11 +346,11 @@ public class UserController extends BaseControllerImpl implements BaseController
 			return resultData;
 		}
 		
-		if(adminUser==null||!adminUser.getIsWork()) {
-			resultData.setMessage(Internationalization.getMessageInternationalization(4000013));
-			resultData.setCode(4000013);
-			return resultData;
-		}
+//		if(adminUser==null||!adminUser.getIsWork()) {
+//			resultData.setMessage(Internationalization.getMessageInternationalization(4000013));
+//			resultData.setCode(4000013);
+//			return resultData;
+//		}
 		
 		List<Role> roleList = roleService.findByUserId1(adminUser.getId());
 		
