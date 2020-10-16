@@ -322,7 +322,7 @@ public class EventScheduler {
 		
 //		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
 //		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
-		Object obj = this.redisTemplate.opsForValue().get(user.getId());
+		Object obj = this.redisTemplate.opsForValue().get(user.getId()+"_tcp");
 		if (Objects.nonNull(obj)){
 			ChannelId channelId = (ChannelId) obj;
 			Channel channel = this.channelGroupUtil.find(channelId);

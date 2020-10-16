@@ -101,12 +101,12 @@ public class TcpServer implements CommandLineRunner {
                 if (map.containsKey("type") && Integer.valueOf(map.get("type").toString())==1){
                     String userId = Objects.nonNull(map.get("userId"))?String.valueOf(map.get("userId")):"";
                     if (StringUtils.hasText(userId)){
-                        redisTemplate.opsForValue().set(userId,ctx.channel().id());
+                        redisTemplate.opsForValue().set(userId+"_tcp",ctx.channel().id());
                     }
                 }else if (map.containsKey("type") && Integer.valueOf(map.get("type").toString())==2){
                     String userId = Objects.nonNull(map.get("userId"))?String.valueOf(map.get("userId")):"";
                     if (StringUtils.hasText(userId)){
-                        Object obj = redisTemplate.opsForValue().get(userId);
+                        Object obj = redisTemplate.opsForValue().get(userId+"_tcp");
                         if (Objects.nonNull(obj)){
                             ChannelId channelId = (ChannelId) obj;
                             Channel channel = channelGroupUtil.find(channelId);
