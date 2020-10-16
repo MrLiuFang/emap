@@ -1,20 +1,23 @@
 package com.pepper.controller.emap.common.timer;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pepper.controller.emap.scoket.ChannelGroupUtil;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelId;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.xmlbeans.impl.inst2xsd.VenetianBlindStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -80,6 +83,12 @@ public class EventScheduler {
 	
 	@Reference
 	private EventMessageService eventMessageService;
+
+	@Autowired
+	private ChannelGroupUtil channelGroupUtil;
+
+	@Autowired
+	private RedisTemplate redisTemplate;
 
 	@Scheduled(fixedRate = 5000)
 	public void scheduled() {
@@ -247,7 +256,7 @@ public class EventScheduler {
 		}
 	}
 	
-	private AdminUser assignment(String departmentId,EventList eventList,String pushTitle) {
+	private AdminUser assignment(String departmentId,EventList eventList,String pushTitle) throws JsonProcessingException {
 		List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentId(departmentId);
 		AdminUser user = null;
 		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
@@ -311,9 +320,22 @@ public class EventScheduler {
 		eventDispatch.setTitle(eventList.getEventName());
 		eventDispatchService.save(eventDispatch);
 		
-		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
-		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
-		
+//		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
+//		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
+		Object obj = this.redisTemplate.opsForValue().get(user.getId());
+		if (Objects.nonNull(obj)){
+			ChannelId channelId = (ChannelId) obj;
+			Channel channel = this.channelGroupUtil.find(channelId);
+			if (Objects.nonNull(channel)){
+				Map<String,String>  map = new HashMap<String,String>();
+				map.put("title",StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單");
+				map.put("eventName",eventList.getEventName());
+				map.put("id",eventList.getId());
+				ObjectMapper objectMapper = new ObjectMapper();
+				channel.writeAndFlush(objectMapper.writeValueAsString(map)+"\r\n");
+			}
+		}
+
 		EventMessage eventMessage = new EventMessage();
 		eventMessage.setEventId(eventList.getEventId());
 		eventMessage.setEventListId(eventList.getId());

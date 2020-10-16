@@ -12,6 +12,8 @@ import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
+import java.nio.charset.Charset;
+
 /**
  * @description:
  * @author: mr.liu
@@ -35,8 +37,8 @@ public class NettyClient {
                         ByteBuf delimiter = Unpooled.copiedBuffer("\n".getBytes());
                         pipeline
                                 .addLast(new DelimiterBasedFrameDecoder(1024,delimiter))
-                                .addLast(new StringDecoder())
-                                .addLast(new StringEncoder())
+                                .addLast(new StringDecoder(Charset.forName("UTF-8")))
+                                .addLast(new StringEncoder(Charset.forName("UTF-8")))
                                 .addLast(new ClientHandler());
 
                     }
