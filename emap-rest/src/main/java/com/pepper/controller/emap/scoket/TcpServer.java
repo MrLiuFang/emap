@@ -132,7 +132,6 @@ public class TcpServer implements CommandLineRunner {
         //通知处理器最后的channelRead()是当前批处理中的最后一条消息时调用
         @Override
         public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-            System.out.println("服务端接收数据完毕..");
             ctx.flush();
         }
 
@@ -146,7 +145,6 @@ public class TcpServer implements CommandLineRunner {
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
             channelGroupUtil.add(ctx.channel());
-            System.out.println("有客户端连接");
 //            ctx.writeAndFlush("服务端测试下发消息\r\n");
         }
 

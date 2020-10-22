@@ -116,7 +116,7 @@ public class Node extends BaseModel {
 	private Boolean isCamera;
 
 	@Column(name = "tile_type",columnDefinition = "int(10) default 512")
-	private Boolean tileType;
+	private Integer tileType;
 
 	public Boolean getIsDoor() {
 		return isDoor;
@@ -366,11 +366,11 @@ public class Node extends BaseModel {
 		this.remark = remark;
 	}
 
-	public Boolean getTileType() {
+	public Integer getTileType() {
 		return tileType;
 	}
 
-	public void setTileType(Boolean tileType) {
+	public void setTileType(Integer tileType) {
 		this.tileType = tileType;
 	}
 }
