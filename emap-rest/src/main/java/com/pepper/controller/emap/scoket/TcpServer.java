@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -94,7 +95,6 @@ public class TcpServer implements CommandLineRunner {
         //接受client发送的消息
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            System.out.println(msg);
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String,Object> map  = objectMapper.readValue(String.valueOf(msg),Map.class);
@@ -102,6 +102,12 @@ public class TcpServer implements CommandLineRunner {
                     String userId = Objects.nonNull(map.get("userId"))?String.valueOf(map.get("userId")):"";
                     if (StringUtils.hasText(userId)){
                         redisTemplate.opsForValue().set(userId+"_tcp",ctx.channel().id());
+                        List<String> list =  redisTemplate.opsForList().range(userId+"_tcp_cahce",0,-1);
+                        if (Objects.nonNull(list)) {
+                            list.forEach(message -> {
+                                ctx.writeAndFlush(message + "\r\n");
+                            });
+                        }
                     }
                 }else if (map.containsKey("type") && Integer.valueOf(map.get("type").toString())==2){
                     String userId = Objects.nonNull(map.get("userId"))?String.valueOf(map.get("userId")):"";

@@ -323,17 +323,19 @@ public class EventScheduler {
 //		String deviceId = valueOperationsService.get("userDeviceId_"+user.getId());
 //		messageService.send(deviceId,StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單",eventList.getEventName(),eventList.getId());
 		Object obj = this.redisTemplate.opsForValue().get(user.getId()+"_tcp");
+		Map<String,String>  map = new HashMap<String,String>();
+		map.put("title",StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單");
+		map.put("eventName",eventList.getEventName());
+		map.put("id",eventList.getId());
+		ObjectMapper objectMapper = new ObjectMapper();
 		if (Objects.nonNull(obj)){
 			ChannelId channelId = (ChannelId) obj;
 			Channel channel = this.channelGroupUtil.find(channelId);
 			if (Objects.nonNull(channel)){
-				Map<String,String>  map = new HashMap<String,String>();
-				map.put("title",StringUtils.hasText(pushTitle)?pushTitle: "您有新的工單");
-				map.put("eventName",eventList.getEventName());
-				map.put("id",eventList.getId());
-				ObjectMapper objectMapper = new ObjectMapper();
 				channel.writeAndFlush(objectMapper.writeValueAsString(map)+"\r\n");
 			}
+		}else {
+			redisTemplate.opsForList().leftPushAll(user.getId()+"_tcp_cahce",objectMapper.writeValueAsString(map));
 		}
 
 		EventMessage eventMessage = new EventMessage();

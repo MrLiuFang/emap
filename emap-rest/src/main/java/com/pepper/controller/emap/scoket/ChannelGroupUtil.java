@@ -8,6 +8,9 @@ import io.netty.channel.group.ChannelMatcher;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.Objects;
 
 /**
  * @description:
@@ -41,5 +44,12 @@ public class ChannelGroupUtil {
 
     public static Channel find(ChannelId channelId) {
         return CHANNEL_GROUP.find(channelId);
+    }
+
+    public static void send(ChannelId channelId,String message){
+        Channel channel = find(channelId);
+        if (Objects.nonNull(channel) && StringUtils.hasText(message)){
+            channel.writeAndFlush(message);
+        }
     }
 }
