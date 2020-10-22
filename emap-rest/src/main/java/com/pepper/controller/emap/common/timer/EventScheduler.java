@@ -12,6 +12,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelId;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.xmlbeans.impl.inst2xsd.VenetianBlindStrategy;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
@@ -83,9 +84,6 @@ public class EventScheduler {
 	
 	@Reference
 	private EventMessageService eventMessageService;
-
-	@Autowired
-	private ChannelGroupUtil channelGroupUtil;
 
 	@Autowired
 	private RedisTemplate redisTemplate;
@@ -330,9 +328,11 @@ public class EventScheduler {
 		ObjectMapper objectMapper = new ObjectMapper();
 		if (Objects.nonNull(obj)){
 			ChannelId channelId = (ChannelId) obj;
-			Channel channel = this.channelGroupUtil.find(channelId);
+			Channel channel = ChannelGroupUtil.find(channelId);
 			if (Objects.nonNull(channel)){
 				channel.writeAndFlush(objectMapper.writeValueAsString(map)+"\r\n");
+			}else {
+				redisTemplate.opsForList().leftPushAll(user.getId()+"_tcp_cahce",objectMapper.writeValueAsString(map));
 			}
 		}else {
 			redisTemplate.opsForList().leftPushAll(user.getId()+"_tcp_cahce",objectMapper.writeValueAsString(map));

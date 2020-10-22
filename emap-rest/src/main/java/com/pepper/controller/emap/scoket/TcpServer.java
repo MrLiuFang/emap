@@ -46,9 +46,6 @@ public class TcpServer implements CommandLineRunner {
     private Integer port;
 
     @Autowired
-    private ChannelGroupUtil channelGroupUtil;
-
-    @Autowired
     private RedisTemplate redisTemplate;
 
     @Override
@@ -99,6 +96,7 @@ public class TcpServer implements CommandLineRunner {
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String,Object> map  = objectMapper.readValue(String.valueOf(msg),Map.class);
                 if (map.containsKey("type") && Integer.valueOf(map.get("type").toString())==1){
+                    ChannelGroupUtil.add(ctx.channel());
                     String userId = Objects.nonNull(map.get("userId"))?String.valueOf(map.get("userId")):"";
                     if (StringUtils.hasText(userId)){
                         redisTemplate.opsForValue().set(userId+"_tcp",ctx.channel().id());
@@ -106,21 +104,26 @@ public class TcpServer implements CommandLineRunner {
                         if (Objects.nonNull(list)) {
                             list.forEach(message -> {
                                 ctx.writeAndFlush(message + "\r\n");
+                                redisTemplate.opsForList().remove(userId+"_tcp_cahce",1,message);
                             });
                         }
                     }
                 }else if (map.containsKey("type") && Integer.valueOf(map.get("type").toString())==2){
                     String userId = Objects.nonNull(map.get("userId"))?String.valueOf(map.get("userId")):"";
+                    Map<String,String>  map1 = new HashMap<String,String>();
+                    map1.put("title","测试");
                     if (StringUtils.hasText(userId)){
                         Object obj = redisTemplate.opsForValue().get(userId+"_tcp");
                         if (Objects.nonNull(obj)){
                             ChannelId channelId = (ChannelId) obj;
-                            Channel channel = channelGroupUtil.find(channelId);
+                            Channel channel = ChannelGroupUtil.find(channelId);
                             if (Objects.nonNull(channel)){
-                                Map<String,String>  map1 = new HashMap<String,String>();
-                                map1.put("title","测试");
                                 channel.writeAndFlush(objectMapper.writeValueAsString(map1) + "\r\n");
+                            }else {
+                                redisTemplate.opsForList().leftPushAll(userId+"_tcp_cahce",objectMapper.writeValueAsString(map1));
                             }
+                        }else {
+                            redisTemplate.opsForList().leftPushAll(userId+"_tcp_cahce",objectMapper.writeValueAsString(map1));
                         }
                     }
                 }
@@ -144,19 +147,19 @@ public class TcpServer implements CommandLineRunner {
         //客户端去和服务端连接成功时触发
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            channelGroupUtil.add(ctx.channel());
+            ChannelGroupUtil.add(ctx.channel());
 //            ctx.writeAndFlush("服务端测试下发消息\r\n");
         }
 
         @Override
         public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-            channelGroupUtil.discard(ctx.channel());
+            ChannelGroupUtil.discard(ctx.channel());
             super.channelUnregistered(ctx);
         }
 
         @Override
         public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-            channelGroupUtil.discard(ctx.channel());
+            ChannelGroupUtil.discard(ctx.channel());
             super.handlerRemoved(ctx);
         }
     }

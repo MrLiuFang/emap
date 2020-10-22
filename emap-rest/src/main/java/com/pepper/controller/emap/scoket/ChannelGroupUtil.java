@@ -17,7 +17,6 @@ import java.util.Objects;
  * @author: mr.liu
  * @create: 2020-10-15 21:32
  **/
-@Component
 public class ChannelGroupUtil {
 
     private static final ChannelGroup CHANNEL_GROUP = new DefaultChannelGroup("ChannelGroups", GlobalEventExecutor.INSTANCE);
