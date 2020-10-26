@@ -531,7 +531,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 		, String departmentId){
 		Pager<EventList> pager = new Pager<EventList>();
-		List<EventListVo> list = list(event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId,pager);
+		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
+		List<EventListVo> list = convertHistoryEventList(pager.getResults());
 		pager.setData("historyEvent",  list);
 		pager.setResults(null);
 //		systemLogService.log("event historyEventList ", this.request.getRequestURL().toString());
