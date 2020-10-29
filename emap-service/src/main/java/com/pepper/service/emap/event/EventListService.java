@@ -22,6 +22,8 @@ public interface EventListService extends BaseService<EventList> {
 	 */
 	public List<EventList> findByStatusOrStatus(String status,String status1);
 
+	public List<EventList> findByStatus(String status);
+
 	public List<EventList> findByStatusNot(String status);
 	/**
 	 * 

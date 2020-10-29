@@ -159,22 +159,15 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		ResultData resultData = new ResultData();
 		EventList eventList = new EventList();
 		MapToBeanUtil.convert(eventList, map);
-		eventList.setIsOperatorTransfer(false);		
-//		if(map.containsKey("isConsole")&&map.get("isConsole")!=null&&((Boolean)map.get("isConsole"))) {
-//			AdminUser currentUser = (AdminUser) this.getCurrentUser();
-//			eventList.setStatus("W");
-//			eventList.setOperator(currentUser.getId());
-//		}
+		eventList.setCreateDate(new Date());
+		eventList.setIsOperatorTransfer(false);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		
 		try {
 			dateFormat.parse(eventList.getEventDate());
 		}catch (Exception e) {
 			eventList.setEventDate(null);
 		}
-		
 		if(!StringUtils.hasText(eventList.getEventDate())) {
-			eventList.setCreateDate(new Date());
 			eventList.setEventDate(dateFormat.format(eventList.getCreateDate()));
 		}
 		eventList = eventListService.save(eventList);

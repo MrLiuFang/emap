@@ -28,6 +28,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
+	public List<EventList> findByStatus(String status) {
+		return eventListDao.findByStatus(status);
+	}
+
+	@Override
 	public List<EventList> findByStatusNot(String status) {
 		return eventListDao.findByStatusNot(status);
 	}

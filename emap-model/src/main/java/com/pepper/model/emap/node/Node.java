@@ -79,6 +79,9 @@ public class Node extends BaseModel {
 	@Column(name = "system_id")
 	private String systemID;
 
+	@Column(name = "system_ip")
+	private String systemIp;
+
 	@Column(name = "windows_user")
 	private String windowsUser;
 
@@ -372,5 +375,13 @@ public class Node extends BaseModel {
 
 	public void setTileType(String tileType) {
 		this.tileType = tileType;
+	}
+
+	public String getSystemIp() {
+		return systemIp;
+	}
+
+	public void setSystemIp(String systemIp) {
+		this.systemIp = systemIp;
 	}
 }

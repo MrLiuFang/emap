@@ -93,7 +93,7 @@ public class EventScheduler {
 		if(!environment.getProperty("scheduler.enabled", "true").equals("true")) {
 			return;
 		}
-		List<EventList> list = eventListService.findByStatusOrStatus(null, "N");
+		List<EventList> list = eventListService.findByStatus(null);
 		for(EventList eventList : list) {
 			eventList.setIsUrgent(eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
 			String sourceCode = eventList.getSourceCode();
