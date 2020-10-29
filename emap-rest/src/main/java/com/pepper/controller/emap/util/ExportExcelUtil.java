@@ -3,12 +3,7 @@ package com.pepper.controller.emap.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -41,7 +36,14 @@ public class ExportExcelUtil {
 			row = sheet.createRow(rowIndex);
 			for(int i =0 ; i<excelColumn.size();i++ ) {
 				String key = excelColumn.get(i).getKey();
-				String cellValue=getCellValue(data,key);
+				Boolean isNotField = excelColumn.get(i).getNotField();
+				String defaultValue = excelColumn.get(i).getDefaultValue();
+				String cellValue = "";
+				if (Objects.nonNull(isNotField) && isNotField){
+					cellValue = defaultValue;
+				}else {
+					cellValue = getCellValue(data,key);
+				}
 				XSSFCell cell = row.createCell(i);
 				cell.setCellValue(cellValue);
 			}

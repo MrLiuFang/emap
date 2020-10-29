@@ -144,6 +144,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("userName", "userName"));
 		excelColumn.add(ExcelColumn.build("password", "password"));
 		excelColumn.add(ExcelColumn.build("systemId", "systemID"));
+		excelColumn.add(ExcelColumn.build("systemIp", "systemIp"));
 		excelColumn.add(ExcelColumn.build("windowsUser", "windowsUser"));
 		excelColumn.add(ExcelColumn.build("windowsPass", "windowsPass"));
 		excelColumn.add(ExcelColumn.build("domainName", "domainName"));
@@ -152,6 +153,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("readerId", "readerId"));
 		excelColumn.add(ExcelColumn.build("readerIo", "readerIo"));
 		excelColumn.add(ExcelColumn.build("remark", "remark"));
+		excelColumn.add(ExcelColumn.build("isDelete", true,"否"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("node"), outputStream, excelColumn);
 	}
 
@@ -454,9 +456,10 @@ public class NodeController extends BaseControllerImpl implements BaseController
 				node.setUserName(getCellValue(row.getCell(12)).toString());
 				node.setPassword(getCellValue(row.getCell(13)).toString());
 				node.setSystemID(getCellValue(row.getCell(14)).toString());
-				node.setWindowsUser(getCellValue(row.getCell(15)).toString());
-				node.setWindowsPass(getCellValue(row.getCell(16)).toString());
-				node.setDomainName(getCellValue(row.getCell(17)).toString());
+				node.setSystemIp(getCellValue(row.getCell(15)).toString());
+				node.setWindowsUser(getCellValue(row.getCell(16)).toString());
+				node.setWindowsPass(getCellValue(row.getCell(17)).toString());
+				node.setDomainName(getCellValue(row.getCell(18)).toString());
 
 //				if(!StringUtils.hasText(node.getIp())) {
 //					resultData.setCode(4000003);
@@ -504,11 +507,11 @@ public class NodeController extends BaseControllerImpl implements BaseController
 //				}
 //			} else if (nodeTypeCode.equals("door")) {
 
-				node.setPaneId(getCellValue(row.getCell(18)).toString());
-				node.setPaneIp(getCellValue(row.getCell(19)).toString());
-				node.setReaderId(getCellValue(row.getCell(20)).toString());
-				node.setReaderIo(getCellValue(row.getCell(21)).toString());
-
+				node.setPaneId(getCellValue(row.getCell(19)).toString());
+				node.setPaneIp(getCellValue(row.getCell(20)).toString());
+				node.setReaderId(getCellValue(row.getCell(21)).toString());
+				node.setReaderIo(getCellValue(row.getCell(22)).toString());
+				node.setRemark(getCellValue(row.getCell(23)).toString());
 //				if(!StringUtils.hasText(node.getPaneId())) {
 //					resultData.setCode(4000003);
 //					resultData.setMessage("数据错误！第"+i+"行paneId数据错误");
@@ -547,11 +550,10 @@ public class NodeController extends BaseControllerImpl implements BaseController
 					return resultData;
 				}
 //			}
-			node.setRemark(getCellValue(row.getCell(22)).toString());
 			Node oldNode = nodeService.findByCode(node.getCode());
 			if (Objects.nonNull(oldNode)) {
 				node.setId(oldNode.getId());
-				String isDelete = getCellValue(row.getCell(23)).toString();
+				String isDelete = getCellValue(row.getCell(24)).toString();
 				if(Objects.equals(isDelete.trim(), "是")) {
 					nodeService.deleteById(oldNode.getId());
 					continue;
@@ -642,31 +644,34 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		if (!getCellValue(row.getCell(14)).toString().equals("systemId")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(15)).toString().equals("windowsUser")) {
+		if (!getCellValue(row.getCell(15)).toString().equals("systemIp")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(16)).toString().equals("windowsPass")) {
+		if (!getCellValue(row.getCell(16)).toString().equals("windowsUser")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(17)).toString().equals("domainName")) {
+		if (!getCellValue(row.getCell(17)).toString().equals("windowsPass")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(18)).toString().equals("paneId")) {
+		if (!getCellValue(row.getCell(18)).toString().equals("domainName")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(19)).toString().equals("paneIp")) {
+		if (!getCellValue(row.getCell(19)).toString().equals("paneId")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(20)).toString().equals("readerId")) {
+		if (!getCellValue(row.getCell(20)).toString().equals("paneIp")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(21)).toString().equals("readerIo")) {
+		if (!getCellValue(row.getCell(21)).toString().equals("readerId")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(22)).toString().equals("remark")) {
+		if (!getCellValue(row.getCell(22)).toString().equals("readerIo")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(23)).toString().equals("isDelete")) {
+		if (!getCellValue(row.getCell(23)).toString().equals("remark")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(24)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;
