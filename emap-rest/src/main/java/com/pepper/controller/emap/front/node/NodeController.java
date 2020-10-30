@@ -153,6 +153,8 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("readerId", "readerId"));
 		excelColumn.add(ExcelColumn.build("readerIo", "readerIo"));
 		excelColumn.add(ExcelColumn.build("remark", "remark"));
+		excelColumn.add(ExcelColumn.build("isCamera", "isCamera"));
+		excelColumn.add(ExcelColumn.build("isDoor", "isDoor"));
 		excelColumn.add(ExcelColumn.build("isDelete", true,"否"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("node"), outputStream, excelColumn);
 	}
@@ -512,6 +514,14 @@ public class NodeController extends BaseControllerImpl implements BaseController
 				node.setReaderId(getCellValue(row.getCell(21)).toString());
 				node.setReaderIo(getCellValue(row.getCell(22)).toString());
 				node.setRemark(getCellValue(row.getCell(23)).toString());
+				String isCamera = getCellValue(row.getCell(24)).toString();
+				String isDoor = getCellValue(row.getCell(25)).toString();
+				if (Objects.nonNull(isCamera) && (Objects.equals(isCamera.toLowerCase(),"true") || Objects.equals(isCamera.toLowerCase(),"false"))){
+					node.setIsCamera(Boolean.valueOf(isCamera));
+				}
+				if (Objects.nonNull(isDoor) && (Objects.equals(isDoor.toLowerCase(),"true") || Objects.equals(isDoor.toLowerCase(),"false"))){
+					node.setIsDoor(Boolean.valueOf(isDoor));
+				}
 //				if(!StringUtils.hasText(node.getPaneId())) {
 //					resultData.setCode(4000003);
 //					resultData.setMessage("数据错误！第"+i+"行paneId数据错误");
@@ -553,7 +563,7 @@ public class NodeController extends BaseControllerImpl implements BaseController
 			Node oldNode = nodeService.findByCode(node.getCode());
 			if (Objects.nonNull(oldNode)) {
 				node.setId(oldNode.getId());
-				String isDelete = getCellValue(row.getCell(24)).toString();
+				String isDelete = getCellValue(row.getCell(26)).toString();
 				if(Objects.equals(isDelete.trim(), "是")) {
 					nodeService.deleteById(oldNode.getId());
 					continue;
@@ -671,7 +681,13 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		if (!getCellValue(row.getCell(23)).toString().equals("remark")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(24)).toString().equals("isDelete")) {
+		if (!getCellValue(row.getCell(24)).toString().equals("isCamera")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(25)).toString().equals("isDoor")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(26)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;
