@@ -532,7 +532,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		return pager;
 	}
 
-	@RequestMapping(value = "/export")
+	@RequestMapping(value = "/workbench/export")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public void export(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
