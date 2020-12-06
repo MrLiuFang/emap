@@ -142,7 +142,7 @@ public class EventScheduler {
 			//特级
 			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
-					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent());
+					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent(),false);
 					eventList.setIsSpecial(true);
 					eventListService.update(eventList);
 					send(eventList,eventRule,user);
@@ -163,13 +163,13 @@ public class EventScheduler {
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 				if(to<from) {
 					if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent(),false);
 						send(eventList,eventRule,user);
 						return ;
 					}
 				}else {
 					if(time>=from&&time<=to) {
-						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent(),false);
 						send(eventList,eventRule,user);
 						return ;
 					}
@@ -177,13 +177,13 @@ public class EventScheduler {
 			}
 			//紧急
 			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
-				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent(),false);
 				send(eventList,eventRule,user);
 				return ;
 			}
 			
 			if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent(),true);
 				send(eventList,eventRule,user);
 				return ;
 			}
@@ -254,7 +254,7 @@ public class EventScheduler {
 		}
 	}
 	
-	private AdminUser assignment(String departmentId,EventList eventList,String pushTitle) throws JsonProcessingException {
+	private AdminUser assignment(String departmentId,EventList eventList,String pushTitle,Boolean isTimeOut) throws JsonProcessingException {
 		List<DepartmentGroup> listDepartmentGroup = this.departmentGroupService.findByDepartmentId(departmentId);
 		AdminUser user = null;
 		for(DepartmentGroup departmentGroup : listDepartmentGroup) {
@@ -289,6 +289,7 @@ public class EventScheduler {
 		eventList.setCurrentHandleUser(user.getId());
 		eventList.setStatus("A");
 		eventList.setAssignDate(new Date());
+		eventList.setDispatchStatus(isTimeOut?1:0);
 		eventList.setContent("系統自動派單");
 		Node node = nodeService.findBySourceCode(eventList.getSourceCode());
 		if(node!=null) {

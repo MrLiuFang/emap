@@ -99,6 +99,9 @@ public class EventList extends BaseModel  {
 	@Column(name ="filed_user_no")
 	private String filedUserNo;
 
+	@Column(name ="dispatch_status")
+	private Integer dispatchStatus;
+
 	public String getFiledUserNo() {
 		return filedUserNo;
 	}
@@ -306,7 +309,12 @@ public class EventList extends BaseModel  {
 	public void setVideo(String video) {
 		this.video = video;
 	}
-	
-	
-	
+
+	public Integer getDispatchStatus() {
+		return dispatchStatus;
+	}
+
+	public void setDispatchStatus(Integer dispatchStatus) {
+		this.dispatchStatus = dispatchStatus;
+	}
 }
