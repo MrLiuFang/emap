@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,9 +76,9 @@ public interface EventListService extends BaseService<EventList> {
 	 */
 	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish);
 	
-	public Pager<EventList>  historyEventList(Pager<EventList> pager,String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String stieName,String operator,String status,String eventId,Date startDate,Date endDate,String departmentId);
+	public Pager<EventList>  historyEventList(Pager<EventList> pager,String event,Integer startWarningLevel,Integer endWarningLevel,String node,String nodeType,String mapName,String buildName,String stieName,String operator,String status,String eventId,Date startDate,Date endDate,String departmentId);
 	
-	public Pager<EventList>  report(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ,String employeeId,Boolean isOrder,String sortBy ,Boolean isSpecial,Boolean isUrgent);
+	public Pager<EventList>  report(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer startWarningLevel, Integer endWarningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status ,String employeeId,Boolean isOrder,String sortBy ,Boolean isSpecial,Boolean isUrgent);
 
 	public EventList findOneByNodeId(String nodeId);
 	
@@ -97,6 +96,8 @@ public interface EventListService extends BaseService<EventList> {
 	public List<Map<String,Object>> currentMonthCount(Date startDate, Date endDate);
 
 	public List<Map<String,Object>> currentMonthCount(Date startDate, Date endDate,Boolean isConsole);
+
+	public List<Map<String,Object>> currentMonthNotRelationNode(Date startDate,Date endDate);
 
 	/**
 	 *

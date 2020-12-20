@@ -8,7 +8,6 @@ import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
@@ -73,16 +72,16 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
-	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer warningLevel, String node,
-			String nodeType, String mapName, String buildName, String stieName, String operator, String status,String eventId,Date startDate,Date endDate, String departmentId) {
-		return eventListDao.historyEventList(pager,startDate,endDate, event, warningLevel, node, nodeType, mapName, buildName, stieName, operator, status,null,null,null,null,null,eventId,departmentId);
+	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer startWarningLevel, Integer endWarningLevel, String node,
+											 String nodeType, String mapName, String buildName, String stieName, String operator, String status, String eventId, Date startDate, Date endDate, String departmentId) {
+		return eventListDao.historyEventList(pager,startDate,endDate, event, startWarningLevel, endWarningLevel, node, nodeType, mapName, buildName, stieName, operator, status, null, null, null, null, null, eventId, departmentId);
 	}
 
 	@Override
 	public Pager<EventList> report(Pager<EventList> pager, Date eventStartDate, Date eventEndDate, String event,
-			Integer warningLevel, String node, String nodeTypeId, String mapName, String buildName, String siteName,
-			String operatorId, String status, String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent) {
-		return eventListDao.historyEventList(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder,sortBy,isSpecial,isUrgent,null,null);
+								   Integer startWarningLevel, Integer endWarningLevel, String node, String nodeTypeId, String mapName, String buildName, String siteName,
+								   String operatorId, String status, String employeeId, Boolean isOrder, String sortBy, Boolean isSpecial, Boolean isUrgent) {
+		return eventListDao.historyEventList(pager, eventStartDate, eventEndDate, event, startWarningLevel, endWarningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder, sortBy, isSpecial, isUrgent, null, null);
 	}
 
 	@Override
@@ -124,6 +123,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public List<Map<String, Object>> currentMonthCount(Date startDate, Date endDate, Boolean isConsole) {
 		return eventListDao.currentMonthIsConsoleCount(startDate,endDate);
+	}
+
+	@Override
+	public List<Map<String, Object>> currentMonthNotRelationNode(Date startDate, Date endDate) {
+		return eventListDao.currentMonthNotRelationNode(startDate, endDate);
 	}
 
 	@Override

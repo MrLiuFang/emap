@@ -1,12 +1,9 @@
 package com.pepper.dao.emap.event.impl;
 
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import com.google.protobuf.StringValue;
 import com.pepper.core.constant.SearchConstant;
-import org.hibernate.jdbc.ReturningWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
@@ -204,8 +201,8 @@ public class EventListDaoImpl  implements EventListDaoEx {
 	}
 
 	@Override
-	public Pager<EventList> historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId
-			,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent,String eventId,String departmentId) {
+	public Pager<EventList> historyEventList(Pager<EventList> pager, Date eventStartDate, Date eventEndDate, String event, Integer startWarningLevel, Integer endWarningLevel, String node, String nodeType, String mapName, String buildName, String siteName, String operatorId, String status, String employeeId
+			, Boolean isOrder, String sortBy, Boolean isSpecial, Boolean isUrgent, String eventId, String departmentId) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -297,9 +294,13 @@ public class EventListDaoImpl  implements EventListDaoEx {
 			jpql.append(" and ( el.id like :event or  el.eventName like :event ) ");
 			searchParameter.put("event", "%"+event+"%");
 		}
-		if(warningLevel!=null) {
-			jpql.append(" and el.warningLevel = :warningLevel ");
-			searchParameter.put("warningLevel", warningLevel);
+		if(startWarningLevel !=null) {
+			jpql.append(" and el.warningLevel >= :startWarningLevel ");
+			searchParameter.put("startWarningLevel", startWarningLevel);
+		}
+		if(endWarningLevel !=null) {
+			jpql.append(" and el.warningLevel <= :endWarningLevel ");
+			searchParameter.put("endWarningLevel", endWarningLevel);
 		}
 		if(StringUtils.hasText(node)) {
 			jpql.append(" and ( n.code like :node or n.name like :node or n.sourceCode like :node or n.source like :node ) ");
@@ -402,13 +403,13 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		List<Object> pararms = new ArrayList<Object>();
 		String sql = "select date_format( create_date, '%Y-%m' ) AS create_date,  count(1) as count from t_event_list where 1=1    ";
 		if(Objects.equals(where,"isSpecial")){
-			sql += " and is_special is true ";
+			sql += " and is_special is true and is_urgent is  not true  ";
 		}
 		if(Objects.equals(where,"isUrgent")){
-			sql += " and is_urgent is true ";
+			sql += " and is_urgent is true and is_special is  not true ";
 		}
 		if(Objects.equals(where,"ordinary")){
-			sql += " and is_urgent is null and is_special is null ";
+			sql += " and is_urgent is  not true  and is_special is  not true  ";
 		}
 		if(Objects.nonNull(startDate)){
 			sql += " and create_date >= ? ";

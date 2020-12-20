@@ -35,14 +35,20 @@ public class ExportExcelUtil {
 		for(Object data : dataSet) {
 			row = sheet.createRow(rowIndex);
 			for(int i =0 ; i<excelColumn.size();i++ ) {
-				String key = excelColumn.get(i).getKey();
-				Boolean isNotField = excelColumn.get(i).getNotField();
-				String defaultValue = excelColumn.get(i).getDefaultValue();
+				ExcelColumn ec = excelColumn.get(i);
+				String key = ec.getKey();
+				Boolean isNotField = ec.getNotField();
+				String defaultValue = ec.getDefaultValue();
 				String cellValue = "";
 				if (Objects.nonNull(isNotField) && isNotField){
 					cellValue = defaultValue;
 				}else {
-					cellValue = getCellValue(data,key);
+					cellValue = getCellValue(data,key).trim();
+					if (Objects.nonNull(ec.getFieldMapping()) && ec.getFieldMapping().size() >0){
+						if (ec.getFieldMapping().containsKey(cellValue)) {
+							cellValue = ec.getFieldMapping().get(cellValue);
+						}
+					}
 				}
 				XSSFCell cell = row.createCell(i);
 				cell.setCellValue(cellValue);
@@ -72,9 +78,9 @@ public class ExportExcelUtil {
 				field.setAccessible(true);
 				if(key.indexOf(".")>0) {
 					return getCellValue(field.get(data),key.substring(key.indexOf(".")+1));
-				 }
-				 Object value = field.get(data);
-				 return value ==null?"":value.toString();
+				}
+				Object value = field.get(data);
+				return value ==null?"":value.toString();
 			}
 		}
 		

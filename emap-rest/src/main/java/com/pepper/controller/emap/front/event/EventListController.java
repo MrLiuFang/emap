@@ -2,7 +2,7 @@ package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import javax.annotation.Resource;
@@ -10,16 +10,14 @@ import javax.servlet.ServletOutputStream;
 
 import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
-import com.pepper.core.ResultEnum;
 import com.pepper.model.console.role.Role;
+import com.pepper.model.emap.node.NodeClassify;
 import com.pepper.service.console.role.RoleService;
+import com.pepper.service.emap.node.NodeClassifyService;
 import org.apache.dubbo.config.annotation.Reference;
-import org.omg.PortableInterceptor.USER_EXCEPTION;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -47,7 +45,6 @@ import com.pepper.model.emap.event.EventDispatch;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventListAssist;
 import com.pepper.model.emap.event.EventMessage;
-import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
@@ -83,7 +80,6 @@ import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.BeanToMapUtil;
-import com.pepper.util.HttpUtil;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
@@ -152,6 +148,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 	@Reference
 	private RoleService roleService;
+
+	@Reference
+	private NodeClassifyService nodeClassifyService;
 
 	@RequestMapping(value = "/add")
 	@ResponseBody
@@ -250,6 +249,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				eventList.setStatus("W");
 			}
 			eventList.setOperator(currentUser.getId());
+			eventList.setApplyDate(LocalDateTime.now());
 			eventListService.update(eventList);
 		}
 //		systemLogService.log("event to me", this.request.getRequestURL().toString());
@@ -292,8 +292,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		if(endDate!=null) {
 			pager.getJpqlParameter().setSearchParameter(SearchConstant.LESS_THAN_OR_EQUAL_TO+"_createDate", endDate);
 		}
-		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
-		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
+		pager.getJpqlParameter().setSortParameter("applyDate", Direction.DESC);
+//		pager.getJpqlParameter().setSortParameter("createDate", Direction.DESC);
+//		pager.getJpqlParameter().setSortParameter("warningLevel", Direction.DESC);
 		List<Node> listNode =  this.nodeService.findAll();
 		List<String> sourceCode = new ArrayList<>();
 		listNode.forEach(node ->{
@@ -524,10 +525,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/historyEventList")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+	public Object historyEventList(String event,Integer startWarningLevel,Integer endWarningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 		, String departmentId){
 		Pager<EventList> pager = new Pager<EventList>();
-		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
+		pager = this.eventListService.historyEventList(pager, event, startWarningLevel, endWarningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate, departmentId);
 		List<EventListVo> list = convertHistoryEventList(pager.getResults());
 		pager.setData("historyEvent",  list);
 		pager.setResults(null);
@@ -538,31 +539,37 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping(value = "/workbench/export")
 	@Authorize(authorizeResources = false)
 	@ResponseBody
-	public void export(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+	public void export(String event,Integer startWarningLevel,Integer endWarningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 		, String departmentId) throws IOException, IllegalAccessException {
 		Pager<EventList> pager = new Pager<EventList>();
 		pager.setPageSize(Integer.MAX_VALUE);
-		List<EventListVo> list = list(event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId,pager);
+		List<EventListVo> list = list(event, startWarningLevel,endWarningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId,pager);
 		response.setCharacterEncoding("UTF-8");
 		response.setContentType("application/xlsx");
 		response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("event.xlsx", "UTF-8"));
 		ServletOutputStream outputStream = response.getOutputStream();
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-		excelColumn.add(ExcelColumn.build("eventId", "eventId"));
-		excelColumn.add(ExcelColumn.build("eventName", "eventName"));
-		excelColumn.add(ExcelColumn.build("nodeName", "node.name"));
-		excelColumn.add(ExcelColumn.build("warningLevel", "warningLevel"));
-		excelColumn.add(ExcelColumn.build("createDate", "createDate"));
-		excelColumn.add(ExcelColumn.build("operatorName", "operatorVo.name"));
-		excelColumn.add(ExcelColumn.build("handleName", "currentHandleUserVo.name"));
-		excelColumn.add(ExcelColumn.build("status", "status"));
-		excelColumn.add(ExcelColumn.build("filedContent", "filedContent"));
+//		excelColumn.add(ExcelColumn.build("eventId", "eventId"));
+		excelColumn.add(ExcelColumn.build("說明", "eventName"));
+		excelColumn.add(ExcelColumn.build("設備名稱", "node.name"));
+		excelColumn.add(ExcelColumn.build("告警級別", "warningLevel"));
+		excelColumn.add(ExcelColumn.build("發生時間", "createDate"));
+		excelColumn.add(ExcelColumn.build("超作員", "operatorVo.name"));
+		excelColumn.add(ExcelColumn.build("處理人", "currentHandleUserVo.name"));
+		Map<String,String> fieldMapping = new HashMap<String, String>();
+		fieldMapping.put("N","等待處理");
+		fieldMapping.put("A","已指派");
+		fieldMapping.put("W","申領未指派");
+		fieldMapping.put("B","以完成");
+		fieldMapping.put("P","以歸檔");
+		excelColumn.add(ExcelColumn.build("狀體", "status",fieldMapping));
+		excelColumn.add(ExcelColumn.build("歸檔說明", "filedContent"));
 		new ExportExcelUtil().export(list, outputStream, excelColumn);
 	}
 
-	private List<EventListVo> list(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+	private List<EventListVo> list(String event,Integer startWarningLevel,Integer endWarningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 			, String departmentId,Pager<EventList> pager){
-		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
+		pager = this.eventListService.historyEventList(pager, event, startWarningLevel,endWarningLevel , node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate, departmentId);
 
 		return convertHistoryEventList(pager.getResults());
 	}
@@ -1065,6 +1072,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 					nodeTypeVo.setWorkingIconUrl(fileService.getUrl(nodeType.getWorkingIcon()));
 					nodeTypeVo.setProcessingIconUrl(fileService.getUrl(nodeType.getProcessingIcon()));
 					nodeTypeVo.setStopIconUrl(fileService.getUrl(nodeType.getStopIcon()));
+					NodeClassify nodeClassify = this.nodeClassifyService.findById(nodeType.getNodeClassifyId());
+					if (Objects.nonNull(nodeClassify)){
+						nodeTypeVo.setNodeClassify(nodeClassify);
+					}
 					nodeVo.setNodeType(nodeTypeVo);
 				}
 				mapVo.setMapImageUrl(mapImageUrlService.findByMapId(map.getId()));

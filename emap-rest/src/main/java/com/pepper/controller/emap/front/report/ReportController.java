@@ -1,20 +1,15 @@
 package com.pepper.controller.emap.front.report;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,17 +19,18 @@ import java.util.Objects;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
-import javax.sql.DataSource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.data.redis.connection.ReactiveSetCommands.SRemCommand;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,18 +39,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.lowagie.text.pdf.PdfCell;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
 import com.pepper.core.base.BaseController;
@@ -63,7 +47,6 @@ import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.building.BuildingInfo;
 import com.pepper.model.emap.event.EventList;
-import com.pepper.model.emap.event.EventMessage;
 import com.pepper.model.emap.event.EventRule;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
@@ -72,7 +55,6 @@ import com.pepper.model.emap.report.ReportParameter;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.AdminUserVo;
 import com.pepper.model.emap.vo.BuildingInfoVo;
-import com.pepper.model.emap.vo.EventListReportVo;
 import com.pepper.model.emap.vo.EventListVo;
 import com.pepper.model.emap.vo.MapVo;
 import com.pepper.model.emap.vo.NodeTypeVo;
@@ -104,19 +86,16 @@ import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.MapToBeanUtil;
 
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.export.PdfExporterConfiguration;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
-import net.sf.jasperreports.export.SimpleXlsReportConfiguration;
 
 @Controller()
 @RequestMapping(value = "/front/report")
-public class ReportController extends BaseControllerImpl implements BaseController {
+public class ReportController extends PdfPageEventHelper{
 
 	@Reference
 	private EventListService eventListService;
@@ -190,6 +169,12 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	@Resource
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private HttpServletResponse response;
+
+	@Autowired
+	private HttpServletRequest request;
+
 	private static Connection connection;
 
 	@RequestMapping(value = "/event")
@@ -216,7 +201,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		String osName = prop.getProperty("os.name").toLowerCase();
 		System.out.println(osName);
 		if (osName.indexOf("linux")>-1) {
-			font1="/usr/share/fonts/simsun.ttc";
+			font1="/home/mr.liu/下载/simsun.ttc";
 		}
 		if(!new File(font1).exists()){
 			throw new RuntimeException("字体文件不存在,影响导出pdf中文显示！"+font1);
@@ -256,13 +241,87 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		pageSize.rotate();
 		document.setPageSize(pageSize);
 		ServletOutputStream servletOutputStream = response.getOutputStream();
-		PdfWriter.getInstance(document, servletOutputStream);
+		PdfWriter writer = PdfWriter.getInstance(document, servletOutputStream);
+
+		writer.setPageEvent(new PdfPageEventHelper(){
+			// 模板
+			public PdfTemplate tpl ;
+			@Override
+			public void onOpenDocument(PdfWriter writer, Document document) {
+
+				try {
+					//  初始化模板，模板的宽和高自己设定， 初始化一个字体，这个其实可以用 代码块实现
+					tpl = writer.getDirectContent().createTemplate(100, 100);
+				} catch (Exception e) {
+					throw new ExceptionConverter(e);
+				}
+			}
+
+			@Override
+			public void onEndPage(PdfWriter writer, Document document) {
+
+				float center = document.getPageSize().getRight() / 2;//页面的水平中点
+				float bottom = document.getPageSize().getBottom() + 20;
+				//在每页结束的时候把“第x页”信息写道模版指定位置
+				PdfContentByte cb = writer.getDirectContent();
+//				// 线的宽度
+//				cb.setLineWidth(1f);
+//				// 线的起点，坐标这个是以左下角为原点的
+//				cb.moveTo(70, 760);
+//				// 线的终点
+//				cb.lineTo(550, 760);
+//				// stroke一下
+//				cb.stroke();
+//				cb.moveTo(70, 40);
+//				cb.lineTo(550, 40);
+//				cb.stroke();
+//        cb.saveState();  saveState只能一次，不然会报错
+				// 获得当前页
+				String text = writer.getPageNumber() + "/";
+				cb.beginText();
+				try {
+					cb.setFontAndSize(BaseFont.createFont(getChineseFont()+",1",BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED), 8);
+				} catch (DocumentException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				cb.setTextMatrix(center, bottom);//定位“第x页,共” 在具体的页面调试时候需要更改这xy的坐标
+				cb.showText(text);
+				cb.endText();
+				cb.addTemplate(tpl, center + 8, bottom);//定位“y页” 在具体的页面调试时候需要更改这xy的坐标
+				cb.stroke();
+				cb.saveState();
+				cb.restoreState();
+				cb.closePath();
+			}
+
+			@Override
+			public void onCloseDocument(PdfWriter writer, Document document) {
+				//关闭document的时候获取总页数，并把总页数按模版写道之前预留的位置
+				tpl.beginText();
+				try {
+					tpl.setFontAndSize(BaseFont.createFont(getChineseFont()+",1",BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED), 8);
+				} catch (DocumentException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				tpl.showText(Integer.toString(writer.getPageNumber()));
+				tpl.endText();
+				tpl.closePath();//sanityCheck();
+			}
+		});
 		document.open();
 		document.addTitle("事件清單");
 		Paragraph paragraph = new Paragraph("事件清單", FontChinese);
 		paragraph.setSpacingAfter(50);
 		paragraph.setIndentationLeft(350);
 		document.add(paragraph);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Paragraph exportDate = new Paragraph("                                                                              導出日期: "+simpleDateFormat.format(new Date())+"                                       ", FontChinese);
+
+		document.add(exportDate);
 		PdfPTable table ;
 //		if(isGroupExport!=null && isGroupExport) 
 //		{
@@ -324,6 +383,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		}
 		if(columnFilterList.size()>0&&columnFilterList.contains("nodeName")) {
 			table.addCell(new Paragraph("設備名稱", FontChinese));
+		}
+		if(columnFilterList.size()>0&&columnFilterList.contains("isRoutine")) {
+			table.addCell(new Paragraph("常規", FontChinese));
 		}
 		if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
 			table.addCell(new Paragraph("緊急", FontChinese));
@@ -451,17 +513,30 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 				if(columnFilterList.size()>0&&columnFilterList.contains("nodeName")) {
 					table.addCell(new Paragraph(eventListVo.getNode()==null?"":eventListVo.getNode().getName(), FontChinese));
 				}
+				if(columnFilterList.size()>0&&columnFilterList.contains("isRoutine")) {
+					table.addCell(new Paragraph((!Objects.equals(eventListVo.getIsUrgent(),true) && !Objects.equals(eventListVo.getIsSpecial(),true)) ? "是" : "否",FontChinese));
+				}
 				if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
-					table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",
-						FontChinese));
+					table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",FontChinese));
 				}
 				if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
-					table.addCell(new Paragraph(
-						eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
+					table.addCell(new Paragraph(eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
 				}
 				
 				if(columnFilterList.size()>0&&columnFilterList.contains("status")) {
-					table.addCell(new Paragraph(eventListVo.getStatus(), FontChinese));
+					String s = "";
+					if (Objects.equals(eventListVo.getStatus(),"N")){
+						s = "等待處理";
+					}else if (Objects.equals(eventListVo.getStatus(),"A")){
+						s = "已指派";
+					}else if (Objects.equals(eventListVo.getStatus(),"W")){
+						s = "申領未指派";
+					}else if (Objects.equals(eventListVo.getStatus(),"B")){
+						s = "已完成";
+					}else if (Objects.equals(eventListVo.getStatus(),"P")){
+						s = "已歸檔";
+					}
+					table.addCell(new Paragraph(s, FontChinese));
 				}
 				if(columnFilterList.size()>0&&columnFilterList.contains("mapName")) {
 					if(eventListVo.getNode()!=null) {
@@ -483,6 +558,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			}
 		}
 		document.add(table);
+
 		document.close();
 		servletOutputStream.flush();
 		servletOutputStream.close();
@@ -589,8 +665,8 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
-		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId,
-				mapName, buildName, siteName, operatorId, status, employeeId,isOrder,sortBy,isSpecial,isUrgent);
+		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel,warningLevel , node,
+                nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder, sortBy, isSpecial, isUrgent);
 		pager.setData("event", convertEventList(pager.getResults(),isUrgent,isSpecial));
 		pager.setResults(null);
 
@@ -813,6 +889,7 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	
 	private Pager<Map<String,Object>> findNodeTypeEventStat(String nodeTypeId,String mapId){
 		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
+		pager.setPageSize(Integer.MAX_VALUE);
 		pager = reportService.findNodeTypeAndMap(pager,nodeTypeId, mapId);
 		List<Map<String,Object>> retusnList = new ArrayList<Map<String,Object>>();
 		for(Map<String,Object> map : pager.getResults()){

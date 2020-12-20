@@ -16,6 +16,8 @@ import javax.servlet.ServletOutputStream;
 
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.map.MapImageUrl;
+import com.pepper.model.emap.node.NodeClassify;
+import com.pepper.service.emap.node.NodeClassifyService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -110,6 +112,9 @@ public class NodeController extends BaseControllerImpl implements BaseController
 
 	@Autowired
 	private RedisTemplate redisTemplate;
+
+	@Reference
+	private NodeClassifyService nodeClassifyService;
 
 	@RequestMapping(value = "/export")
 	@Authorize(authorizeResources = false)
@@ -837,6 +842,11 @@ public class NodeController extends BaseControllerImpl implements BaseController
 			redisTemplate.opsForValue().set("stopIcon:"+nodeType.getStopIcon(),stopIcon,1, TimeUnit.MINUTES);
 		}
 		nodeTypeVo.setStopIconUrl(stopIcon);
+
+		NodeClassify nodeClassify = this.nodeClassifyService.findById(nodeType.getNodeClassifyId());
+		if (Objects.nonNull(nodeClassify)){
+			nodeTypeVo.setNodeClassify(nodeClassify);
+		}
 		nodeVo.setNodeType(nodeTypeVo);
 
 		com.pepper.model.emap.map.Map entity = null;

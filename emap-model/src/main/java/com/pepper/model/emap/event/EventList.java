@@ -1,5 +1,6 @@
 package com.pepper.model.emap.event;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -101,6 +102,17 @@ public class EventList extends BaseModel  {
 
 	@Column(name ="dispatch_status")
 	private Integer dispatchStatus;
+
+	@Column(name ="apply_date")
+	private LocalDateTime applyDate;
+
+	public LocalDateTime getApplyDate() {
+		return applyDate;
+	}
+
+	public void setApplyDate(LocalDateTime applyDate) {
+		this.applyDate = applyDate;
+	}
 
 	public String getFiledUserNo() {
 		return filedUserNo;

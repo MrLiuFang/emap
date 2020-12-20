@@ -927,6 +927,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
         Date endDate = getEndDayOfMonth();
         List<Map<String,Object>> list = eventListService.currentMonthCount(startDate,endDate);
         list.addAll(eventListService.currentMonthCount(startDate,endDate,true));
+        list.addAll(eventListService.currentMonthNotRelationNode(startDate,endDate));
         resultData.setData("data",list);
         return resultData;
     }
@@ -939,6 +940,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
         Date endDate = getEndDayOfYear();
         List<Map<String,Object>> list = eventListService.currentMonthCount(startDate,endDate);
         list.addAll(eventListService.currentMonthCount(startDate,endDate,true));
+        list.addAll(eventListService.currentMonthNotRelationNode(startDate,endDate));
         resultData.setData("data",list);
         return resultData;
     }
@@ -973,7 +975,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
         String startDate = sdf.format(m)+"-01 00:00:00";
         SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<Map<String,Object>> currentMonth = eventListService.currentMonthCount(getBeginDayOfMonth(),new Date());
-        List<Map<String,Object>> previousMonth = eventListService.currentMonthCount(sdf1.parse(startDate),new Date());
+        currentMonth.addAll(eventListService.currentMonthCount(getBeginDayOfMonth(),new Date(),true));
+        currentMonth.addAll(eventListService.currentMonthNotRelationNode(getBeginDayOfMonth(),new Date()));
+        List<Map<String,Object>> previousMonth = eventListService.currentMonthCount(sdf1.parse(startDate),getLastDayOfMonth(sdf1.parse(startDate)));
+        previousMonth.addAll(eventListService.currentMonthCount(sdf1.parse(startDate),getLastDayOfMonth(sdf1.parse(startDate)),true));
+        previousMonth.addAll(eventListService.currentMonthNotRelationNode(sdf1.parse(startDate),getLastDayOfMonth(sdf1.parse(startDate))));
         List<String> listType = new ArrayList<String>();
         for(Map<String,Object> map  : currentMonth){
             Set<String> key = map.keySet();
@@ -1025,6 +1031,23 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
         resultData.setData("data",returnMap);
         return resultData;
+    }
+
+    private Date getLastDayOfMonth(Date date) {
+        Calendar cal = Calendar.getInstance();
+        // 设置年份
+        cal.set(Calendar.YEAR, date.getYear());
+        // 设置月份
+        // cal.set(Calendar.MONTH, month - 1);
+        cal.set(Calendar.MONTH, date.getMonth()); //设置当前月的上一个月
+        // 获取某月最大天数
+        //int lastDay = cal.getActualMaximum(Calendar.DATE);
+        int lastDay = cal.getMinimum(Calendar.DATE); //获取月份中的最小值，即第一天
+        // 设置日历中月份的最大天数
+        //cal.set(Calendar.DAY_OF_MONTH, lastDay);
+        cal.set(Calendar.DAY_OF_MONTH, lastDay - 1); //上月的第一天减去1就是当月的最后一天
+
+        return cal.getTime();
     }
 
     //获取本年的开始时间

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.pepper.core.Pager;
 import com.pepper.model.emap.event.EventList;
-import com.pepper.model.emap.event.HelpList;
 
 /**
  * 
@@ -49,7 +48,7 @@ public interface EventListDaoEx {
 	 */
 	public Pager<EventList> assistEventList(Pager<EventList> pager,String userId,Boolean isFinish);
 	
-	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer warningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent,String eventId, String departmentId);
+	public Pager<EventList>  historyEventList(Pager<EventList> pager,Date eventStartDate, Date eventEndDate, String event,Integer startWarningLevel, Integer endWarningLevel,String node,String nodeType,String mapName,String buildName,String siteName,String operatorId,String status , String employeeId,Boolean isOrder,String sortBy,Boolean isSpecial,Boolean isUrgent,String eventId, String departmentId);
 	
 	public EventList findFirstByNodeId(String nodeId);
 

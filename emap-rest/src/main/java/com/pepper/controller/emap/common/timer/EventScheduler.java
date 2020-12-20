@@ -144,6 +144,7 @@ public class EventScheduler {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
 					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent(),false);
 					eventList.setIsSpecial(true);
+					eventList.setIsUrgent(false);
 					eventListService.update(eventList);
 					send(eventList,eventRule,user);
 					return ;
