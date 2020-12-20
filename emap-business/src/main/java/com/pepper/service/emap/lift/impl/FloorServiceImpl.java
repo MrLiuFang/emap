@@ -17,6 +17,6 @@ public class FloorServiceImpl extends BaseServiceImpl<Floor> implements FloorSer
 
     @Override
     public List<Floor> findByLiftId(String liftId) {
-        return floorDao.findByLiftId(liftId);
+        return floorDao.findByLiftIdOrderByFloorDesc(liftId);
     }
 }

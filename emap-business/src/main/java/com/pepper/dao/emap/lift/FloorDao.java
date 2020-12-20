@@ -9,5 +9,5 @@ import java.util.List;
 public interface FloorDao extends BaseDao<Floor> {
 
     @Query( "  select t1 from Floor t1 where t1.id in (select t2.floorId from LiftFloor t2 where t2.liftId = ?1 )" )
-    public List<Floor> findByLiftId(String liftId);
+    public List<Floor> findByLiftIdOrderByFloorDesc(String liftId);
 }
