@@ -74,14 +74,14 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public Pager<EventList> historyEventList(Pager<EventList> pager, String event, Integer startWarningLevel, Integer endWarningLevel, String node,
 											 String nodeType, String mapName, String buildName, String stieName, String operator, String status, String eventId, Date startDate, Date endDate, String departmentId) {
-		return eventListDao.historyEventList(pager,startDate,endDate, event, startWarningLevel, endWarningLevel, node, nodeType, mapName, buildName, stieName, operator, status, null, null, null, null, null, eventId, departmentId);
+		return eventListDao.historyEventList(pager,startDate,endDate, event, startWarningLevel, endWarningLevel, node, nodeType, mapName, buildName, stieName, operator, status, null, null, null, null, null, null, eventId, departmentId);
 	}
 
 	@Override
 	public Pager<EventList> report(Pager<EventList> pager, Date eventStartDate, Date eventEndDate, String event,
 								   Integer startWarningLevel, Integer endWarningLevel, String node, String nodeTypeId, String mapName, String buildName, String siteName,
-								   String operatorId, String status, String employeeId, Boolean isOrder, String sortBy, Boolean isSpecial, Boolean isUrgent) {
-		return eventListDao.historyEventList(pager, eventStartDate, eventEndDate, event, startWarningLevel, endWarningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder, sortBy, isSpecial, isUrgent, null, null);
+								   String operatorId, String status, String employeeId, Boolean isOrder, String sortBy, Boolean isSpecial, Boolean isUrgent,Boolean isRoutine) {
+		return eventListDao.historyEventList(pager, eventStartDate, eventEndDate, event, startWarningLevel, endWarningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder, sortBy, isSpecial, isUrgent, isRoutine, null, null);
 	}
 
 	@Override

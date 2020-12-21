@@ -202,7 +202,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 	@Override
 	public Pager<EventList> historyEventList(Pager<EventList> pager, Date eventStartDate, Date eventEndDate, String event, Integer startWarningLevel, Integer endWarningLevel, String node, String nodeType, String mapName, String buildName, String siteName, String operatorId, String status, String employeeId
-			, Boolean isOrder, String sortBy, Boolean isSpecial, Boolean isUrgent, String eventId, String departmentId) {
+            , Boolean isOrder, String sortBy, Boolean isSpecial, Boolean isUrgent, Boolean isRoutine, String eventId, String departmentId) {
 		StringBuffer jpql = new StringBuffer();
 		Map<String,String> joinKey = new HashMap<String, String>();
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
@@ -351,6 +351,12 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		if(java.util.Objects.nonNull(isUrgent)) {
 			jpql.append(" and  el.isUrgent = :isUrgent ");
 			searchParameter.put("isUrgent", isUrgent);
+		}
+
+		if (Objects.equals(isRoutine,true)){
+			jpql.append(" and  el.isSpecial is not true and el.isUrgent is not true and el.status is not null ");
+		}else {
+			jpql.append(" and ( el.isSpecial is not false or el.isUrgent is not false ) and el.status is not null ");
 		}
 		
 		

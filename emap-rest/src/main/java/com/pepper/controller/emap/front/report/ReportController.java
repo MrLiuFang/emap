@@ -183,10 +183,10 @@ public class ReportController extends PdfPageEventHelper{
 	public Object event(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
-			String status, String employeeId,Boolean isUrgent,Boolean isSpecial,String sortBy) {
+			String status, String employeeId,Boolean isUrgent,Boolean isSpecial,Boolean isRoutine,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,isRoutine,sortBy);
 	}
 
 	private String getChineseFont(){
@@ -216,7 +216,7 @@ public class ReportController extends PdfPageEventHelper{
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
 			String status, String employeeId,Boolean isGroupExport,String groupFilter,String sortFilter,String columnFilter,Boolean isUrgent,Boolean isSpecial
-			,String sortBy) throws IOException, DocumentException {
+			,Boolean isRoutine,String sortBy) throws IOException, DocumentException {
 		
 //		systemLogService.log("event export report ", this.request.getRequestURL().toString());
 		@SuppressWarnings("unchecked")
@@ -225,7 +225,7 @@ public class ReportController extends PdfPageEventHelper{
 			columnFilterList.remove(groupFilter);
 		}
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, warningLevel,
-				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,sortBy);
+				node, nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,isRoutine,sortBy);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -573,7 +573,7 @@ public class ReportController extends PdfPageEventHelper{
 			String status, String employeeId,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, 0, node, "door", mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,false,sortBy);
 	}
 
 	@RequestMapping(value = "/openDoor/export")
@@ -583,7 +583,7 @@ public class ReportController extends PdfPageEventHelper{
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
 			String status, String employeeId,Boolean isGroupExport,Boolean isUrgent,Boolean isSpecial,String sortBy) throws DocumentException, IOException {
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, 0,
-				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,sortBy);
+				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,false,sortBy);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -642,7 +642,7 @@ public class ReportController extends PdfPageEventHelper{
 			String status, String employeeId ,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,false,sortBy);
 	}
 
 	@RequestMapping(value = "/employeeHandleEvent")
@@ -654,19 +654,19 @@ public class ReportController extends PdfPageEventHelper{
 			String status, String employeeId,Boolean  isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,false,sortBy);
 	}
 
 	private Object findEvent(Date eventStartDate, Date eventEndDate, String event, Integer warningLevel, String node,
 			String nodeTypeId, String mapName, String buildName, String siteName, String operatorId, String status,
-			String employeeId, Boolean isExport,Boolean isOrder,Boolean  isUrgent,Boolean isSpecial,String sortBy) {
+			String employeeId, Boolean isExport,Boolean isOrder,Boolean  isUrgent,Boolean isSpecial,Boolean isRoutine,String sortBy) {
 		Pager<EventList> pager = new Pager<EventList>();
 		if (isExport) {
 			pager.setPageNo(1);
 			pager.setPageSize(Integer.MAX_VALUE);
 		}
 		pager = this.eventListService.report(pager, eventStartDate, eventEndDate, event, warningLevel,warningLevel , node,
-                nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder, sortBy, isSpecial, isUrgent);
+                nodeTypeId, mapName, buildName, siteName, operatorId, status, employeeId, isOrder, sortBy, isSpecial, isUrgent,isRoutine);
 		pager.setData("event", convertEventList(pager.getResults(),isUrgent,isSpecial));
 		pager.setResults(null);
 

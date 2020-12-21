@@ -96,6 +96,7 @@ public class EventScheduler {
 		List<EventList> list = eventListService.findByStatus(null);
 		for(EventList eventList : list) {
 			eventList.setIsUrgent(eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
+			eventList.setIsSpecial(false);
 			String sourceCode = eventList.getSourceCode();
 			if(!StringUtils.hasText(eventList.getStatus())) {
 				eventList.setStatus("N");
