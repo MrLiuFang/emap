@@ -314,7 +314,7 @@ public class ReportController extends PdfPageEventHelper{
 		});
 		document.open();
 		document.addTitle("事件清單");
-		Paragraph paragraph = new Paragraph("事件清單", FontChinese);
+		Paragraph paragraph = new Paragraph("事件清單", new Font(bfChinese,24));
 		paragraph.setSpacingAfter(50);
 		paragraph.setIndentationLeft(350);
 		document.add(paragraph);
@@ -678,7 +678,8 @@ public class ReportController extends PdfPageEventHelper{
 	@RequestMapping(value = "/nodeTypeEventStat")
 	@ResponseBody
 	public Object nodeTypeEventStat(String nodeTypeId,String mapId) {
-		return findNodeTypeEventStat(nodeTypeId,mapId);
+		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
+		return findNodeTypeEventStat(nodeTypeId,mapId,pager);
 	}
 	
 	@RequestMapping(value = "/nodeTypeEventStat/export")
@@ -712,7 +713,9 @@ public class ReportController extends PdfPageEventHelper{
 		table.addCell(new Paragraph("設備數量", FontChinese));
 		table.addCell(new Paragraph("當天發生事件的設備數量", FontChinese));
 		table.addCell(new Paragraph("一周内發生事件的設備數量", FontChinese));
-		List<Map<String,Object>> list = findNodeTypeEventStat(nodeTypeId,mapId).getResults();
+		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
+		pager.setPageSize(Integer.MAX_VALUE);
+		List<Map<String,Object>> list = findNodeTypeEventStat(nodeTypeId,mapId,pager).getResults();
 		for (Map<String,Object> map : list) {
 			table.addCell(new Paragraph(map.get("nodeTypeName").toString(), FontChinese));
 			table.addCell(new Paragraph(map.get("mapName").toString(), FontChinese));
@@ -887,12 +890,12 @@ public class ReportController extends PdfPageEventHelper{
 		return null;
 	}
 	
-	private Pager<Map<String,Object>> findNodeTypeEventStat(String nodeTypeId,String mapId){
-		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
-		pager.setPageSize(Integer.MAX_VALUE);
+	private Pager<Map<String,Object>> findNodeTypeEventStat(String nodeTypeId,String mapId,Pager pager ){
+
 		pager = reportService.findNodeTypeAndMap(pager,nodeTypeId, mapId);
 		List<Map<String,Object>> retusnList = new ArrayList<Map<String,Object>>();
-		for(Map<String,Object> map : pager.getResults()){
+		for(Object object : pager.getResults()){
+			Map<String,Object> map = (Map<String, Object>) object;
 			Map<String,Object> returnMap = new HashMap<String, Object>();
 			returnMap.put("nodeTypeName", map.get("nodeTypeName"));
 			returnMap.put("mapName", map.get("mapName"));

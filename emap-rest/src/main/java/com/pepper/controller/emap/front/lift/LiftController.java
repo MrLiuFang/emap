@@ -139,8 +139,9 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @ResponseBody
     public Object addFloor(@RequestBody Floor floor){
         ResultData resultData = new ResultData();
-        this.floorService.save(floor);
+        floor = this.floorService.save(floor);
         systemLogService.log("floor add", this.request.getRequestURL().toString());
+        resultData.setData("id",floor.getId());
         return resultData;
     }
 
@@ -170,6 +171,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
         ResultData resultData = new ResultData();
         floorService.update(floor);
         systemLogService.log("floor update", this.request.getRequestURL().toString());
+        resultData.setData("id",floor.getId());
         return resultData;
     }
 
@@ -302,17 +304,22 @@ public class LiftController extends BaseControllerImpl implements BaseController
     public Object addOrDeleteLiftRight(@RequestBody Map<String,Object> map){
         Boolean isDelete = Boolean.valueOf(map.get("isDelete").toString());
         String liftId = map.get("liftId").toString();
-        String floorId = map.get("floorId").toString();
-        String staffId = map.get("staffId").toString();
-        if (isDelete){
-            liftRightService.delete(staffId,liftId,floorId);
-        }else {
-            LiftRight liftRight = new LiftRight();
-            liftRight.setStaffId(staffId);
-            liftRight.setLiftId(liftId);
-            liftRight.setFloorId(floorId);
-            liftRightService.save(liftRight);
-        }
+        List<String> floorId = (List<String>) map.get("floorId");
+        List<String> staffId = (List<String>) map.get("staffId");
+        staffId.forEach(s -> {
+            floorId.forEach(f->{
+                if (isDelete){
+                    liftRightService.delete(s,liftId,f);
+                }else {
+                    LiftRight liftRight = new LiftRight();
+                    liftRight.setStaffId(s);
+                    liftRight.setLiftId(liftId);
+                    liftRight.setFloorId(f);
+                    liftRightService.save(liftRight);
+                }
+            });
+        });
+
         ResultData resultData = new ResultData();
         return resultData;
     }
