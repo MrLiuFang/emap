@@ -5,4 +5,6 @@ import com.pepper.model.emap.lift.Floor;
 import com.pepper.model.emap.lift.Lift;
 
 public interface LiftService extends BaseService<Lift> {
+
+    public Lift findByFloorId(String floorId);
 }

@@ -302,18 +302,16 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @Authorize(authorizeResources = false)
     @ResponseBody
     public Object addOrDeleteLiftRight(@RequestBody Map<String,Object> map){
-        Boolean isDelete = Boolean.valueOf(map.get("isDelete").toString());
-        String liftId = map.get("liftId").toString();
         List<String> floorId = (List<String>) map.get("floorId");
         List<String> staffId = (List<String>) map.get("staffId");
         staffId.forEach(s -> {
+            liftRightService.deleteByStaffId(s);
             floorId.forEach(f->{
-                if (isDelete){
-                    liftRightService.delete(s,liftId,f);
-                }else {
-                    LiftRight liftRight = new LiftRight();
+                LiftRight liftRight = new LiftRight();
+                Lift lift =  liftService.findByFloorId(f);
+                if (Objects.nonNull(lift)) {
                     liftRight.setStaffId(s);
-                    liftRight.setLiftId(liftId);
+                    liftRight.setLiftId(lift.getId());
                     liftRight.setFloorId(f);
                     liftRightService.save(liftRight);
                 }

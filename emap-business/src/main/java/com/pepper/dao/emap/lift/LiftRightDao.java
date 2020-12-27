@@ -7,6 +7,8 @@ public interface LiftRightDao extends BaseDao<LiftRight> {
 
     public void deleteByStaffIdAndLiftIdAndFloorId(String staffId,String liftId,String floorId );
 
+    public void deleteByStaffId(String staffId);
+
     public void deleteByLiftIdAndFloorId(String liftId,String floorId);
 
     public void deleteByLiftId(String liftId);

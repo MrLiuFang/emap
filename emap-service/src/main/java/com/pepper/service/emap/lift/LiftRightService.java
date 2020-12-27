@@ -6,7 +6,7 @@ import com.pepper.model.emap.lift.LiftRight;
 public interface LiftRightService extends BaseService<LiftRight> {
 
     public void delete(String staffId,String liftId,String floorId );
-
+    public void deleteByStaffId(String staffId);
     public void delete(String liftId, String floorId);
 
     public void delete(String liftId);

@@ -23,6 +23,12 @@ public class LiftRightServiceImpl extends BaseServiceImpl<LiftRight> implements 
 
     @Override
     @Transactional
+    public void deleteByStaffId(String staffId) {
+        liftRightDao.deleteByStaffId(staffId);
+    }
+
+    @Override
+    @Transactional
     public void delete(String liftId, String floorId) {
         liftRightDao.deleteByLiftIdAndFloorId(liftId, floorId);
     }

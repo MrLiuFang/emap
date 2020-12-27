@@ -95,7 +95,7 @@ import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 
 @Controller()
 @RequestMapping(value = "/front/report")
-public class ReportController extends PdfPageEventHelper{
+public class ReportController extends BaseControllerImpl implements BaseController{
 
 	@Reference
 	private EventListService eventListService;
@@ -211,6 +211,7 @@ public class ReportController extends PdfPageEventHelper{
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/event/export")
+	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public void eventExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
@@ -242,86 +243,17 @@ public class ReportController extends PdfPageEventHelper{
 		document.setPageSize(pageSize);
 		ServletOutputStream servletOutputStream = response.getOutputStream();
 		PdfWriter writer = PdfWriter.getInstance(document, servletOutputStream);
-
-		writer.setPageEvent(new PdfPageEventHelper(){
-			// 模板
-			public PdfTemplate tpl ;
-			@Override
-			public void onOpenDocument(PdfWriter writer, Document document) {
-
-				try {
-					//  初始化模板，模板的宽和高自己设定， 初始化一个字体，这个其实可以用 代码块实现
-					tpl = writer.getDirectContent().createTemplate(100, 100);
-				} catch (Exception e) {
-					throw new ExceptionConverter(e);
-				}
-			}
-
-			@Override
-			public void onEndPage(PdfWriter writer, Document document) {
-
-				float center = document.getPageSize().getRight() / 2;//页面的水平中点
-				float bottom = document.getPageSize().getBottom() + 20;
-				//在每页结束的时候把“第x页”信息写道模版指定位置
-				PdfContentByte cb = writer.getDirectContent();
-//				// 线的宽度
-//				cb.setLineWidth(1f);
-//				// 线的起点，坐标这个是以左下角为原点的
-//				cb.moveTo(70, 760);
-//				// 线的终点
-//				cb.lineTo(550, 760);
-//				// stroke一下
-//				cb.stroke();
-//				cb.moveTo(70, 40);
-//				cb.lineTo(550, 40);
-//				cb.stroke();
-//        cb.saveState();  saveState只能一次，不然会报错
-				// 获得当前页
-				String text = writer.getPageNumber() + "/";
-				cb.beginText();
-				try {
-					cb.setFontAndSize(BaseFont.createFont(getChineseFont()+",1",BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED), 8);
-				} catch (DocumentException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				cb.setTextMatrix(center, bottom);//定位“第x页,共” 在具体的页面调试时候需要更改这xy的坐标
-				cb.showText(text);
-				cb.endText();
-				cb.addTemplate(tpl, center + 8, bottom);//定位“y页” 在具体的页面调试时候需要更改这xy的坐标
-				cb.stroke();
-				cb.saveState();
-				cb.restoreState();
-				cb.closePath();
-			}
-
-			@Override
-			public void onCloseDocument(PdfWriter writer, Document document) {
-				//关闭document的时候获取总页数，并把总页数按模版写道之前预留的位置
-				tpl.beginText();
-				try {
-					tpl.setFontAndSize(BaseFont.createFont(getChineseFont()+",1",BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED), 8);
-				} catch (DocumentException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				tpl.showText(Integer.toString(writer.getPageNumber()));
-				tpl.endText();
-				tpl.closePath();//sanityCheck();
-			}
-		});
+		AdminUser user = (AdminUser) this.getCurrentUser();
+		writer.setPageEvent(new EmapPdfPageEventHelper(this.getChineseFont(),user.getName()));
 		document.open();
-		document.addTitle("事件清單");
-		Paragraph paragraph = new Paragraph("事件清單", new Font(bfChinese,24));
-		paragraph.setSpacingAfter(50);
-		paragraph.setIndentationLeft(350);
-		document.add(paragraph);
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Paragraph exportDate = new Paragraph("                                                                              導出日期: "+simpleDateFormat.format(new Date())+"                                       ", FontChinese);
-
-		document.add(exportDate);
+//		document.addTitle("事件清單");
+//		Paragraph paragraph = new Paragraph("事件清單", new Font(bfChinese,24));
+//		paragraph.setSpacingAfter(50);
+//		paragraph.setIndentationLeft(350);
+//		document.add(paragraph);
+//		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//		Paragraph exportDate = new Paragraph("                                                                              導出日期: "+simpleDateFormat.format(new Date())+"                                       ", FontChinese);
+//		document.add(exportDate);
 		PdfPTable table ;
 //		if(isGroupExport!=null && isGroupExport) 
 //		{
@@ -329,8 +261,17 @@ public class ReportController extends PdfPageEventHelper{
 //		}else {
 //			table = new PdfPTable(columnFilterList.size()>0?columnFilterList.size():11);
 //		}
-		table = new PdfPTable(columnFilterList.size()>0?columnFilterList.size()+(isGroupExport?1:0):11);
+		int i = columnFilterList.size()>0?columnFilterList.size()+(isGroupExport?1:0):11;
+		table = new PdfPTable(i);
 		table.setWidthPercentage(100);
+		PdfPCell cellTitle = new PdfPCell(new Paragraph("事件清單", new Font(bfChinese,24)));
+		cellTitle.setColspan(i);
+		cellTitle.setHorizontalAlignment(Element.ALIGN_CENTER);
+		table.addCell(cellTitle);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		PdfPCell cellTitle1 = new PdfPCell(new Paragraph("導出日期: "+simpleDateFormat.format(new Date()), new Font(bfChinese)));
+		cellTitle1.setColspan(i);
+		table.addCell(cellTitle1);
 		if(isGroupExport) {
 			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("nodeType")) {
 				table.addCell(new Paragraph("設備類型", FontChinese));
@@ -573,17 +514,18 @@ public class ReportController extends PdfPageEventHelper{
 			String status, String employeeId,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, 0, node, "door", mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,false,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,null,sortBy);
 	}
 
 	@RequestMapping(value = "/openDoor/export")
+	@Authorize(authorizeResources = false)
 	@ResponseBody
 	public Object openDoorExport(@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventStartDate,
 			@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date eventEndDate, String event, Integer warningLevel,
 			String node, String nodeTypeId, String mapName, String buildName, String siteName, String operatorId,
 			String status, String employeeId,Boolean isGroupExport,Boolean isUrgent,Boolean isSpecial,String sortBy) throws DocumentException, IOException {
 		Pager<EventListVo> pager = (Pager<EventListVo>) findEvent(eventStartDate, eventEndDate, event, 0,
-				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,false,sortBy);
+				node, "door", mapName, buildName, siteName, operatorId, status, employeeId, true,isGroupExport,isUrgent,isSpecial,null,sortBy);
 
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,
 //				BaseFont.NOT_EMBEDDED);
@@ -599,15 +541,25 @@ public class ReportController extends PdfPageEventHelper{
 		pageSize.rotate();
 		document.setPageSize(pageSize);
 		ServletOutputStream servletOutputStream = response.getOutputStream();
-		PdfWriter.getInstance(document, servletOutputStream);
+		PdfWriter writer = PdfWriter.getInstance(document, servletOutputStream);
+		AdminUser user = (AdminUser) this.getCurrentUser();
+		writer.setPageEvent(new EmapPdfPageEventHelper(this.getChineseFont(),user.getName()));
 		document.open();
-		document.addTitle("門禁記錄");
-		Paragraph paragraph = new Paragraph("門禁記錄", FontChinese);
-		paragraph.setSpacingAfter(50);
-		paragraph.setIndentationLeft(350);
-		document.add(paragraph);
+//		document.addTitle("門禁記錄");
+//		Paragraph paragraph = new Paragraph("門禁記錄", FontChinese);
+//		paragraph.setSpacingAfter(50);
+//		paragraph.setIndentationLeft(350);
+//		document.add(paragraph);
 		PdfPTable table = new PdfPTable(6);
 		table.setWidthPercentage(100);
+		PdfPCell cellTitle = new PdfPCell(new Paragraph("門禁記錄", new Font(bfChinese,24)));
+		cellTitle.setColspan(6);
+		cellTitle.setHorizontalAlignment(Element.ALIGN_CENTER);
+		table.addCell(cellTitle);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		PdfPCell cellTitle1 = new PdfPCell(new Paragraph("導出日期: "+simpleDateFormat.format(new Date()), new Font(bfChinese)));
+		cellTitle1.setColspan(6);
+		table.addCell(cellTitle1);
 		table.addCell(new Paragraph("事件時間", FontChinese));
 		table.addCell(new Paragraph("設備編碼", FontChinese));
 		table.addCell(new Paragraph("設備名稱", FontChinese));
@@ -642,7 +594,7 @@ public class ReportController extends PdfPageEventHelper{
 			String status, String employeeId ,Boolean isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,false,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,null,sortBy);
 	}
 
 	@RequestMapping(value = "/employeeHandleEvent")
@@ -654,7 +606,7 @@ public class ReportController extends PdfPageEventHelper{
 			String status, String employeeId,Boolean  isUrgent,Boolean isSpecial,String sortBy) {
 		systemLogService.log("event report ", this.request.getRequestURL().toString());
 		return findEvent(eventStartDate, eventEndDate, event, warningLevel, node, nodeTypeId, mapName, buildName,
-				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,false,sortBy);
+				siteName, operatorId, status, employeeId, false,null,isUrgent,isSpecial,null,sortBy);
 	}
 
 	private Object findEvent(Date eventStartDate, Date eventEndDate, String event, Integer warningLevel, String node,
@@ -677,6 +629,7 @@ public class ReportController extends PdfPageEventHelper{
 
 	@RequestMapping(value = "/nodeTypeEventStat")
 	@ResponseBody
+	@Authorize(authorizeResources = false)
 	public Object nodeTypeEventStat(String nodeTypeId,String mapId) {
 		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
 		return findNodeTypeEventStat(nodeTypeId,mapId,pager);
@@ -684,6 +637,7 @@ public class ReportController extends PdfPageEventHelper{
 	
 	@RequestMapping(value = "/nodeTypeEventStat/export")
 	@ResponseBody
+	@Authorize(authorizeResources = false)
 	public Object nodeTypeEventStatExport(String nodeTypeId,String mapId) throws DocumentException, IOException {
 		
 //		BaseFont bfChinese = BaseFont.createFont("C:/WINDOWS/Fonts/SIMYOU.TTF", BaseFont.IDENTITY_H,BaseFont.NOT_EMBEDDED);
@@ -699,15 +653,28 @@ public class ReportController extends PdfPageEventHelper{
 		pageSize.rotate();
 		document.setPageSize(pageSize);
 		ServletOutputStream servletOutputStream = response.getOutputStream();
-		PdfWriter.getInstance(document, servletOutputStream);
+		PdfWriter writer = PdfWriter.getInstance(document, servletOutputStream);
+		AdminUser user = (AdminUser) this.getCurrentUser();
+		writer.setPageEvent(new EmapPdfPageEventHelper(this.getChineseFont(),user.getName()));
 		document.open();
-		document.addTitle("設備事件統計");
-		Paragraph paragraph = new Paragraph("設備事件統計", FontChinese);
-		paragraph.setSpacingAfter(50);
-		paragraph.setIndentationLeft(350);
-		document.add(paragraph);
+//		document.addTitle("設備事件統計");
+//		Paragraph paragraph = new Paragraph("設備事件統計", FontChinese);
+//		paragraph.setSpacingAfter(50);
+//		paragraph.setIndentationLeft(350);
+//		document.add(paragraph);
 		PdfPTable table = new PdfPTable(5);
 		table.setWidthPercentage(100);
+		PdfPCell cellTitle = new PdfPCell(new Paragraph("設備事件統計", new Font(bfChinese,24)));
+		cellTitle.setColspan(5);
+		cellTitle.setHorizontalAlignment(Element.ALIGN_CENTER);
+		table.addCell(cellTitle);
+		PdfPCell cellTitle0 = new PdfPCell(new Paragraph("統計類型：設備類型", new Font(bfChinese)));
+		cellTitle0.setColspan(2);
+		table.addCell(cellTitle0);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		PdfPCell cellTitle1 = new PdfPCell(new Paragraph("導出日期: "+simpleDateFormat.format(new Date()), new Font(bfChinese)));
+		cellTitle1.setColspan(3);
+		table.addCell(cellTitle1);
 		table.addCell(new Paragraph("設備類型名稱", FontChinese));
 		table.addCell(new Paragraph("地圖名稱", FontChinese));
 		table.addCell(new Paragraph("設備數量", FontChinese));

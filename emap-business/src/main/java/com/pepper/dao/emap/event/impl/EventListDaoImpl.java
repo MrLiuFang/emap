@@ -355,7 +355,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 
 		if (Objects.equals(isRoutine,true)){
 			jpql.append(" and  el.isSpecial is not true and el.isUrgent is not true and el.status is not null ");
-		}else {
+		}else if (Objects.equals(isRoutine,false)){
 			jpql.append(" and ( el.isSpecial is not false or el.isUrgent is not false )  ");
 		}
 		
