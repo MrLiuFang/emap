@@ -6,6 +6,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Entity()
 @Table(name = "t_lift_right")
@@ -20,6 +21,12 @@ public class LiftRight extends BaseModel {
 
     @Column(name = "floor_id")
     private String floorId;
+
+    @Column(name = "start_date")
+    private Date startDate;
+
+    @Column(name = "end_date")
+    private Date endDate;
 
     public String getStaffId() {
         return staffId;
@@ -43,5 +50,21 @@ public class LiftRight extends BaseModel {
 
     public void setFloorId(String floorId) {
         this.floorId = floorId;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 }

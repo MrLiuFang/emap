@@ -34,6 +34,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -304,6 +306,9 @@ public class LiftController extends BaseControllerImpl implements BaseController
     public Object addOrDeleteLiftRight(@RequestBody Map<String,Object> map){
         List<String> floorId = (List<String>) map.get("floorId");
         List<String> staffId = (List<String>) map.get("staffId");
+        String startDate = map.get("startDate").toString();
+        String endDate = map.get("endDate").toString();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
         staffId.forEach(s -> {
             liftRightService.deleteByStaffId(s);
             floorId.forEach(f->{
@@ -313,6 +318,12 @@ public class LiftController extends BaseControllerImpl implements BaseController
                     liftRight.setStaffId(s);
                     liftRight.setLiftId(lift.getId());
                     liftRight.setFloorId(f);
+                    try {
+                        liftRight.setStartDate(simpleDateFormat.parse(startDate));
+                        liftRight.setEndDate(simpleDateFormat.parse(endDate));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                     liftRightService.save(liftRight);
                 }
             });
@@ -338,6 +349,9 @@ public class LiftController extends BaseControllerImpl implements BaseController
                     FloorVo floorVo = new FloorVo();
                     BeanUtils.copyProperties(floor,floorVo);
                     LiftRight liftRight = liftRightService.find(staffId,lift.getId(),floor.getId());
+                    if (Objects.nonNull(liftRight)) {
+                        BeanUtils.copyProperties(liftRight, liftRightVo);
+                    }
                     floorVo.setRight(Objects.nonNull(liftRight));
                     floorVoList.add(floorVo);
                 });

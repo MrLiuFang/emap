@@ -2,10 +2,11 @@ package com.pepper.model.emap.vo;
 
 import com.pepper.model.emap.lift.Floor;
 import com.pepper.model.emap.lift.Lift;
+import com.pepper.model.emap.lift.LiftRight;
 
 import java.util.List;
 
-public class LiftRightVo {
+public class LiftRightVo extends LiftRight {
     private Lift lift;
 
     private List<FloorVo> floors;

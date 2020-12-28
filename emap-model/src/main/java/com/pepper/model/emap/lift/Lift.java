@@ -19,7 +19,7 @@ public class Lift extends BaseModel {
     private String ip;
 
     @Column (name = "uart_id")
-    private int uartId;
+    private Integer uartId;
 
 
     public String getName() {
@@ -38,11 +38,11 @@ public class Lift extends BaseModel {
         this.ip = ip;
     }
 
-    public int getUartId() {
+    public Integer getUartId() {
         return uartId;
     }
 
-    public void setUartId(int uartId) {
+    public void setUartId(Integer uartId) {
         this.uartId = uartId;
     }
 }
