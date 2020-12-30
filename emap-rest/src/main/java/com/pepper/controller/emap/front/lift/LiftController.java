@@ -10,19 +10,15 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.group.Group;
 import com.pepper.model.emap.group.GroupBuild;
-import com.pepper.model.emap.lift.Floor;
-import com.pepper.model.emap.lift.Lift;
-import com.pepper.model.emap.lift.LiftFloor;
-import com.pepper.model.emap.lift.LiftRight;
+import com.pepper.model.emap.lift.*;
 import com.pepper.model.emap.vo.FloorVo;
 import com.pepper.model.emap.vo.LiftFloorVo;
+import com.pepper.model.emap.vo.LiftRightVipVo;
 import com.pepper.model.emap.vo.LiftRightVo;
 import com.pepper.service.authentication.aop.Authorize;
-import com.pepper.service.emap.lift.FloorService;
-import com.pepper.service.emap.lift.LiftFloorSevice;
-import com.pepper.service.emap.lift.LiftRightService;
-import com.pepper.service.emap.lift.LiftService;
+import com.pepper.service.emap.lift.*;
 import com.pepper.service.emap.log.SystemLogService;
+import com.pepper.service.emap.staff.StaffService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.omg.CORBA.OBJ_ADAPTER;
 import org.springframework.beans.BeanUtils;
@@ -59,6 +55,12 @@ public class LiftController extends BaseControllerImpl implements BaseController
 
     @Reference
     private SystemLogService systemLogService;
+
+    @Reference
+    private LiftRightVipService liftRightVipService;
+
+    @Reference
+    private StaffService staffService;
 
     @RequestMapping("/lift/add")
     @Authorize(authorizeResources = false)
@@ -363,6 +365,40 @@ public class LiftController extends BaseControllerImpl implements BaseController
         resultData.setData("info",listLiftRightVo);
         return resultData;
     }
+
+    @RequestMapping(value = "/lift/right/vip/add")
+    @Authorize(authorizeResources = false)
+    @ResponseBody
+    public Object addLiftRightVip(@RequestBody LiftRightVip liftRightVip){
+        liftRightVipService.save(liftRightVip);
+        ResultData resultData = new ResultData();
+        return resultData;
+    }
+
+    @RequestMapping(value = "/lift/right/vip/list")
+    @Authorize(authorizeResources = false)
+    @ResponseBody
+    public Object addLiftRightVip(String staffName,String staffIdCard,String liftName){
+        Pager<LiftRightVip> pager = new Pager<LiftRightVip>();
+        pager.getJpqlParameter().setSortParameter("createDate", Sort.Direction.DESC);
+        pager = liftRightVipService.List(pager,staffName,staffIdCard,liftName);
+        pager.setData("liftRightVip",convterliftRightVip(pager.getResults()));
+        pager.setResults(null);
+        return pager;
+    }
+
+    private List<LiftRightVipVo> convterliftRightVip(List<LiftRightVip> liftRightVip){
+        List<LiftRightVipVo> list = new ArrayList<LiftRightVipVo>();
+        liftRightVip.forEach(l->{
+            LiftRightVipVo liftRightVipVo = new LiftRightVipVo();
+            BeanUtils.copyProperties(l,liftRightVipVo);
+            liftRightVipVo.setStaff(staffService.findById(l.getStaffId()));
+            liftRightVipVo.setLift(liftService.findById(l.getLiftId()));
+            list.add(liftRightVipVo);
+        });
+        return list;
+    }
+
 
     private List<LiftFloorVo> convterLiftFloor(List<LiftFloor> liftFloors){
         List<LiftFloorVo> list = new ArrayList<LiftFloorVo>();
