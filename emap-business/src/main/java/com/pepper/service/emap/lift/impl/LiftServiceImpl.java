@@ -17,4 +17,9 @@ public class LiftServiceImpl extends BaseServiceImpl<Lift> implements LiftServic
     public Lift findByFloorId(String floorId) {
         return liftDao.findByFloorId(floorId);
     }
+
+    @Override
+    public Lift findByName(String name) {
+        return liftDao.findByName(name);
+    }
 }

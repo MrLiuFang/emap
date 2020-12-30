@@ -5,4 +5,5 @@ import com.pepper.model.emap.lift.Floor;
 import com.pepper.model.emap.lift.LiftRightVip;
 
 public interface LiftRightVipDao  extends BaseDao<LiftRightVip> ,LiftRightVipDaoEx {
+    public LiftRightVip findFirstByStaffIdAndLiftId(String staffId,String liftId);
 }

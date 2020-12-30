@@ -15,7 +15,12 @@ public class LiftRightVipServiceImpl extends BaseServiceImpl<LiftRightVip> imple
     private LiftRightVipDao liftRightVipDao;
 
     @Override
-    public Pager<LiftRightVip> List(Pager<LiftRightVip> pager, String staffName, String staffIdCard, String liftName) {
-        return liftRightVipDao.List(pager, staffName, staffIdCard, liftName);
+    public Pager<LiftRightVip> List(Pager<LiftRightVip> pager, String staffId) {
+        return liftRightVipDao.List(pager, staffId);
+    }
+
+    @Override
+    public LiftRightVip findFirstByStaffIdAndLiftId(String staffId, String liftId) {
+        return liftRightVipDao.findFirstByStaffIdAndLiftId(staffId,liftId);
     }
 }
