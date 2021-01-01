@@ -9,4 +9,6 @@ import java.util.List;
 public interface FloorService extends BaseService<Floor> {
 
     public List<Floor> findByLiftId(String liftId);
+
+    public Floor findByName (String name);
 }

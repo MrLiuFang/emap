@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @DynamicUpdate(true)
 public class Floor extends BaseModel {
 
-    @Column(name = "name")
+    @Column(name = "name",unique = true)
     private String name;
 
     @Column(name = "floor")

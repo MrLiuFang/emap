@@ -22,10 +22,10 @@ public class LiftRight extends BaseModel {
     @Column(name = "floor_id")
     private String floorId;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date" , columnDefinition = " DATE ")
     private Date startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date" , columnDefinition = " DATE ")
     private Date endDate;
 
     public String getStaffId() {

@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @DynamicUpdate(true)
 public class Lift extends BaseModel {
 
-    @Column(name = "name")
+    @Column(name = "name",unique = true)
     private String name;
 
     @Column (name = "ip")
@@ -20,6 +20,9 @@ public class Lift extends BaseModel {
 
     @Column (name = "uart_id")
     private Integer uartId;
+
+    @Column (name = "download_time")
+    private String downloadTime;
 
 
     public String getName() {
@@ -42,7 +45,17 @@ public class Lift extends BaseModel {
         return uartId;
     }
 
+    public String getDownloadTime() {
+        return downloadTime;
+    }
+
+    public void setDownloadTime(String downloadTime) {
+        this.downloadTime = downloadTime;
+    }
+
     public void setUartId(Integer uartId) {
         this.uartId = uartId;
     }
+
+
 }

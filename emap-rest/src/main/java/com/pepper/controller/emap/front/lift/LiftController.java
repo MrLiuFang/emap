@@ -11,6 +11,7 @@ import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.emap.lift.*;
+import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.FloorVo;
 import com.pepper.model.emap.vo.LiftFloorVo;
 import com.pepper.model.emap.vo.LiftRightVipVo;
@@ -512,7 +513,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
         List<String> staffId = (List<String>) map.get("staffId");
         String startDate = map.get("startDate").toString();
         String endDate = map.get("endDate").toString();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         staffId.forEach(s -> {
             liftRightService.deleteByStaffId(s);
             floorId.forEach(f->{
@@ -543,6 +544,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
     public Object liftRightInfo(String staffId){
         List<LiftRightVo> listLiftRightVo = new ArrayList<LiftRightVo>();
         List<Lift> listLift = this.liftService.findAll();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         listLift.forEach(lift -> {
             LiftRightVo liftRightVo = new LiftRightVo();
             liftRightVo.setLift(lift);
@@ -554,7 +556,12 @@ public class LiftController extends BaseControllerImpl implements BaseController
                     BeanUtils.copyProperties(floor,floorVo);
                     LiftRight liftRight = liftRightService.find(staffId,lift.getId(),floor.getId());
                     if (Objects.nonNull(liftRight)) {
-                        BeanUtils.copyProperties(liftRight, liftRightVo);
+                        if (Objects.nonNull(liftRight.getEndDate())) {
+                            liftRightVo.setEndDate(simpleDateFormat.format(liftRight.getEndDate()));
+                        }
+                        if (Objects.nonNull(liftRight.getStartDate())) {
+                            liftRightVo.setStartDate(simpleDateFormat.format(liftRight.getStartDate()));
+                        }
                     }
                     floorVo.setRight(Objects.nonNull(liftRight));
                     floorVoList.add(floorVo);
@@ -571,7 +578,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @RequestMapping(value = "/lift/right/export")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public void exportLiftRight(String staffId) throws IOException,
+    public void exportLiftRight() throws IOException,
             IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 //		systemLogService.log("department export", this.request.getRequestURL().toString());
         response.setCharacterEncoding("UTF-8");
@@ -580,34 +587,40 @@ public class LiftController extends BaseControllerImpl implements BaseController
         ServletOutputStream outputStream = response.getOutputStream();
         List<LiftRightExportVo> list = new ArrayList<LiftRightExportVo>();
         List<Lift> listLift = this.liftService.findAll();
+        List<Staff> staffList = this.staffService.findAll();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        listLift.forEach(lift -> {
-            LiftRightExportVo liftRightExportVo = new LiftRightExportVo();
-            List<Floor> floorList = floorService.findByLiftId(lift.getId());
-            if (floorList.size()>0){
-                floorList.forEach(floor -> {
-                    FloorVo floorVo = new FloorVo();
-                    BeanUtils.copyProperties(floor,floorVo);
-                    LiftRight liftRight = liftRightService.find(staffId,lift.getId(),floor.getId());
-                    if (Objects.nonNull(liftRight)){
-                        if (Objects.nonNull(liftRight.getEndDate())) {
-                            liftRightExportVo.setEndDate(simpleDateFormat.format(liftRight.getEndDate()));
+        staffList.forEach(s->{
+            listLift.forEach(lift -> {
+                LiftRightExportVo liftRightExportVo = new LiftRightExportVo();
+                List<Floor> floorList = floorService.findByLiftId(lift.getId());
+                if (floorList.size()>0){
+                    floorList.forEach(floor -> {
+                        FloorVo floorVo = new FloorVo();
+                        BeanUtils.copyProperties(floor,floorVo);
+                        LiftRight liftRight = liftRightService.find(s.getId(),lift.getId(),floor.getId());
+                        if (Objects.nonNull(liftRight)){
+                            if (Objects.nonNull(liftRight.getEndDate())) {
+                                liftRightExportVo.setEndDate("'"+simpleDateFormat.format(liftRight.getEndDate()));
+                            }
+                            if (Objects.nonNull(liftRight.getStartDate())) {
+                                liftRightExportVo.setStartDate("'"+simpleDateFormat.format(liftRight.getStartDate()));
+                            }
                         }
-                        if (Objects.nonNull(liftRight.getStartDate())) {
-                            liftRightExportVo.setStartDate(simpleDateFormat.format(liftRight.getStartDate()));
+                        floorVo.setRight(Objects.nonNull(liftRight));
+                        liftRightExportVo.setFloorVo(floorVo);
+                        liftRightExportVo.setLift(lift);
+                        liftRightExportVo.setStaff(s);
+                        if (StringUtils.hasText(s.getIdCard())){
+                            list.add(liftRightExportVo);
                         }
-                    }
-                    floorVo.setRight(Objects.nonNull(liftRight));
-                    liftRightExportVo.setFloorVo(floorVo);
-                    liftRightExportVo.setLift(lift);
-                    list.add(liftRightExportVo);
-                });
-            }
+                    });
+                }
+            });
         });
+
         List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
-        excelColumn.add(ExcelColumn.build("liftId", "lift.id"));
+        excelColumn.add(ExcelColumn.build("idCard", "staff.idCard"));
         excelColumn.add(ExcelColumn.build("liftName", "lift.name"));
-        excelColumn.add(ExcelColumn.build("floorId", "floorVo.id"));
         excelColumn.add(ExcelColumn.build("floorName", "floorVo.name"));
         excelColumn.add(ExcelColumn.build("startDate", "startDate"));
         excelColumn.add(ExcelColumn.build("endDate", "endDate"));
@@ -618,7 +631,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @RequestMapping(value = "/lift/right/import")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object importRight(StandardMultipartHttpServletRequest multipartHttpServletRequest,String staffId) throws IOException, ParseException {
+    public Object importRight(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException, ParseException {
         com.pepper.controller.emap.core.ResultData resultData = new com.pepper.controller.emap.core.ResultData();
         Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
         List<LiftRight> list = new ArrayList<LiftRight>();
@@ -646,49 +659,65 @@ public class LiftController extends BaseControllerImpl implements BaseController
             {
                 Row row = sheet.getRow(i);
                 LiftRight liftRight = new LiftRight();
-                String liftId = getCellValue(row.getCell(0)).toString();
-                String floorId = getCellValue(row.getCell(2)).toString();
-                String startDate = getCellValue(row.getCell(4)).toString();
-                String endDate = getCellValue(row.getCell(5)).toString();
-                String isRight = getCellValue(row.getCell(6)).toString();
+                String idCard = getCellValue(row.getCell(0)).toString();
+                String liftName = getCellValue(row.getCell(1)).toString();
+                String floorName = getCellValue(row.getCell(2)).toString();
+                String startDate = getCellValue(row.getCell(3)).toString();
+                String endDate = getCellValue(row.getCell(4)).toString();
+                String isRight = getCellValue(row.getCell(5)).toString();
                 if (StringUtils.hasText(startDate) && StringUtils.hasText(endDate) && Boolean.valueOf(isRight)){
-                    liftRight.setStaffId(staffId);
-                    liftRight.setEndDate(simpleDateFormat.parse(endDate));
-                    liftRight.setStartDate(simpleDateFormat.parse(startDate));
-                    liftRight.setFloorId(floorId);
-                    liftRight.setLiftId(liftId);
-                    LiftRight tmp = liftRightService.find(staffId,liftId,floorId);
+                    List<Staff> staffList = this.staffService.findByIdCard(idCard);
+                    Staff staff = staffList.size()>0?staffList.get(0):null;
+                    if (Objects.nonNull(staff)) {
+                        liftRight.setStaffId(staff.getId());
+                    }else {
+                        continue;
+                    }
+                    liftRight.setEndDate(simpleDateFormat.parse(endDate.replace("'","")));
+                    liftRight.setStartDate(simpleDateFormat.parse(startDate.replace("'","")));
+                    Floor floor = this.floorService.findByName(floorName);
+                    if (Objects.nonNull(floor)){
+                        liftRight.setFloorId(floor.getId());
+                    }else {
+                        continue;
+                    }
+
+                    Lift lift = this.liftService.findByName(liftName);
+                    if (Objects.nonNull(lift)){
+                        liftRight.setLiftId(lift.getId());
+                    }else {
+                        continue;
+                    }
+
+                    LiftRight tmp = liftRightService.find(staff.getId(),lift.getId(),floor.getId());
                     if (Objects.isNull(tmp)) {
-                        list.add(liftRight);
+                        this.liftRightService.save(liftRight);
                     }
                 }
             }
         }
-        this.liftRightService.saveAll(list);
+
         systemLogService.log("import lift right");
         return resultData;
     }
 
     private Boolean check2(Row row) {
-        if(!getCellValue(row.getCell(0)).toString().equals("liftId")) {
+        if(!getCellValue(row.getCell(0)).toString().equals("idCard")) {
             return false;
         }
         if(!getCellValue(row.getCell(1)).toString().equals("liftName")) {
             return false;
         }
-        if(!getCellValue(row.getCell(2)).toString().equals("floorId")) {
+        if(!getCellValue(row.getCell(2)).toString().equals("floorName")) {
             return false;
         }
-        if(!getCellValue(row.getCell(3)).toString().equals("floorName")) {
+        if(!getCellValue(row.getCell(3)).toString().equals("startDate")) {
             return false;
         }
-        if(!getCellValue(row.getCell(4)).toString().equals("startDate")) {
+        if(!getCellValue(row.getCell(4)).toString().equals("endDate")) {
             return false;
         }
-        if(!getCellValue(row.getCell(5)).toString().equals("endDate")) {
-            return false;
-        }
-        if(!getCellValue(row.getCell(6)).toString().equals("isRight")) {
+        if(!getCellValue(row.getCell(5)).toString().equals("isRight")) {
             return false;
         }
         return true;
@@ -718,25 +747,39 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @RequestMapping(value = "/lift/right/vip/export")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public void exportLiftRightVip(String staffId) throws IOException,
+    public void exportLiftRightVip() throws IOException,
             IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 //		systemLogService.log("department export", this.request.getRequestURL().toString());
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/xlsx");
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("rightVip.xlsx", "UTF-8"));
         ServletOutputStream outputStream = response.getOutputStream();
-        Pager<LiftRightVip> pager = new Pager<LiftRightVip>();
-        pager.getJpqlParameter().setSortParameter("createDate", Sort.Direction.DESC);
-        pager = liftRightVipService.List(pager,staffId);
+        List<Staff> staffList = this.staffService.findAll();
+        List<Lift> listLift = this.liftService.findAll();
+        List<LiftRightVipExport> list = new ArrayList<LiftRightVipExport>();
+        staffList.forEach(s->{
+            LiftRightVipExport liftRightVipExport = new LiftRightVipExport();
+            listLift.forEach(lift -> {
+                liftRightVipExport.setStaff(s);
+                LiftRightVip liftRightVip = this.liftRightVipService.findFirstByStaffIdAndLiftId(s.getId(),lift.getId());
+                if (Objects.nonNull(liftRightVip)){
+                    liftRightVipExport.setLift(lift);
+                    if (StringUtils.hasText(s.getIdCard())) {
+                        list.add(liftRightVipExport);
+                    }
+                }
+            });
+        });
         List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
+        excelColumn.add(ExcelColumn.build("idCard", "staff.idCard"));
         excelColumn.add(ExcelColumn.build("liftName", "lift.name"));
-        new ExportExcelUtil().export((Collection<?>) convterliftRightVip(pager.getResults()), outputStream, excelColumn);
+        new ExportExcelUtil().export((Collection<?>) list, outputStream, excelColumn);
     }
 
     @RequestMapping(value = "/lift/right/vip/import")
     @Authorize(authorizeResources = false)
     @ResponseBody
-    public Object importRightVip(StandardMultipartHttpServletRequest multipartHttpServletRequest,String staffId) throws IOException, ParseException {
+    public Object importRightVip(StandardMultipartHttpServletRequest multipartHttpServletRequest) throws IOException, ParseException {
         com.pepper.controller.emap.core.ResultData resultData = new com.pepper.controller.emap.core.ResultData();
         Map<String, MultipartFile> files = multipartHttpServletRequest.getFileMap();
         List<LiftRightVip> list = new ArrayList<LiftRightVip>();
@@ -764,24 +807,29 @@ public class LiftController extends BaseControllerImpl implements BaseController
             {
                 Row row = sheet.getRow(i);
                 LiftRightVip obj = new LiftRightVip();
-                String liftName = getCellValue(row.getCell(0)).toString();
+                String idCard = getCellValue(row.getCell(0)).toString();
+                String liftName = getCellValue(row.getCell(1)).toString();
                 Lift lift = this.liftService.findByName(liftName);
-                if (Objects.nonNull(lift)){
-                    LiftRightVip liftRightVip = this.liftRightVipService.findFirstByStaffIdAndLiftId(staffId,lift.getId());
+                List<Staff> staffList = this.staffService.findByIdCard(idCard);
+                Staff staff = staffList.size()>0?staffList.get(0):null;
+                if (Objects.nonNull(lift) && Objects.nonNull(staff)){
+                    LiftRightVip liftRightVip = this.liftRightVipService.findFirstByStaffIdAndLiftId(staff.getId(),lift.getId());
                     if (Objects.isNull(liftRightVip)){
                         obj.setLiftId(lift.getId());
-                        obj.setStaffId(staffId);
-                        list.add(obj);
+                        obj.setStaffId(staff.getId());
+                        liftRightVipService.save(obj);
                     }
                 }
             }
         }
-        this.liftRightVipService.saveAll(list);
         systemLogService.log("import lift right");
         return resultData;
     }
     private Boolean check3(Row row) {
-        if(!getCellValue(row.getCell(0)).toString().equals("liftName")) {
+        if(!getCellValue(row.getCell(0)).toString().equals("idCard")) {
+            return false;
+        }
+        if(!getCellValue(row.getCell(1)).toString().equals("liftName")) {
             return false;
         }
         return true;
@@ -794,9 +842,20 @@ public class LiftController extends BaseControllerImpl implements BaseController
         Pager<LiftLog> pager = new Pager<LiftLog>();
         pager.getJpqlParameter().setSortParameter("createDate", Sort.Direction.DESC);
         pager =liftLogService.List(pager,liftId,startDate,endDate);
-        pager.setData("liftLog",pager.getResults());
+        pager.setData("liftLog",convterLiftLog(pager.getResults()));
         pager.setResults(null);
         return pager;
+    }
+
+    private List<LiftLogVo> convterLiftLog(List<LiftLog> listLiftLog){
+        List<LiftLogVo> list = new ArrayList<LiftLogVo>();
+        listLiftLog.forEach(l->{
+            LiftLogVo liftLogVo = new LiftLogVo();
+            BeanUtils.copyProperties(l,liftLogVo);
+            liftLogVo.setLift(liftService.findById(l.getLiftId()));
+            list.add(liftLogVo);
+        });
+        return list;
     }
 
 
@@ -826,8 +885,44 @@ public class LiftController extends BaseControllerImpl implements BaseController
     }
 }
 
+class LiftLogVo {
+    private Lift lift;
+
+    public Lift getLift() {
+        return lift;
+    }
+
+    public void setLift(Lift lift) {
+        this.lift = lift;
+    }
+}
+
+class LiftRightVipExport {
+    private Staff staff;
+
+    private Lift lift;
+
+    public Staff getStaff() {
+        return staff;
+    }
+
+    public void setStaff(Staff staff) {
+        this.staff = staff;
+    }
+
+    public Lift getLift() {
+        return lift;
+    }
+
+    public void setLift(Lift lift) {
+        this.lift = lift;
+    }
+}
+
 class LiftRightExportVo{
     private Lift lift;
+
+    private Staff staff;
 
     private FloorVo floorVo;
 
@@ -865,5 +960,13 @@ class LiftRightExportVo{
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+
+    public Staff getStaff() {
+        return staff;
+    }
+
+    public void setStaff(Staff staff) {
+        this.staff = staff;
     }
 }
