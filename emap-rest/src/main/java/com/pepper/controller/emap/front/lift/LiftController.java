@@ -28,8 +28,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,9 +45,11 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 import javax.servlet.ServletOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 @Controller()
 @RequestMapping(value = "/front")
@@ -845,6 +851,141 @@ public class LiftController extends BaseControllerImpl implements BaseController
         pager.setData("liftLog",convterLiftLog(pager.getResults()));
         pager.setResults(null);
         return pager;
+    }
+
+    @Value("${mssql.jdbc-url}")
+    private String mssqlJdbcUrl;
+
+    @Value("${mssql.username}")
+    private String mssqlUsername;
+
+    @Value("${mssql.password}")
+    private String mssqlPassword;
+
+    @RequestMapping(value = "/lift/kaba/syncData")
+//    @Authorize(authorizeResources = false)
+    @ResponseBody
+    public Object kabaSyncData() throws SQLException {
+
+        Map<String,Integer> map = new HashMap<>();
+        map.put("RF",12);
+        map.put("7F",11);map.put("6F",10);map.put("5F",9);map.put("4F",8);map.put("3F",7);map.put("2F",6);map.put("1F",5);
+        map.put("B1",3);map.put("B2",2);
+        map.put("F7",11);map.put("F6",10);map.put("F5",9);map.put("F4",8);map.put("F3",7);map.put("F2",6);map.put("F1",5);
+        map.put("1B",3);map.put("2B",2);
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = DriverManager.getConnection(mssqlJdbcUrl, mssqlUsername, mssqlPassword);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT p.PersId, p.FullName, ISNULL(p.Email, '') EMAIL, ISNULL(p.currentCardNr, '') Card FROM hPerson P");
+            while (rs.next()) {
+                String fullName = rs.getString("FullName");
+                String email = rs.getString("EMAIL");
+                String card = rs.getString("Card").trim();
+                if (StringUtils.hasText(card)){
+                    List<Staff> staffList = this.staffService.findByIdCard(card);
+                    Staff staff = staffList.size()>0?staffList.get(0):null;
+                    if (Objects.isNull(staff)){
+                        staff = new Staff();
+                        staff.setEmail(email);
+                        staff.setIdCard(card);
+                        staff.setName(fullName);
+                        staff = staffService.save(staff);
+                    }
+                }
+            }
+
+            rs = stmt.executeQuery("SELECT V1.Medium,  V1.ProfileDetailsValidFrom ProfileFrom, V1.ProfileDetailsValidTo ProfileTo,\n" +
+                    "  t2.DeviceType T2DevType, T2.Address T2Address, T4.Name T4Name, T3.Name T3Name\n" +
+                    "FROM vaReportPersRoomzone        V1\n" +
+                    "  LEFT JOIN pPassagewayComponent T2 ON V1.RZoneID = t2.RZoneFK\n" +
+                    "  LEFT JOIN pPassageway          t3 ON t2.PassagewayFK=t3.PassagewayID\n" +
+                    "  LEFT JOIN pPeriphery           t4 ON (t2.DeviceType='EF' and t4.DeviceType='BO' and t2.Address = t4.DeviceAddress)\n" +
+                    "WHERE (NOT t2.DeviceType IS NULL)\n" +
+                    "ORDER BY V1.Medium, T3.Name, T4.Name");
+            while (rs.next()) {
+                String medium = rs.getString("Medium");
+                String profileFrom = rs.getString("ProfileFrom");
+                String profileTo = rs.getString("ProfileTo");
+                String t4Name = rs.getString("T4Name");
+                String t3Name = rs.getString("T3Name");
+                List<Staff> staffList = this.staffService.findByIdCard(medium);
+                Staff staff = staffList.size()>0?staffList.get(0):null;
+                if (Objects.nonNull(staff)){
+//                    this.liftRightService.deleteByStaffId(staff.getId());
+                    Lift lift = this.liftService.findByName(t3Name);
+                    if (Objects.isNull(lift)){
+                        lift = new Lift();
+                        lift.setUartId(1);
+                        lift.setName(t3Name);
+                        lift = this.liftService.save(lift);
+                    }
+                    String[] floors = t4Name.replace(t3Name,"").trim().split("-");
+                    String startFloor = floors[0];
+                    String endFloor = floors[1];
+                    if (!StringUtils.hasText(startFloor) || !StringUtils.hasText(endFloor)){
+                        continue;
+                    }
+                    if (!map.containsKey(startFloor) || !map.containsKey(endFloor)){
+                        continue;
+                    }
+                    for (int i = map.get(startFloor);i<=map.get(endFloor);i++){
+                        int finalI = i;
+                        Lift finalLift = lift;
+                        map.forEach((k, v)->{
+                            if (v== finalI){
+                                Floor floor = this.floorService.findByName(k);
+                                if (Objects.isNull(floor)){
+                                    floor = new Floor();
+                                    floor.setName(k);
+                                    floor.setFloor(v);
+                                    floor = this.floorService.save(floor);
+                                }
+                                LiftFloor liftFloor = this.liftFloorSevice.findLiftFloor(finalLift.getId(),floor.getId());
+                                if (Objects.isNull(liftFloor)){
+                                    liftFloor = new LiftFloor();
+                                    liftFloor.setLiftId(finalLift.getId());
+                                    liftFloor.setFloorId(floor.getId());
+                                    liftFloor = this.liftFloorSevice.save(liftFloor);
+                                }
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+                                LiftRight liftRight = this.liftRightService.find(staff.getId(),finalLift.getId(),floor.getId());
+                                if (Objects.isNull(liftRight)) {
+                                    liftRight = new LiftRight();
+                                    liftRight.setLiftId(finalLift.getId());
+                                    liftRight.setFloorId(floor.getId());
+                                    liftRight.setStaffId(staff.getId());
+                                    if (StringUtils.hasText(profileFrom) && profileFrom.split(" ").length > 1) {
+                                        try {
+                                            liftRight.setStartDate(simpleDateFormat.parse(profileFrom.split(" ")[0]));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    if (StringUtils.hasText(profileTo) && profileTo.split(" ").length > 1) {
+                                        try {
+                                            liftRight.setEndDate(simpleDateFormat.parse(profileTo.split(" ")[0]));
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    liftRight = this.liftRightService.save(liftRight);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            rs.close();
+            stmt.close();
+            conn.close();
+        }
+        return new ResultData();
     }
 
     private List<LiftLogVo> convterLiftLog(List<LiftLog> listLiftLog){

@@ -15,7 +15,7 @@ import com.pepper.core.BaseDaoFactoryBean;
 import com.pepper.core.dubbo.DubboDynamicVersion;
 
 @DubboDynamicVersion
-@SpringBootApplication(scanBasePackages = { "com.pepper.controller.**", "com.pepper.service.**", "com.pepper.util.**",
+@SpringBootApplication(scanBasePackages = { "com.pepper.controller.**", "com.pepper.service.**","com.pepper.config.**", "com.pepper.util.**",
 		"com.pepper.core.**", "com.pepper.model.**", "com.pepper.init.data.console.**","com.pepper.register.**"})
 @EnableJpaRepositories(basePackages = "com.pepper.dao.**", repositoryFactoryBeanClass = BaseDaoFactoryBean.class)
 @EntityScan("com.pepper.model.**")
