@@ -11,4 +11,6 @@ public interface FloorService extends BaseService<Floor> {
     public List<Floor> findByLiftId(String liftId);
 
     public Floor findByName (String name);
+
+    public Floor find(String liftId,String floorName);
 }

@@ -5,11 +5,12 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.util.Date;
 
 @Entity()
-@Table(name = "t_lift_right")
+@Table(name = "t_lift_right",indexes = {@Index(columnList = "staff_id")})
 @DynamicUpdate(true)
 public class LiftRight extends BaseModel {
 

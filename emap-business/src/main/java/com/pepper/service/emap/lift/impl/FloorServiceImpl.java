@@ -24,4 +24,9 @@ public class FloorServiceImpl extends BaseServiceImpl<Floor> implements FloorSer
     public Floor findByName(String name) {
         return floorDao.findFirstByName(name);
     }
+
+    @Override
+    public Floor find(String liftId, String floorName) {
+        return floorDao.find(liftId,floorName);
+    }
 }

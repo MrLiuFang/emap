@@ -15,7 +15,7 @@ public class LiftLog extends BaseModel {
     @Column(name = "lift_id")
     private String liftId;
 
-    @Column(name = "lift_no")
+    @Column(name = "card_no")
     private String cardNo;
 
     @Column(name = "is_success")

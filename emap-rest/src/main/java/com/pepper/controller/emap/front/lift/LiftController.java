@@ -10,6 +10,7 @@ import com.pepper.core.ResultData;
 import com.pepper.core.base.BaseController;
 import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
+import com.pepper.core.exception.BusinessException;
 import com.pepper.model.emap.lift.*;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.FloorVo;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -356,11 +358,21 @@ public class LiftController extends BaseControllerImpl implements BaseController
                 list.add(floor);
             }
             list.forEach(f->{
-                f = this.floorService.save(f);
-                LiftFloor liftFloor = new LiftFloor();
-                liftFloor.setFloorId(f.getId());
-                liftFloor.setLiftId(liftId);
-                this.liftFloorSevice.save(liftFloor);
+//                Floor floor = floorService.findByName(f.getName());
+//                if (Objects.isNull(floor)){
+//                    f = this.floorService.save(f);
+//                }
+                Floor floor1 = floorService.find(liftId,f.getName());
+                if (Objects.nonNull(floor1)){
+                    this.floorService.save(f);
+                }
+//                LiftFloor temp = liftFloorSevice.findLiftFloor(liftId,f.getId());
+                if (Objects.isNull(floor1)) {
+                    LiftFloor liftFloor = new LiftFloor();
+                    liftFloor.setFloorId(f.getId());
+                    liftFloor.setLiftId(liftId);
+                    this.liftFloorSevice.save(liftFloor);
+                }
             });
         }
         systemLogService.log("import lift");
@@ -432,11 +444,23 @@ public class LiftController extends BaseControllerImpl implements BaseController
         List<String> list = (List<String>) map.get("floorId");
         String liftId = map.get("liftId").toString();
         list.forEach(s -> {
-            LiftFloor tmp = liftFloorSevice.findLiftFloor(liftId,s);
+            Floor floor = this.floorService.findById(s);
+            if (Objects.isNull(floor)){
+                new BusinessException("沒有該樓層");
+            }
+            Floor tmp = floorService.find(liftId,floor.getName());
+            if (Objects.nonNull(tmp)){
+//                floorService.delete(floor);
+                new BusinessException("該電梯已有該樓層");
+            }
             if (Objects.isNull(tmp)){
                 LiftFloor liftFloor = new LiftFloor();
                 liftFloor.setLiftId(liftId);
                 liftFloor.setFloorId(s);
+                LiftFloor temp = liftFloorSevice.findLiftFloor(liftId,s);
+                if (Objects.nonNull(temp)){
+                    new BusinessException("該電梯已有該樓層");
+                }
                 liftFloorSevice.save(liftFloor);
             }
         });
@@ -477,6 +501,10 @@ public class LiftController extends BaseControllerImpl implements BaseController
                 LiftFloor liftFloor = new LiftFloor();
                 liftFloor.setLiftId(liftId);
                 liftFloor.setFloorId(s);
+                LiftFloor temp = liftFloorSevice.findLiftFloor(liftId,s);
+                if (Objects.nonNull(temp)){
+                    new BusinessException("該電梯已有該樓層");
+                }
                 liftFloorSevice.save(liftFloor);
             }
         });
@@ -506,7 +534,14 @@ public class LiftController extends BaseControllerImpl implements BaseController
     public Object deleteLiftFloor(@RequestBody Map<String,Object> map) throws IOException {
         com.pepper.controller.emap.core.ResultData resultData = new com.pepper.controller.emap.core.ResultData();
         String liftId = map.get("liftId").toString();
-        liftFloorSevice.deleteByLiftId(liftId);
+        Object obj = map.get("floorId");
+        String floorId = Objects.nonNull(obj)?obj.toString():null;
+        if (StringUtils.hasText(floorId)){
+            liftFloorSevice.deleteByLiftId(liftId);
+        }else {
+            liftFloorSevice.deleteByLiftIdAndFloorId(liftId,floorId);
+        }
+
         systemLogService.log("liftFloor delete", this.request.getRequestURL().toString());
         return resultData;
     }
@@ -517,8 +552,6 @@ public class LiftController extends BaseControllerImpl implements BaseController
     public Object addOrDeleteLiftRight(@RequestBody Map<String,Object> map){
         List<String> floorId = (List<String>) map.get("floorId");
         List<String> staffId = (List<String>) map.get("staffId");
-        String startDate = map.get("startDate").toString();
-        String endDate = map.get("endDate").toString();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         staffId.forEach(s -> {
             liftRightService.deleteByStaffId(s);
@@ -530,10 +563,18 @@ public class LiftController extends BaseControllerImpl implements BaseController
                     liftRight.setLiftId(lift.getId());
                     liftRight.setFloorId(f);
                     try {
-                        liftRight.setStartDate(simpleDateFormat.parse(startDate));
-                        liftRight.setEndDate(simpleDateFormat.parse(endDate));
+                        Object startObj = map.get("startDate");
+                        Object endObj = map.get("endDate");
+                        String startDate = Objects.nonNull(startObj)?startObj.toString():"";
+                        String endDate = Objects.nonNull(endObj)?startObj.toString():"";
+                        if (StringUtils.hasText(startDate)) {
+                            liftRight.setStartDate(simpleDateFormat.parse(startDate));
+                        }
+                        if (StringUtils.hasText(endDate)) {
+                            liftRight.setEndDate(simpleDateFormat.parse(endDate));
+                        }
                     } catch (ParseException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                     }
                     liftRightService.save(liftRight);
                 }
@@ -597,10 +638,10 @@ public class LiftController extends BaseControllerImpl implements BaseController
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         staffList.forEach(s->{
             listLift.forEach(lift -> {
-                LiftRightExportVo liftRightExportVo = new LiftRightExportVo();
                 List<Floor> floorList = floorService.findByLiftId(lift.getId());
                 if (floorList.size()>0){
                     floorList.forEach(floor -> {
+                        LiftRightExportVo liftRightExportVo = new LiftRightExportVo();
                         FloorVo floorVo = new FloorVo();
                         BeanUtils.copyProperties(floor,floorVo);
                         LiftRight liftRight = liftRightService.find(s.getId(),lift.getId(),floor.getId());
@@ -671,7 +712,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
                 String startDate = getCellValue(row.getCell(3)).toString();
                 String endDate = getCellValue(row.getCell(4)).toString();
                 String isRight = getCellValue(row.getCell(5)).toString();
-                if (StringUtils.hasText(startDate) && StringUtils.hasText(endDate) && Boolean.valueOf(isRight)){
+                if ( Boolean.valueOf(isRight)){
                     List<Staff> staffList = this.staffService.findByIdCard(idCard);
                     Staff staff = staffList.size()>0?staffList.get(0):null;
                     if (Objects.nonNull(staff)) {
@@ -679,18 +720,29 @@ public class LiftController extends BaseControllerImpl implements BaseController
                     }else {
                         continue;
                     }
-                    liftRight.setEndDate(simpleDateFormat.parse(endDate.replace("'","")));
-                    liftRight.setStartDate(simpleDateFormat.parse(startDate.replace("'","")));
-                    Floor floor = this.floorService.findByName(floorName);
-                    if (Objects.nonNull(floor)){
-                        liftRight.setFloorId(floor.getId());
-                    }else {
-                        continue;
+                    if (StringUtils.hasText(startDate) ) {
+                        liftRight.setEndDate(simpleDateFormat.parse(endDate.replace("'","")));
                     }
+                    if (StringUtils.hasText(endDate) ) {
+                        liftRight.setStartDate(simpleDateFormat.parse(startDate.replace("'","")));
+                    }
+//                    Floor floor = this.floorService.findByName(floorName);
+//                    if (Objects.nonNull(floor)){
+//                        liftRight.setFloorId(floor.getId());
+//                    }else {
+//                        continue;
+//                    }
 
                     Lift lift = this.liftService.findByName(liftName);
                     if (Objects.nonNull(lift)){
                         liftRight.setLiftId(lift.getId());
+                    }else {
+                        continue;
+                    }
+
+                    Floor floor = floorService.find(lift.getId(),floorName);
+                    if (Objects.nonNull(floor)){
+                        liftRight.setFloorId(floor.getId());
                     }else {
                         continue;
                     }
@@ -865,8 +917,8 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @RequestMapping(value = "/lift/kaba/syncData")
 //    @Authorize(authorizeResources = false)
     @ResponseBody
+    @Scheduled(cron = "0 0 2 * * ?")
     public Object kabaSyncData() throws SQLException {
-
         Map<String,Integer> map = new HashMap<>();
         map.put("RF",12);
         map.put("7F",11);map.put("6F",10);map.put("5F",9);map.put("4F",8);map.put("3F",7);map.put("2F",6);map.put("1F",5);
@@ -936,7 +988,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
                         Lift finalLift = lift;
                         map.forEach((k, v)->{
                             if (v== finalI){
-                                Floor floor = this.floorService.findByName(k);
+                                Floor floor = floorService.find(finalLift.getId(),k);
                                 if (Objects.isNull(floor)){
                                     floor = new Floor();
                                     floor.setName(k);
@@ -975,6 +1027,52 @@ public class LiftController extends BaseControllerImpl implements BaseController
                                 }
                             }
                         });
+                    }
+                }
+            }
+
+            Map<String,String> map1 = new HashMap<String,String>();
+            map1.put("I0100010203","ELE1,ELE2,ELE3");map1.put("I0100010503","ELE4");map1.put("I0100020703","ELE1,ELE2,ELE3");map1.put("I0100020403","ELE4");
+            map1.put("I0100020403","ELE4");map1.put("I0100030503","ELE1,ELE2,ELE3");map1.put("I0100130103","ELE4");map1.put("I0100130104","ELE5");
+            map1.put("I0100150203","ELE1,ELE2,ELE3");map1.put("I0100160403","ELE4");map1.put("I0100160404","ELE5");map1.put("I0100210303","ELE1,ELE2,ELE3");
+            map1.put("I0100200103","ELE4");map1.put("I0100200104","ELE5");map1.put("I0100250703","ELE1,ELE2,ELE3");map1.put("I0100240703","ELE4");
+            map1.put("I0100240704","ELE5");map1.put("I0100260803","ELE1,ELE2,ELE3");map1.put("I0100270703","ELE4");map1.put("I0100260303","ELE1,ELE2,ELE3");
+            map1.put("I0100270404","ELE5");map1.put("I0100270403","ELE4");map1.put("I0100270704","ELE5");map1.put("I0100290403","ELE1,ELE2,ELE3");
+            map1.put("I0100300503","ELE4");map1.put("I0100300504","ELE5");map1.put("I0100320403","ELE1,ELE2,ELE3");map1.put("I0100330303","ELE4");
+            map1.put("I0100330304","ELE5");map1.put("I0100340203","ELE1,ELE2,ELE3");
+            List<Staff> staffList = this.staffService.findAll();
+            for (Staff s: staffList){
+                String sql =" SELECT * FROM vpUserAccessRight WHERE BadgeNr='"+s.getIdCard()+"' and ReaderType='RU' " +
+                        "AND (ReaderAddress ='I0100010203' or ReaderAddress ='I0100010503' or ReaderAddress ='I0100020703' or ReaderAddress ='I0100020403'" +
+                        " or ReaderAddress ='I0100020403' or ReaderAddress ='I0100030503' or ReaderAddress ='I0100130103' or ReaderAddress ='I0100130104' " +
+                        " or ReaderAddress ='I0100150203' or ReaderAddress ='I0100160403' or ReaderAddress ='I0100160404' or ReaderAddress ='I0100210303' " +
+                        " or ReaderAddress ='I0100200103' or ReaderAddress ='I0100200104' or ReaderAddress ='I0100250703' or ReaderAddress ='I0100240703' " +
+                        " or ReaderAddress ='I0100240704' or ReaderAddress ='I0100260803' or ReaderAddress ='I0100270703' or ReaderAddress ='I0100260303' " +
+                        " or ReaderAddress ='I0100300503' or ReaderAddress ='I0100300504' or ReaderAddress ='I0100320403' or ReaderAddress ='I0100330303' " +
+                        " or ReaderAddress ='I0100330304' or ReaderAddress ='I0100340203')";
+                rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    String readerAddress = rs.getString("ReaderAddress");
+                    if (map1.containsKey(readerAddress) && Objects.nonNull(map1.get(readerAddress))){
+                        String[] str =map1.get(readerAddress).split(",");
+                        for (String s1 : str)  {
+                            Lift lift = liftService.findByName(s1);
+                            if (Objects.isNull(lift)){
+                                lift = new Lift();
+                                lift.setName(s1);
+                                lift.setUartId(1);
+                                lift = this.liftService.save(lift);
+                            }
+                            if (Objects.nonNull(lift)){
+                                LiftRightVip liftRightVip = liftRightVipService.findFirstByStaffIdAndLiftId(s.getId(),lift.getId());
+                                if (Objects.isNull(liftRightVip)){
+                                    liftRightVip = new LiftRightVip();
+                                    liftRightVip.setStaffId(s.getId());
+                                    liftRightVip.setLiftId(lift.getId());
+                                    this.liftRightVipService.save(liftRightVip);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1026,7 +1124,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
     }
 }
 
-class LiftLogVo {
+class LiftLogVo extends LiftLog {
     private Lift lift;
 
     public Lift getLift() {

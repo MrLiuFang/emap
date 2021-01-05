@@ -26,6 +26,11 @@ public class LiftFloorSeviceImpl extends BaseServiceImpl<LiftFloor> implements L
     }
 
     @Override
+    public void deleteByLiftIdAndFloorId(String liftId, String floorId) {
+        liftFloorDao.deleteByLiftIdAndFloorId(liftId, floorId);
+    }
+
+    @Override
     @Transactional
     public void deleteByFloorId(String floorId) {
         liftFloorDao.deleteByFloorId(floorId);

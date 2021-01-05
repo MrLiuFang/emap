@@ -9,5 +9,7 @@ public interface LiftFloorDao extends BaseDao<LiftFloor> {
 
     public void deleteByLiftId(String liftId);
 
+    public void deleteByLiftIdAndFloorId(String liftId,String floorId);
+
     public void deleteByFloorId(String floorId);
 }

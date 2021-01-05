@@ -7,6 +7,6 @@ import com.pepper.model.emap.lift.LiftFloor;
 public interface LiftFloorSevice extends BaseService<LiftFloor> {
     public LiftFloor findLiftFloor(String liftId, String floorId);
     public void deleteByLiftId(String liftId);
-
+    public void deleteByLiftIdAndFloorId(String liftId,String floorId);
     public void deleteByFloorId(String floorId);
 }
