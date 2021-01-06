@@ -161,10 +161,10 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
-		if(map.containsKey("sex")) {
-			if(Objects.equals(map.get("sex").toString(), Gender.MALE.getName())) {
+		if(map.containsKey("sex") && Objects.nonNull(map.get("sex"))) {
+			if(Objects.equals(map.get("sex"), Gender.MALE.getName())) {
 				staff.setSex(Gender.MALE);
-			}else if(Objects.equals(map.get("sex").toString(), Gender.FEMALE.getName())) {
+			}else if(Objects.equals(map.get("sex"), Gender.FEMALE.getName())) {
 				staff.setSex(Gender.FEMALE);
 			}
 		}
@@ -186,10 +186,10 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		ResultData resultData = new ResultData();
 		Staff staff = new Staff();
 		MapToBeanUtil.convert(staff, map);
-		if(map.containsKey("sex")) {
-			if(Objects.equals(map.get("sex").toString(), Gender.MALE.getName())) {
+		if(map.containsKey("sex") && Objects.nonNull(map.get("sex"))) {
+			if(Objects.equals(map.get("sex"), Gender.MALE.getName())) {
 				staff.setSex(Gender.MALE);
-			}else if(Objects.equals(map.get("sex").toString(), Gender.FEMALE.getName())) {
+			}else if(Objects.equals(map.get("sex"), Gender.FEMALE.getName())) {
 				staff.setSex(Gender.FEMALE);
 			}
 		}
@@ -280,10 +280,13 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				staff.setUserNo(getCellValue(row.getCell(2)).toString());
 				staff.setIdCard(getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", ""));
 				staff.setEmail(getCellValue(row.getCell(4)).toString());
-				if(Objects.equals(getCellValue(row.getCell(5)).toString(), Gender.MALE.getDesc())) {
-					staff.setSex(Gender.MALE);
-				}else {
-					staff.setSex(Gender.FEMALE);
+				Object sex = getCellValue(row.getCell(5));
+				if(Objects.nonNull(sex)) {
+					if(Objects.equals(sex, Gender.MALE.getName())) {
+						staff.setSex(Gender.MALE);
+					}else if(Objects.equals(sex, Gender.FEMALE.getName())) {
+						staff.setSex(Gender.FEMALE);
+					}
 				}
 //				if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
 //					resultData.setCode(1200002);
