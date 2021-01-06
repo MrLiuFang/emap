@@ -83,13 +83,14 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		Pager<Staff> pager = getPager(name, email, siteId, idCard,status,staffType,userNo,sex, keyWord, true);
 		List<ExcelColumn> excelColumn = new ArrayList<ExcelColumn>();
 		excelColumn.add(ExcelColumn.build("name", "name"));
-		excelColumn.add(ExcelColumn.build("email", "email"));
-		excelColumn.add(ExcelColumn.build("idCard", "idCard"));
-		excelColumn.add(ExcelColumn.build("siteCode", "site.code"));
-		excelColumn.add(ExcelColumn.build("userNo", "userNo"));
-		excelColumn.add(ExcelColumn.build("status", "status"));
 		excelColumn.add(ExcelColumn.build("staffType", "staffType"));
+		excelColumn.add(ExcelColumn.build("userNo", "userNo"));
+		excelColumn.add(ExcelColumn.build("idCard", "idCard"));
+		excelColumn.add(ExcelColumn.build("email", "email"));
 		excelColumn.add(ExcelColumn.build("sex", "sex"));
+		excelColumn.add(ExcelColumn.build("siteName", "site.name"));
+		excelColumn.add(ExcelColumn.build("siteCode", "site.code"));
+		excelColumn.add(ExcelColumn.build("status", "status"));
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("staff"), outputStream, excelColumn);
 	}
 	
@@ -275,16 +276,22 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 				Row row = sheet.getRow(i);
 				Staff staff = new Staff();
 				staff.setName(getCellValue(row.getCell(0)).toString());
-				staff.setEmail(getCellValue(row.getCell(1)).toString());
-				staff.setIdCard(getCellValue(row.getCell(2)).toString().replaceAll("(\\.(\\d*))", ""));
-				
+				staff.setStaffType(getCellValue(row.getCell(1)).toString());
+				staff.setUserNo(getCellValue(row.getCell(2)).toString());
+				staff.setIdCard(getCellValue(row.getCell(3)).toString().replaceAll("(\\.(\\d*))", ""));
+				staff.setEmail(getCellValue(row.getCell(4)).toString());
+				if(Objects.equals(getCellValue(row.getCell(5)).toString(), Gender.MALE.getDesc())) {
+					staff.setSex(Gender.MALE);
+				}else {
+					staff.setSex(Gender.FEMALE);
+				}
 //				if(StringUtils.hasText(staff.getIdCard())&&staffService.findByIdCard(staff.getIdCard()).size()>=1) {
 //					resultData.setCode(1200002);
 //					resultData.setMessage(Internationalization.getMessageInternationalization(1200002).replace("{1}", String.valueOf(i)).replace("{2}", staff.getIdCard()));
 //					return resultData;
 //				}
 				
-				String site = getCellValue(row.getCell(3)).toString().toLowerCase();
+				String site = getCellValue(row.getCell(7)).toString().toLowerCase();
 				if(!StringUtils.hasText(site)) {
 					resultData.setCode(1200003);
 					resultData.setMessage(Internationalization.getMessageInternationalization(1200003).replace("{1}", String.valueOf(i)));
@@ -303,19 +310,15 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 					resultData.setMessage(Internationalization.getMessageInternationalization(1200004).replace("{1}", String.valueOf(i)));
 					return resultData;
 				}
-				staff.setUserNo(getCellValue(row.getCell(4)).toString());
-				staff.setStatus(getCellValue(row.getCell(5)).toString());
-				staff.setStaffType(getCellValue(row.getCell(6)).toString());
-				if(Objects.equals(getCellValue(row.getCell(7)).toString(), Gender.MALE.getDesc())) {
-					staff.setSex(Gender.MALE);
-				}else {
-					staff.setSex(Gender.FEMALE);
-				}
+
+				staff.setStatus(getCellValue(row.getCell(8)).toString());
+
+
 				if (StringUtils.hasText(staff.getIdCard())) {
 					List<Staff> listStaff = staffService.findByIdCard(staff.getIdCard());
 					Staff oldStaff = listStaff.size()>0?listStaff.get(0):null;
 					if(Objects.nonNull(oldStaff)) {
-						String isDelete = getCellValue(row.getCell(8)).toString();
+						String isDelete = getCellValue(row.getCell(9)).toString();
 						if(Objects.equals(isDelete.trim(), "是")) {
 							staffService.deleteById(oldStaff.getId());
 							continue;
@@ -348,28 +351,28 @@ public class StaffController extends BaseControllerImpl implements BaseControlle
 		if(!getCellValue(row.getCell(0)).toString().equals("name")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(1)).toString().equals("email")) {
+		if(!getCellValue(row.getCell(1)).toString().equals("staffType")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(2)).toString().equals("idCard")) {
+		if(!getCellValue(row.getCell(2)).toString().equals("userNo")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(3)).toString().equals("siteCode")) {
+		if(!getCellValue(row.getCell(3)).toString().equals("idCard")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(4)).toString().equals("userNo")) {
+		if(!getCellValue(row.getCell(4)).toString().equals("email")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(5)).toString().equals("status")) {
+		if(!getCellValue(row.getCell(5)).toString().equals("sex")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(6)).toString().equals("staffType")) {
+		if(!getCellValue(row.getCell(7)).toString().equals("siteCode")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(7)).toString().equals("sex")) {
+		if(!getCellValue(row.getCell(8)).toString().equals("status")) {
 			return false;
 		}
-		if(!getCellValue(row.getCell(8)).toString().equals("isDelete")) {
+		if(!getCellValue(row.getCell(9)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

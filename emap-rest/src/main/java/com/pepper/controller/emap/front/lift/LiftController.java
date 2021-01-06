@@ -12,6 +12,7 @@ import com.pepper.core.base.impl.BaseControllerImpl;
 import com.pepper.core.constant.SearchConstant;
 import com.pepper.core.exception.BusinessException;
 import com.pepper.model.emap.lift.*;
+import com.pepper.model.emap.site.SiteInfo;
 import com.pepper.model.emap.staff.Staff;
 import com.pepper.model.emap.vo.FloorVo;
 import com.pepper.model.emap.vo.LiftFloorVo;
@@ -20,6 +21,7 @@ import com.pepper.model.emap.vo.LiftRightVo;
 import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.emap.lift.*;
 import com.pepper.service.emap.log.SystemLogService;
+import com.pepper.service.emap.site.SiteInfoService;
 import com.pepper.service.emap.staff.StaffService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -80,6 +82,9 @@ public class LiftController extends BaseControllerImpl implements BaseController
 
     @Reference
     private LiftLogService liftLogService;
+
+    @Reference
+    private SiteInfoService siteInfoService;
 
     @RequestMapping("/lift/add")
     @Authorize(authorizeResources = false)
@@ -226,6 +231,9 @@ public class LiftController extends BaseControllerImpl implements BaseController
     public Object update(@RequestBody Lift lift) throws IOException {
         ResultData resultData = new ResultData();
         liftService.update(lift);
+        if (Objects.isNull(lift.getDownloadTime())){
+            liftService.updateDownloadTime(lift.getId());
+        }
         systemLogService.log("lift update", this.request.getRequestURL().toString());
         return resultData;
     }
@@ -917,7 +925,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
     @RequestMapping(value = "/lift/kaba/syncData")
 //    @Authorize(authorizeResources = false)
     @ResponseBody
-    @Scheduled(cron = "0 0 2 * * ?")
+//    @Scheduled(cron = "0 0 2 * * ?")
     public Object kabaSyncData() throws SQLException {
         Map<String,Integer> map = new HashMap<>();
         map.put("RF",12);
@@ -928,6 +936,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
+        List<SiteInfo> siteInfos = siteInfoService.findAll();
         try {
             conn = DriverManager.getConnection(mssqlJdbcUrl, mssqlUsername, mssqlPassword);
             stmt = conn.createStatement();
@@ -943,6 +952,10 @@ public class LiftController extends BaseControllerImpl implements BaseController
                         staff = new Staff();
                         staff.setEmail(email);
                         staff.setIdCard(card);
+                        SiteInfo siteInfo = siteInfos.size()>0?siteInfos.get(0):null;
+                        if (Objects.nonNull(siteInfo)){
+                            staff.setSiteId(siteInfo.getId());
+                        }
                         staff.setName(fullName);
                         staff = staffService.save(staff);
                     }
@@ -962,6 +975,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
                 String profileFrom = rs.getString("ProfileFrom");
                 String profileTo = rs.getString("ProfileTo");
                 String t4Name = rs.getString("T4Name");
+                String t2Address = rs.getString("T2Address");
                 String t3Name = rs.getString("T3Name");
                 List<Staff> staffList = this.staffService.findByIdCard(medium);
                 Staff staff = staffList.size()>0?staffList.get(0):null;
@@ -971,6 +985,12 @@ public class LiftController extends BaseControllerImpl implements BaseController
                     if (Objects.isNull(lift)){
                         lift = new Lift();
                         lift.setUartId(1);
+                        String sql1="SELECT  * FROM pPeriphery WHERE DeviceType='SS' AND DeviceAddress='"+t2Address.substring(0,t2Address.length()-4)+"'";
+                        ResultSet rs1 = stmt.executeQuery(sql1);
+                        while (rs1.next()) {
+                            lift.setIp(rs1.getString("IP"));
+                        }
+                        rs1.close();
                         lift.setName(t3Name);
                         lift = this.liftService.save(lift);
                     }
@@ -1002,7 +1022,7 @@ public class LiftController extends BaseControllerImpl implements BaseController
                                     liftFloor.setFloorId(floor.getId());
                                     liftFloor = this.liftFloorSevice.save(liftFloor);
                                 }
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd");
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                                 LiftRight liftRight = this.liftRightService.find(staff.getId(),finalLift.getId(),floor.getId());
                                 if (Objects.isNull(liftRight)) {
                                     liftRight = new LiftRight();
@@ -1061,6 +1081,12 @@ public class LiftController extends BaseControllerImpl implements BaseController
                                 lift = new Lift();
                                 lift.setName(s1);
                                 lift.setUartId(1);
+                                String sql1="SELECT  * FROM pPeriphery WHERE DeviceType='SS' AND DeviceAddress='"+readerAddress.substring(0,readerAddress.length()-4)+"'";
+                                ResultSet rs1 = stmt.executeQuery(sql1);
+                                while (rs1.next()) {
+                                    lift.setIp(rs1.getString("IP"));
+                                }
+                                rs1.close();
                                 lift = this.liftService.save(lift);
                             }
                             if (Objects.nonNull(lift)){

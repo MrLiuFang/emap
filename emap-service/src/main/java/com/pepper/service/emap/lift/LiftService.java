@@ -9,4 +9,6 @@ public interface LiftService extends BaseService<Lift> {
     public Lift findByFloorId(String floorId);
 
     public Lift findByName(String name);
+
+    public void updateDownloadTime(String id);
 }
