@@ -1,5 +1,7 @@
 package com.pepper.service.emap.report;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -28,5 +30,10 @@ public class ReportServiceImpl extends BaseServiceImpl<Report> implements Report
 	@Override
 	public Integer findNodeCout(String nodeTypeId, String mapId) {
 		return reportDao.findNodeCout(nodeTypeId, mapId);
+	}
+
+	@Override
+	public Integer findNodeCout(String nodeTypeId, String mapId, Date startDate, Date endDate) {
+		return reportDao.findNodeCout(nodeTypeId, mapId, startDate, endDate);
 	}
 }

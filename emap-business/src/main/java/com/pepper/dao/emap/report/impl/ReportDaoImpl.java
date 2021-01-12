@@ -1,7 +1,9 @@
 package com.pepper.dao.emap.report.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -37,7 +39,7 @@ public class ReportDaoImpl implements ReportDaoEx {
 	public Integer findNodeCout(String nodeTypeId, String mapId) {
 		StringBuffer jpql = new StringBuffer();
 		jpql.append(" select new map( count(t1.id) as nodeCount ) "
-				+ "from Node t1 join NodeType t2 on t1.nodeTypeId = t2.id join Map t3 on t1.mapId = t3. id where 1=1 ");
+				+ "from Node t1 join NodeType t2 on t1.nodeTypeId = t2.id join Map t3 on t1.mapId = t3.id where 1=1 ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		if(StringUtils.hasText(nodeTypeId)) {
 			jpql.append(" and t2.id = :nodeTypeId ");
@@ -48,6 +50,36 @@ public class ReportDaoImpl implements ReportDaoEx {
 			searchParameter.put("mapId", mapId);
 		}
 		
+		Map<String, Object> map =baseDao.findOneToMap(jpql.toString(), searchParameter);
+		if(map!=null && map.containsKey("nodeCount")) {
+			return Integer.valueOf(map.get("nodeCount").toString());
+		}
+		return 0;
+	}
+
+	public Integer findNodeCout(String nodeTypeId, String mapId, Date startDate,Date endDate) {
+		StringBuffer jpql = new StringBuffer();
+		jpql.append(" select new map( count(t1.id) as nodeCount ) "
+				+ "from Node t1 join NodeType t2 on t1.nodeTypeId = t2.id join Map t3 on t1.mapId = t3.id" +
+				" join EventList t4 on t1.sourceCode = t4.sourceCode  where 1=1 ");
+		Map<String,Object> searchParameter = new HashMap<String, Object>();
+		if(StringUtils.hasText(nodeTypeId)) {
+			jpql.append(" and t2.id = :nodeTypeId ");
+			searchParameter.put("nodeTypeId", nodeTypeId);
+		}
+		if(StringUtils.hasText(mapId)) {
+			jpql.append(" and t3.id = :mapId ");
+			searchParameter.put("mapId", mapId);
+		}
+		if (Objects.nonNull(startDate)){
+			jpql.append(" and t4.createDate >= :startDate ");
+			searchParameter.put("startDate", startDate);
+		}
+		if (Objects.nonNull(endDate)){
+			jpql.append(" and t4.createDate <= :endDate ");
+			searchParameter.put("endDate", endDate);
+		}
+
 		Map<String, Object> map =baseDao.findOneToMap(jpql.toString(), searchParameter);
 		if(map!=null && map.containsKey("nodeCount")) {
 			return Integer.valueOf(map.get("nodeCount").toString());

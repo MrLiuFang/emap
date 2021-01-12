@@ -7,7 +7,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -867,8 +871,11 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			returnMap.put("nodeTypeName", map.get("nodeTypeName"));
 			returnMap.put("mapName", map.get("mapName"));
 			returnMap.put("nodeCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString()));
-			returnMap.put("dayEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString()));
-			returnMap.put("weekEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString()));
+			LocalDateTime today_start = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+			LocalDateTime today_end = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+			returnMap.put("dayEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString(),Date.from( today_start.atZone( ZoneId.systemDefault()).toInstant()),Date.from( today_end.atZone( ZoneId.systemDefault()).toInstant())));
+			LocalDateTime day7 = today_start.minus( 7, ChronoUnit.DAYS );
+			returnMap.put("weekEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString(),Date.from( day7.atZone( ZoneId.systemDefault()).toInstant()),Date.from( today_end.atZone( ZoneId.systemDefault()).toInstant())));
 			retusnList.add(returnMap);
 		}
 		pager.setResults(retusnList);
