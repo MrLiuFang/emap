@@ -2,6 +2,7 @@ package com.pepper.controller.emap.front.event;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -160,18 +161,17 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		MapToBeanUtil.convert(eventList, map);
 		eventList.setCreateDate(new Date());
 		eventList.setIsOperatorTransfer(false);
-		if (map.containsKey("eventTime")){
-			eventList.setEventDate(String.valueOf(map.get("eventTime")));
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if (map.containsKey("eventTime") && Objects.nonNull(map.get("eventTime")) && StringUtils.hasText(String.valueOf(map.get("eventTime")))){
+			try {
+				dateFormat.parse(eventList.getEventDate());
+				eventList.setEventDate(String.valueOf(map.get("eventTime")));
+			}catch (Exception e) {
+				eventList.setEventDate(dateFormat.format(new Date()));
+			}
+		}else if (!map.containsKey("eventTime") || Objects.isNull(map.get("eventTime")) || !StringUtils.hasText(String.valueOf(map.get("eventTime")))){
+			eventList.setEventDate(dateFormat.format(new Date()));
 		}
-//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//		try {
-//			dateFormat.parse(eventList.getEventDate());
-//		}catch (Exception e) {
-//			eventList.setEventDate(null);
-//		}
-//		if(!StringUtils.hasText(eventList.getEventDate())) {
-//			eventList.setEventDate(dateFormat.format(eventList.getCreateDate()));
-//		}
 		eventList = eventListService.save(eventList);
 		return resultData;
 	}
