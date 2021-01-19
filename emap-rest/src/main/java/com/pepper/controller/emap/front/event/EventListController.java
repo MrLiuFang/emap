@@ -785,6 +785,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			if(map.containsKey("video")) {
 				eventList.setVideo(Objects.isNull(map.get("video"))?"":map.get("video").toString());
 			}
+			if(map.containsKey("filedImg")) {
+				eventList.setFiledImg(Objects.isNull(map.get("filedImg"))?"":map.get("filedImg").toString());
+			}
 			if(map.containsKey("filedUserNo")){
 				String filedUserNo = String.valueOf(map.get("filedUserNo"));
 //				if(!StringUtils.hasText(filedUserNo)){

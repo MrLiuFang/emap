@@ -100,6 +100,9 @@ public class EventList extends BaseModel  {
 	@Column(name ="filed_user_no")
 	private String filedUserNo;
 
+	@Column(name ="filed_img")
+	private String filedImg;
+
 	@Column(name ="dispatch_status")
 	private Integer dispatchStatus;
 
@@ -328,5 +331,13 @@ public class EventList extends BaseModel  {
 
 	public void setDispatchStatus(Integer dispatchStatus) {
 		this.dispatchStatus = dispatchStatus;
+	}
+
+	public String getFiledImg() {
+		return filedImg;
+	}
+
+	public void setFiledImg(String filedImg) {
+		this.filedImg = filedImg;
 	}
 }
