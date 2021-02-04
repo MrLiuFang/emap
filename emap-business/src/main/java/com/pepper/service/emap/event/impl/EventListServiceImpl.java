@@ -1,16 +1,20 @@
 package com.pepper.service.emap.event.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Resource;
 
+import com.pepper.dao.emap.node.NodeDao;
+import com.pepper.dao.emap.node.NodeGroupDao;
+import com.pepper.model.emap.event.EventListGroup;
+import com.pepper.model.emap.node.Node;
+import com.pepper.model.emap.node.NodeGroup;
+import com.pepper.service.emap.event.EventListGroupService;
+import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
@@ -22,7 +26,16 @@ import com.pepper.service.emap.event.EventListService;
 public class EventListServiceImpl extends BaseServiceImpl<EventList> implements EventListService {
 	
 	@Resource
-	private EventListDao eventListDao; 
+	private EventListDao eventListDao;
+
+	@Resource
+	private NodeGroupDao nodeGroupDao;
+
+	@Resource
+	private NodeDao nodeDao;
+
+	@Reference
+	private EventListGroupService eventListGroupService;
 
 	@Override
 	public List<EventList> findByStatusOrStatus(String status, String status1) {
@@ -131,5 +144,41 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public int delete(Date createDate) {
 		return eventListDao.deleteByCreateDateLessThanEqual(createDate);
+	}
+
+	@Override
+	public void otherTreatment(EventList eventList) {
+		Node node = nodeDao.findFirstBySourceCode(eventList.getSourceCode());
+		List<NodeGroup> list = nodeGroupDao.findAllByNodeId(node.getId(),node.getId());
+		String eventGroupId = UUID.randomUUID().toString();
+		list.forEach(nodeGroup -> {
+			Optional<Node> optional = nodeDao.findById(nodeGroup.getNodeId());
+			if (optional.isPresent()){
+				Node node1 = optional.get();
+				EventList eventList1 = new EventList();
+				eventList1.setMaster(false);
+				eventList1.setSourceCode(node1.getSourceCode());
+				eventList1.setWarningLevel(-1);
+				eventList1.setEventName("关联事件");
+				eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
+				eventList1 = this.save(eventList1);
+
+				EventListGroup eventListGroup = new EventListGroup();
+				eventListGroup.setEventId(eventList1.getId());
+				eventListGroup.setLevel(-1);
+				eventListGroup.setIsMaster(false);
+				eventListGroup.setEventGroupId(eventGroupId);
+				eventListGroup.setNodeId(node1.getId());
+				eventListGroupService.save(eventListGroup);
+			}
+		});
+
+		EventListGroup eventListGroup = new EventListGroup();
+		eventListGroup.setEventId(eventList.getId());
+		eventListGroup.setLevel(eventList.getWarningLevel());
+		eventListGroup.setIsMaster(true);
+		eventListGroup.setEventGroupId(eventGroupId);
+		eventListGroup.setNodeId(node.getId());
+		eventListGroupService.save(eventListGroup);
 	}
 }

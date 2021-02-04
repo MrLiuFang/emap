@@ -62,4 +62,5 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	public List<Map<String,Object>> currentMonthIsConsoleCount(Date startDate,Date endDate);
 
 	public Integer deleteByCreateDateLessThanEqual(Date createDate);
+
 }

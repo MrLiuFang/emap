@@ -18,6 +18,8 @@ public class NodeClassify extends BaseModel {
     @Column(name = "name")
     private String name;
 
+
+
     public String getCode() {
         return code;
     }
@@ -33,4 +35,5 @@ public class NodeClassify extends BaseModel {
     public void setName(String name) {
         this.name = name;
     }
+
 }

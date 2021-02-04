@@ -12,7 +12,9 @@ import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.core.ResultEnum;
 import com.pepper.model.console.role.Role;
+import com.pepper.model.emap.event.*;
 import com.pepper.service.console.role.RoleService;
+import com.pepper.service.emap.event.*;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
@@ -41,13 +43,6 @@ import com.pepper.core.constant.SearchConstant;
 import com.pepper.model.console.admin.user.AdminUser;
 import com.pepper.model.emap.department.Department;
 import com.pepper.model.emap.department.DepartmentGroup;
-import com.pepper.model.emap.event.ActionList;
-import com.pepper.model.emap.event.EventDispatch;
-import com.pepper.model.emap.event.EventList;
-import com.pepper.model.emap.event.EventListAssist;
-import com.pepper.model.emap.event.EventMessage;
-import com.pepper.model.emap.event.EventRule;
-import com.pepper.model.emap.event.HelpList;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeType;
 import com.pepper.model.emap.staff.Staff;
@@ -65,13 +60,6 @@ import com.pepper.service.authentication.aop.Authorize;
 import com.pepper.service.console.admin.user.AdminUserService;
 import com.pepper.service.emap.department.DepartmentGroupService;
 import com.pepper.service.emap.department.DepartmentService;
-import com.pepper.service.emap.event.ActionListService;
-import com.pepper.service.emap.event.EventDispatchService;
-import com.pepper.service.emap.event.EventListAssistService;
-import com.pepper.service.emap.event.EventListService;
-import com.pepper.service.emap.event.EventMessageService;
-import com.pepper.service.emap.event.EventRuleService;
-import com.pepper.service.emap.event.HelpListService;
 import com.pepper.service.emap.log.SystemLogService;
 import com.pepper.service.emap.map.MapImageUrlService;
 import com.pepper.service.emap.map.MapService;
@@ -152,6 +140,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@Reference
 	private RoleService roleService;
 
+	@Reference
+	private EventListGroupService eventListGroupService;
+
 	@RequestMapping(value = "/add")
 	@ResponseBody
 	public Object add(@RequestBody Map<String,Object> map) {
@@ -178,7 +169,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		}
 		eventList.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
 		eventList.setStatus("W");
+		eventList.setMaster(true);
 		eventList = eventListService.save(eventList);
+		eventListService.otherTreatment(eventList);
 		return resultData;
 	}
 	
@@ -791,9 +784,18 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setFiledContent(map.containsKey("filedContent")?Objects.isNull(map.get("filedContent"))?"":map.get("filedContent").toString():"");
 			eventListService.update(eventList);
 			sendEmail(eventList);
+
+			List<EventListGroup> list = eventListGroupService.findAllByEventId(map.get("id").toString());
+			list.forEach(eventListGroup -> {
+				EventList eventList1 = this.eventListService.findById(eventListGroup.getEventId());
+				eventList1.setStatus("P");
+				eventListService.update(eventList1);
+			});
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
-		
+
+
+
 		return resultData;
 	}
 	

@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,4 +106,6 @@ public interface EventListService extends BaseService<EventList> {
 
 	@Transactional(propagation=Propagation.REQUIRED)
 	public int delete(Date createDate);
+
+	public void otherTreatment(EventList eventList);
 }

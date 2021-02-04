@@ -115,6 +115,127 @@ public class Node extends BaseModel {
 	@Column(name = "is_camera")
 	private Boolean isCamera;
 
+	@Column(name = "line_path",length = 500)
+	private String line;
+
+	@Column(name = "port")
+	private Integer port;
+
+	@Column(name = "in_port")
+	private Integer inPort;
+
+	@Column(name = "out_port")
+	private Integer outPort;
+
+	@Column(name = "out_is_on")
+	private Boolean outIsOn;
+
+	@Column(name = "icon")
+	private String icon;
+
+	@Column(name = "alarm_icon")
+	private String alarmIcon;
+
+	@Column(name = "problem_icon")
+	private String problemIcon;
+
+	@Column(name = "disabled_icon")
+	private String disabledIcon;
+
+	@Column(name = "is_zone")
+	private Boolean isZone;
+
+	@Column(name = "is_out")
+	private Boolean isOut;
+
+	public Boolean getZone() {
+		return isZone;
+	}
+
+	public void setZone(Boolean zone) {
+		isZone = zone;
+	}
+
+	public Boolean getOut() {
+		return isOut;
+	}
+
+	public void setOut(Boolean out) {
+		isOut = out;
+	}
+
+	public Integer getPort() {
+		return port;
+	}
+
+	public void setPort(Integer port) {
+		this.port = port;
+	}
+
+	public Integer getInPort() {
+		return inPort;
+	}
+
+	public void setInPort(Integer inPort) {
+		this.inPort = inPort;
+	}
+
+	public Integer getOutPort() {
+		return outPort;
+	}
+
+	public void setOutPort(Integer outPort) {
+		this.outPort = outPort;
+	}
+
+	public Boolean getOutIsOn() {
+		return outIsOn;
+	}
+
+	public void setOutIsOn(Boolean outIsOn) {
+		this.outIsOn = outIsOn;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	public String getAlarmIcon() {
+		return alarmIcon;
+	}
+
+	public void setAlarmIcon(String alarmIcon) {
+		this.alarmIcon = alarmIcon;
+	}
+
+	public String getProblemIcon() {
+		return problemIcon;
+	}
+
+	public void setProblemIcon(String problemIcon) {
+		this.problemIcon = problemIcon;
+	}
+
+	public String getDisabledIcon() {
+		return disabledIcon;
+	}
+
+	public void setDisabledIcon(String disabledIcon) {
+		this.disabledIcon = disabledIcon;
+	}
+
+	public String getLine() {
+		return line;
+	}
+
+	public void setLine(String line) {
+		this.line = line;
+	}
+
 	public Boolean getIsDoor() {
 		return isDoor;
 	}

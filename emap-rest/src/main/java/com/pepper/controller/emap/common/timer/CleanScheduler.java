@@ -22,8 +22,8 @@ import java.util.Objects;
  * @Author mr.liu
  * @Date 2020/5/29
  **/
-@Component
-@Order(value= Ordered.LOWEST_PRECEDENCE)
+//@Component
+//@Order(value= Ordered.LOWEST_PRECEDENCE)
 public class CleanScheduler {
 
     @Reference

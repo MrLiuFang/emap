@@ -25,8 +25,7 @@ public class EventList extends BaseModel  {
 	
 	@Column(name = "event_name")
 	private String eventName;
-	
-	
+
 	@Column(name = "event_date")
 	private String eventDate;
 	
@@ -98,6 +97,17 @@ public class EventList extends BaseModel  {
 
 	@Column(name ="filed_user_no")
 	private String filedUserNo;
+
+	@Column(name = "is_master")
+	private Boolean isMaster;
+
+	public Boolean getMaster() {
+		return isMaster;
+	}
+
+	public void setMaster(Boolean master) {
+		isMaster = master;
+	}
 
 	public String getFiledUserNo() {
 		return filedUserNo;
