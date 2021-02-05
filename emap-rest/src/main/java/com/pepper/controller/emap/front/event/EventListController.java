@@ -845,9 +845,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 								e.printStackTrace();
 							}
 						}
+						node.setOutIsOn(false);
+						nodeService.update(node);
 					}
-					node.setOutIsOn(false);
-					nodeService.update(node);
+
 				}
 			});
 		}
