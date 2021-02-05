@@ -848,9 +848,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 						node.setOutIsOn(false);
 						nodeService.update(node);
 					}
-
 				}
 			});
+			node.setStatusUniversity(1);
+			nodeService.update(node);
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
 		return resultData;
