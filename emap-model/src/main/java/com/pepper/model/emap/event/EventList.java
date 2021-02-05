@@ -97,9 +97,19 @@ public class EventList extends BaseModel  {
 
 	@Column(name ="filed_user_no")
 	private String filedUserNo;
-
+	@Column(name ="filed_img")
+	private String filedImg;
 	@Column(name = "is_master")
 	private Boolean isMaster;
+
+
+	public String getFiledImg() {
+		return filedImg;
+	}
+
+	public void setFiledImg(String filedImg) {
+		this.filedImg = filedImg;
+	}
 
 	public Boolean getMaster() {
 		return isMaster;
