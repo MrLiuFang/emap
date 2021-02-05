@@ -149,27 +149,29 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public void otherTreatment(EventList eventList) {
 		Node node = nodeDao.findFirstBySourceCode(eventList.getSourceCode());
-		List<NodeGroup> list = nodeGroupDao.findAllByNodeId(node.getId(),node.getId());
+		List<NodeGroup> list = nodeGroupDao.findAllByNodeId(node.getId());
 		String eventGroupId = UUID.randomUUID().toString();
 		list.forEach(nodeGroup -> {
 			Optional<Node> optional = nodeDao.findById(nodeGroup.getNodeId());
 			if (optional.isPresent()){
 				Node node1 = optional.get();
-				EventList eventList1 = new EventList();
-				eventList1.setMaster(false);
-				eventList1.setSourceCode(node1.getSourceCode());
-				eventList1.setWarningLevel(-1);
-				eventList1.setEventName("关联事件");
-				eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
-				eventList1 = this.save(eventList1);
+				if (node1.getOut()) {
+					EventList eventList1 = new EventList();
+					eventList1.setMaster(false);
+					eventList1.setSourceCode(node1.getSourceCode());
+					eventList1.setWarningLevel(-1);
+					eventList1.setEventName("关联事件");
+					eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
+					eventList1 = this.save(eventList1);
 
-				EventListGroup eventListGroup = new EventListGroup();
-				eventListGroup.setEventId(eventList1.getId());
-				eventListGroup.setLevel(-1);
-				eventListGroup.setIsMaster(false);
-				eventListGroup.setEventGroupId(eventGroupId);
-				eventListGroup.setNodeId(node1.getId());
-				eventListGroupService.save(eventListGroup);
+					EventListGroup eventListGroup = new EventListGroup();
+					eventListGroup.setEventId(eventList1.getId());
+					eventListGroup.setLevel(-1);
+					eventListGroup.setIsMaster(false);
+					eventListGroup.setEventGroupId(eventGroupId);
+					eventListGroup.setNodeId(node1.getId());
+					eventListGroupService.save(eventListGroup);
+				}
 			}
 		});
 
@@ -181,4 +183,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		eventListGroup.setNodeId(node.getId());
 		eventListGroupService.save(eventListGroup);
 	}
+
+
+
 }

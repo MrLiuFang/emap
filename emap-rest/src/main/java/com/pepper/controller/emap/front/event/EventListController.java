@@ -790,12 +790,11 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				EventList eventList1 = this.eventListService.findById(eventListGroup.getEventId());
 				eventList1.setStatus("P");
 				eventListService.update(eventList1);
+				eventListGroup.setStatus("P");
+				eventListGroupService.update(eventListGroup);
 			});
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
-
-
-
 		return resultData;
 	}
 	

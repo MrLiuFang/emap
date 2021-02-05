@@ -35,4 +35,7 @@ public class EventListGroup extends BaseModel {
 
     @Column(name = "level")
     private Integer level;
+
+    @Column(name = "status")
+    private String status;
 }
