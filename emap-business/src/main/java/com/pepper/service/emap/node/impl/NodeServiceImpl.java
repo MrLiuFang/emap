@@ -55,6 +55,15 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 		return nodeDao.findByNameLike("%"+name+"%");
 	}
 
-	
+	@Override
+	public Node findFirstByIpAndPortAndIdNot(String ip, Integer port, String id) {
+		return nodeDao.findFirstByIpAndPortAndIdNot(ip,port,id);
+	}
+
+	@Override
+	public Node findFirstBySourceCode(String sourceCode) {
+		return nodeDao.findFirstBySourceCode(sourceCode);
+	}
+
 
 }

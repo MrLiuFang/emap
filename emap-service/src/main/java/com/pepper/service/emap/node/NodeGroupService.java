@@ -16,4 +16,6 @@ public interface NodeGroupService extends BaseService<NodeGroup> {
     public void deleteAllByCode(String code);
 
     public List<NodeGroup> find(String code);
+
+    public List<NodeGroup> findAllByNodeId(String nodeId);
 }

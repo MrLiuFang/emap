@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.pepper.model.emap.event.EventListGroup;
+import com.pepper.model.emap.node.Node;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,4 +110,8 @@ public interface EventListService extends BaseService<EventList> {
 	public int delete(Date createDate);
 
 	public void otherTreatment(EventList eventList);
+
+	public void sendTcp(Node node,Boolean outIsOn) throws InterruptedException;
+
+	public void send(Node node,String cmd) throws InterruptedException;
 }

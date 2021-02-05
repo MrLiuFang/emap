@@ -13,4 +13,6 @@ import java.util.List;
 public interface EventListGroupService extends BaseService<EventListGroup> {
 
     public List<EventListGroup> findAllByEventId(String eventId);
+
+    public List<EventListGroup> findAllByNodeIdAndStatusNot(String nodeId,String status);
 }

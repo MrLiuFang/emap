@@ -1,5 +1,7 @@
 package com.pepper.service.emap.event.impl;
 
+import java.nio.channels.Channel;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import javax.annotation.Resource;
@@ -10,6 +12,18 @@ import com.pepper.model.emap.event.EventListGroup;
 import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeGroup;
 import com.pepper.service.emap.event.EventListGroupService;
+import com.pepper.service.emap.node.NodeService;
+import com.sun.org.apache.xalan.internal.lib.NodeInfo;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.domain.Page;
@@ -21,6 +35,7 @@ import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventListDao;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.service.emap.event.EventListService;
+import org.springframework.util.StringUtils;
 
 @Service(interfaceClass=EventListService.class)
 public class EventListServiceImpl extends BaseServiceImpl<EventList> implements EventListService {
@@ -33,6 +48,9 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 
 	@Resource
 	private NodeDao nodeDao;
+
+	@Resource
+	private NodeService nodeService;
 
 	@Reference
 	private EventListGroupService eventListGroupService;
@@ -153,9 +171,9 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		String eventGroupId = UUID.randomUUID().toString();
 		list.forEach(nodeGroup -> {
 			Optional<Node> optional = nodeDao.findById(nodeGroup.getNodeId());
-			if (optional.isPresent()){
+			if (optional.isPresent() && !Objects.equals(nodeGroup.getNodeId(),node.getId())){
 				Node node1 = optional.get();
-				if (node1.getOut()) {
+				if (node1.getZone()) {
 					EventList eventList1 = new EventList();
 					eventList1.setMaster(false);
 					eventList1.setSourceCode(node1.getSourceCode());
@@ -163,27 +181,112 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 					eventList1.setEventName("关联事件");
 					eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
 					eventList1 = this.save(eventList1);
+					saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId());
+				}else if (node1.getOut()) {
+					try {
+						sendTcp(node1,true);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				updateNodeStatus(node1);
+			}
+		});
+		updateNodeStatus(node);
+		saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),true,eventGroupId,node.getId());
+	}
 
-					EventListGroup eventListGroup = new EventListGroup();
-					eventListGroup.setEventId(eventList1.getId());
-					eventListGroup.setLevel(-1);
-					eventListGroup.setIsMaster(false);
-					eventListGroup.setEventGroupId(eventGroupId);
-					eventListGroup.setNodeId(node1.getId());
-					eventListGroupService.save(eventListGroup);
+	public void sendTcp(Node node,Boolean outIsOn) throws InterruptedException {
+		String cmd0 = "000100000008010F006400040100";
+		String cmd1 = "000100000008010F006400040101";
+		String cmd2 = "000100000008010F006400040102";
+		String cmd3 = "000100000008010F006400040103";
+		String cmd = "";
+		if (Objects.isNull(node.getPort()) || !StringUtils.hasText(node.getIp())) {
+			return;
+		}
+		Node node1 = nodeService.findFirstByIpAndPortAndIdNot(node.getIp(), node.getPort(), node.getId());
+		if (node.getOutPort() == 1) {
+			if (node1.getOutIsOn()) {
+				cmd = cmd3;
+			} else {
+				cmd = cmd1;
+			}
+		} else if (node.getOutPort() == 2) {
+			if (node1.getOutIsOn()) {
+				cmd = cmd3;
+			} else {
+				cmd = cmd2;
+			}
+		}
+		send(node,cmd);
+		node.setOutIsOn(outIsOn);
+		nodeService.update(node);
+	}
+	@Override
+	public void send(Node node,String cmd) throws InterruptedException {
+		String host = node.getIp();
+		int port =node.getPort();
+		Channel channel;
+		final EventLoopGroup group = new NioEventLoopGroup();
+
+		Bootstrap b = new Bootstrap();
+		b.group(group).channel(NioSocketChannel.class)  // 使用NioSocketChannel来作为连接用的channel类
+				.handler(new ChannelInitializer<SocketChannel>() { // 绑定连接初始化器
+					@Override
+					public void initChannel(SocketChannel socketChannel) throws Exception {
+						System.out.println("正在连接中...");
+//						ChannelPipeline pipeline = socketChannel.pipeline();
+//						ByteBuf delimiter = Unpooled.copiedBuffer("\n".getBytes());
+//						pipeline
+//								.addLast(new DelimiterBasedFrameDecoder(1024,delimiter))
+//								.addLast(new StringDecoder(Charset.forName("UTF-8")))
+//								.addLast(new StringEncoder(Charset.forName("UTF-8")))
+//								.addLast(new ClientHandler());
+
+					}
+				});
+		//发起异步连接请求，绑定连接端口和host信息
+		final ChannelFuture future = b.connect(host, port).sync();
+		String finalCmd = cmd;
+		future.addListener(new ChannelFutureListener() {
+			@Override
+			public void operationComplete(ChannelFuture arg0) throws Exception {
+				if (future.isSuccess()) {
+					System.out.println("连接服务器成功");
+					arg0.channel().writeAndFlush(finalCmd.getBytes());
+				} else {
+					System.out.println("连接服务器失败");
+					future.cause().printStackTrace();
+					group.shutdownGracefully(); //关闭线程组
 				}
 			}
 		});
-
-		EventListGroup eventListGroup = new EventListGroup();
-		eventListGroup.setEventId(eventList.getId());
-		eventListGroup.setLevel(eventList.getWarningLevel());
-		eventListGroup.setIsMaster(true);
-		eventListGroup.setEventGroupId(eventGroupId);
-		eventListGroup.setNodeId(node.getId());
-		eventListGroupService.save(eventListGroup);
+		group.shutdownGracefully();
 	}
 
 
 
+	private void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId){
+		EventListGroup eventListGroup = new EventListGroup();
+		eventListGroup.setEventId(eventId);
+		eventListGroup.setLevel(warningLevel);
+		eventListGroup.setIsMaster(isMaster);
+		eventListGroup.setStatus("A");
+		eventListGroup.setEventGroupId(eventGroupId);
+		eventListGroup.setNodeId(nodeId);
+		eventListGroupService.save(eventListGroup);
+	}
+
+	private void updateNodeStatus(Node node){
+		node.setStatusUniversity(9);
+		nodeService.update(node);
+	}
+}
+class ClientHandler extends SimpleChannelInboundHandler<String> {
+
+	@Override
+	protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+		System.out.println("接受到server响应数据: " + msg);
+	}
 }

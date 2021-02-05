@@ -13,8 +13,10 @@ import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.core.ResultEnum;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.emap.event.*;
+import com.pepper.model.emap.node.NodeGroup;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.emap.event.*;
+import com.pepper.service.emap.node.NodeGroupService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
@@ -142,6 +144,9 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 	@Reference
 	private EventListGroupService eventListGroupService;
+
+	@Reference
+	private NodeGroupService nodeGroupService;
 
 	@RequestMapping(value = "/add")
 	@ResponseBody
@@ -792,6 +797,58 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				eventListService.update(eventList1);
 				eventListGroup.setStatus("P");
 				eventListGroupService.update(eventListGroup);
+			});
+			Node node = nodeService.findFirstBySourceCode(eventList.getSourceCode());
+			List<NodeGroup> listNodeGroup = nodeGroupService.findAllByNodeId(node.getId());
+			listNodeGroup.forEach(nodeGroup -> {
+				Node node1 = nodeService.findById(nodeGroup.getNodeId());
+				if (Objects.nonNull(node1)) {
+					if (node1.getOut()) {
+						List<EventListGroup> list1 = eventListGroupService.findAllByNodeIdAndStatusNot(node1.getId(),"P");
+						if (list1.size()>1){
+//							if (node1.getOutPort() == 2){
+//								try {
+//									eventListService.send(node1,"000100000008010F006400040101");
+//								} catch (InterruptedException e) {
+//									e.printStackTrace();
+//								}
+//							}if (node1.getOutPort() == 1){
+//								try {
+//									eventListService.send(node1,"000100000008010F006400040102");
+//								} catch (InterruptedException e) {
+//									e.printStackTrace();
+//								}
+//							}
+						}else {
+							try {
+								String cmd0 = "000100000008010F006400040100";
+								String cmd1 = "000100000008010F006400040101";
+								String cmd2 = "000100000008010F006400040102";
+								String cmd3 = "000100000008010F006400040103";
+								String cmd = "";
+								Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
+								if (node1.getOutPort() == 1) {
+									if (node2.getOutIsOn()) {
+										cmd = cmd1;
+									} else {
+										cmd = cmd0;
+									}
+								} else if (node1.getOutPort() == 2) {
+									if (node2.getOutIsOn()) {
+										cmd = cmd2;
+									} else {
+										cmd = cmd0;
+									}
+								}
+								eventListService.send(node1,cmd);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					node.setOutIsOn(false);
+					nodeService.update(node);
+				}
 			});
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());

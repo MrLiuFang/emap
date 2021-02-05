@@ -148,6 +148,50 @@ public class Node extends BaseModel {
 	@Column(name = "is_out")
 	private Boolean isOut;
 
+	@Column(name = "cam_ip")
+	private String camIp;
+
+	@Column(name = "cam_port")
+	private String camPort;
+
+	@Column(name = "cam_cmd")
+	private String camCmd;
+
+	@Column(name = "status_university")
+	private Integer statusUniversity;
+
+	public Integer getStatusUniversity() {
+		return statusUniversity;
+	}
+
+	public void setStatusUniversity(Integer statusUniversity) {
+		this.statusUniversity = statusUniversity;
+	}
+
+	public String getCamIp() {
+		return camIp;
+	}
+
+	public void setCamIp(String camIp) {
+		this.camIp = camIp;
+	}
+
+	public String getCamPort() {
+		return camPort;
+	}
+
+	public void setCamPort(String camPort) {
+		this.camPort = camPort;
+	}
+
+	public String getCamCmd() {
+		return camCmd;
+	}
+
+	public void setCamCmd(String camCmd) {
+		this.camCmd = camCmd;
+	}
+
 	public Boolean getZone() {
 		return isZone;
 	}

@@ -17,4 +17,6 @@ public interface EventListGroupDao extends BaseDao<EventListGroup> {
     @Query(" select t1 from EventListGroup t1 where t1.eventGroupId = (select t2.eventGroupId from EventListGroup t2 where t2.eventId = :eventId ) and t1.eventId <> :eventId")
     public List<EventListGroup> findAllByEventId(String eventId);
 
+    public List<EventListGroup> findAllByNodeIdAndStatusNot(String nodeId,String status);
+
 }

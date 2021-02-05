@@ -17,6 +17,6 @@ public interface NodeGroupDao extends BaseDao<NodeGroup> {
 
     public List<NodeGroup> findAllByCode(String code);
 
-    @Query("select t1 from NodeGroup t1 where t1.code in (select t2.code from NodeGroup t2 where t2.nodeId = :nodeId ) and t1.nodeId <> :nodeId")
+    @Query("select t1 from NodeGroup t1 where t1.code in (select t2.code from NodeGroup t2 where t2.nodeId = :nodeId )")
     public List<NodeGroup> findAllByNodeId(String nodeId);
 }

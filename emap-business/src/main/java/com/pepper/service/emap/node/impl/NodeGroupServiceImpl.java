@@ -31,4 +31,9 @@ public class NodeGroupServiceImpl extends BaseServiceImpl<NodeGroup> implements 
     public List<NodeGroup> find(String code) {
         return nodeGroupDao.findAllByCode(code);
     }
+
+    @Override
+    public List<NodeGroup> findAllByNodeId(String nodeId) {
+        return nodeGroupDao.findAllByNodeId(nodeId);
+    }
 }

@@ -27,4 +27,9 @@ public class EventListGroupServiceImpl extends BaseServiceImpl<EventListGroup> i
     public List<EventListGroup> findAllByEventId(String eventId) {
         return eventListGroupDao.findAllByEventId(eventId);
     }
+
+    @Override
+    public List<EventListGroup> findAllByNodeIdAndStatusNot(String nodeId, String status) {
+        return eventListGroupDao.findAllByNodeIdAndStatusNot(nodeId, status);
+    }
 }
