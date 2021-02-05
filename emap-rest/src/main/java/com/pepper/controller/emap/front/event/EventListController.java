@@ -171,7 +171,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		eventList.setStatus("W");
 		eventList.setMaster(true);
 		eventList = eventListService.save(eventList);
-		eventListService.otherTreatment(eventList);
+//		eventListService.otherTreatment(eventList);
 		return resultData;
 	}
 	
@@ -785,14 +785,14 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventListService.update(eventList);
 			sendEmail(eventList);
 
-			List<EventListGroup> list = eventListGroupService.findAllByEventId(map.get("id").toString());
-			list.forEach(eventListGroup -> {
-				EventList eventList1 = this.eventListService.findById(eventListGroup.getEventId());
-				eventList1.setStatus("P");
-				eventListService.update(eventList1);
-				eventListGroup.setStatus("P");
-				eventListGroupService.update(eventListGroup);
-			});
+//			List<EventListGroup> list = eventListGroupService.findAllByEventId(map.get("id").toString());
+//			list.forEach(eventListGroup -> {
+//				EventList eventList1 = this.eventListService.findById(eventListGroup.getEventId());
+//				eventList1.setStatus("P");
+//				eventListService.update(eventList1);
+//				eventListGroup.setStatus("P");
+//				eventListGroupService.update(eventListGroup);
+//			});
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
 		return resultData;
