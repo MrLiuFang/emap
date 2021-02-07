@@ -10,7 +10,6 @@ import javax.servlet.ServletOutputStream;
 
 import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
-import com.pepper.core.ResultEnum;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.emap.event.*;
 import com.pepper.model.emap.node.NodeGroup;
@@ -21,8 +20,6 @@ import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -72,7 +69,6 @@ import com.pepper.service.emap.staff.StaffService;
 import com.pepper.service.file.FileService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import com.pepper.util.BeanToMapUtil;
-import com.pepper.util.HttpUtil;
 import com.pepper.util.MapToBeanUtil;
 
 @Controller
@@ -800,32 +796,49 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			});
 			Node node = nodeService.findFirstBySourceCode(eventList.getSourceCode());
 			List<NodeGroup> listNodeGroup = nodeGroupService.findAllByNodeId(node.getId());
+			String cmd0 = "000100000008010F006400040100";
+			String cmd1 = "000100000008010F006400040101";
+			String cmd2 = "000100000008010F006400040102";
+			String cmd3 = "000100000008010F006400040103";
+
 			listNodeGroup.forEach(nodeGroup -> {
+				String cmd = "";
 				Node node1 = nodeService.findById(nodeGroup.getNodeId());
 				if (Objects.nonNull(node1)) {
 					if (node1.getOut()) {
-						List<EventListGroup> list1 = eventListGroupService.findAllByNodeIdAndStatusNot(node1.getId(),"P");
+						//查node1是否有两个设备组 如果没有就直接关灯，如果有 就查另外一个组是否有事件 未归档  有 没有归档的事件不光灯，否则关灯
+						List<String> list1 = nodeGroupService.findNodeGroupCodeByNodeId(node1.getId());
 						if (list1.size()>1){
-//							if (node1.getOutPort() == 2){
-//								try {
-//									eventListService.send(node1,"000100000008010F006400040101");
-//								} catch (InterruptedException e) {
-//									e.printStackTrace();
-//								}
-//							}if (node1.getOutPort() == 1){
-//								try {
-//									eventListService.send(node1,"000100000008010F006400040102");
-//								} catch (InterruptedException e) {
-//									e.printStackTrace();
-//								}
-//							}
+							list1.forEach(s->{
+								String cmd4 = "";
+								if (!Objects.equals(s,nodeGroup.getCode())){
+									//查询其它设备组的事件
+									List<EventListGroup> list2 = eventListGroupService.findAllByNodeGroupCodeAndStatusNot( s,"P");
+									if (Objects.nonNull(list2) && list2.size()<=0){
+										Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
+										if (node1.getOutPort() == 1) {
+											if (node2.getOutIsOn()) {
+												cmd4 = cmd1;
+											} else {
+												cmd4 = cmd0;
+											}
+										} else if (node1.getOutPort() == 2) {
+											if (node2.getOutIsOn()) {
+												cmd4 = cmd2;
+											} else {
+												cmd4 = cmd0;
+											}
+										}
+										try {
+											eventListService.send(node1,cmd4);
+										} catch (InterruptedException e) {
+											e.printStackTrace();
+										}
+									}
+								}
+							});
 						}else {
 							try {
-								String cmd0 = "000100000008010F006400040100";
-								String cmd1 = "000100000008010F006400040101";
-								String cmd2 = "000100000008010F006400040102";
-								String cmd3 = "000100000008010F006400040103";
-								String cmd = "";
 								Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
 								if (node1.getOutPort() == 1) {
 									if (node2.getOutIsOn()) {

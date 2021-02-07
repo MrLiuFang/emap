@@ -20,6 +20,7 @@ import javax.persistence.Table;
 public class NodeGroup extends BaseModel {
     @Column(name = "name")
     private String name;
+
     @Column(name = "code")
     private String code;
 

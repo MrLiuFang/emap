@@ -2,10 +2,8 @@ package com.pepper.service.emap.event.impl;
 
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventListGroupDao;
-import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.EventListGroup;
 import com.pepper.service.emap.event.EventListGroupService;
-import com.pepper.service.emap.event.EventListService;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,7 +27,7 @@ public class EventListGroupServiceImpl extends BaseServiceImpl<EventListGroup> i
     }
 
     @Override
-    public List<EventListGroup> findAllByNodeIdAndStatusNot(String nodeId, String status) {
-        return eventListGroupDao.findAllByNodeIdAndStatusNot(nodeId, status);
+    public List<EventListGroup> findAllByNodeGroupCodeAndStatusNot(String nodeId, String status) {
+        return eventListGroupDao.findAllByNodeGroupCodeAndStatusNot(nodeId, status);
     }
 }

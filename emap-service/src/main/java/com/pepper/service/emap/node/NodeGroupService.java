@@ -18,4 +18,6 @@ public interface NodeGroupService extends BaseService<NodeGroup> {
     public List<NodeGroup> find(String code);
 
     public List<NodeGroup> findAllByNodeId(String nodeId);
+
+    public List<String> findNodeGroupCodeByNodeId(String nodeId);
 }

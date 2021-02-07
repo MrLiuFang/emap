@@ -1,8 +1,8 @@
 package com.pepper.service.emap.event.impl;
 
 import java.nio.channels.Channel;
-import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Resource;
 
@@ -13,17 +13,11 @@ import com.pepper.model.emap.node.Node;
 import com.pepper.model.emap.node.NodeGroup;
 import com.pepper.service.emap.event.EventListGroupService;
 import com.pepper.service.emap.node.NodeService;
-import com.sun.org.apache.xalan.internal.lib.NodeInfo;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.domain.Page;
@@ -169,6 +163,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		Node node = nodeDao.findFirstBySourceCode(eventList.getSourceCode());
 		List<NodeGroup> list = nodeGroupDao.findAllByNodeId(node.getId());
 		String eventGroupId = UUID.randomUUID().toString();
+		AtomicReference<String> nodeGroupCode= new AtomicReference<>("");
 		list.forEach(nodeGroup -> {
 			Optional<Node> optional = nodeDao.findById(nodeGroup.getNodeId());
 			if (optional.isPresent() && !Objects.equals(nodeGroup.getNodeId(),node.getId())){
@@ -181,7 +176,8 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 					eventList1.setEventName("关联事件");
 					eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
 					eventList1 = this.save(eventList1);
-					saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId());
+					nodeGroupCode.set(nodeGroup.getCode());
+					saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
 				}else if (node1.getOut()) {
 					try {
 						sendTcp(node1,true);
@@ -193,7 +189,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 			}
 		});
 		updateNodeStatus(node);
-		saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),true,eventGroupId,node.getId());
+		saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),true,eventGroupId,node.getId(),nodeGroupCode.get());
 	}
 
 	public void sendTcp(Node node,Boolean outIsOn) throws InterruptedException {
@@ -267,11 +263,12 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 
 
 
-	private void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId){
+	private void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId,String nodeGroupCode){
 		EventListGroup eventListGroup = new EventListGroup();
 		eventListGroup.setEventId(eventId);
 		eventListGroup.setLevel(warningLevel);
 		eventListGroup.setIsMaster(isMaster);
+		eventListGroup.setNodeGroupCode(nodeGroupCode);
 		eventListGroup.setStatus("A");
 		eventListGroup.setEventGroupId(eventGroupId);
 		eventListGroup.setNodeId(nodeId);

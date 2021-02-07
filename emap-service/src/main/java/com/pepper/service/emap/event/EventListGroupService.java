@@ -14,5 +14,5 @@ public interface EventListGroupService extends BaseService<EventListGroup> {
 
     public List<EventListGroup> findAllByEventId(String eventId);
 
-    public List<EventListGroup> findAllByNodeIdAndStatusNot(String nodeId,String status);
+    public List<EventListGroup> findAllByNodeGroupCodeAndStatusNot(String nodeId, String status);
 }

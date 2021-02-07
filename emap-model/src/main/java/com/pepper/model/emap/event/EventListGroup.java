@@ -24,6 +24,9 @@ public class EventListGroup extends BaseModel {
     @Column(name = "event_group_id")
     private String eventGroupId;
 
+    @Column(name = "node_group_ode")
+    private String nodeGroupCode;
+
     @Column(name = "node_id")
     private String nodeId;
 
