@@ -115,7 +115,7 @@ public class Node extends BaseModel {
 	@Column(name = "is_camera")
 	private Boolean isCamera;
 
-	@Column(name = "line_path",length = 500)
+	@Column(name = "line_path",columnDefinition = " LONGTEXT ")
 	private String line;
 
 	@Column(name = "port")
