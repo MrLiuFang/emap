@@ -11,7 +11,7 @@ import java.util.List;
  * @author: 雄大
  * @create: 2021-02-04 15:48
  */
-public interface NodeGroupDao extends BaseDao<NodeGroup> {
+public interface NodeGroupDao extends BaseDao<NodeGroup> ,NodeGroupDaoEx {
 
     public void deleteAllByCode(String code);
 
@@ -22,4 +22,5 @@ public interface NodeGroupDao extends BaseDao<NodeGroup> {
 
     @Query(" select code from NodeGroup where nodeId =:nodeId group by code")
     public List<String> findNodeGroupCodeByNodeId(String nodeId);
+
 }

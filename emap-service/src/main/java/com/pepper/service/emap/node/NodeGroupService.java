@@ -1,5 +1,6 @@
 package com.pepper.service.emap.node;
 
+import com.pepper.core.Pager;
 import com.pepper.core.base.BaseService;
 import com.pepper.model.emap.node.NodeClassify;
 import com.pepper.model.emap.node.NodeGroup;
@@ -20,4 +21,6 @@ public interface NodeGroupService extends BaseService<NodeGroup> {
     public List<NodeGroup> findAllByNodeId(String nodeId);
 
     public List<String> findNodeGroupCodeByNodeId(String nodeId);
+
+    public Pager<NodeGroup> findNavigator(Pager<NodeGroup> pager, String code, String name );
 }

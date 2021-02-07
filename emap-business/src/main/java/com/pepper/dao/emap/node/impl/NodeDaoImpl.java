@@ -24,8 +24,6 @@ public class NodeDaoImpl implements NodeDaoEx<Node> {
 	@Override
 	public Pager<Node> findNavigator(Pager<Node> pager,Map<String, Object> parameter) {
 		StringBuffer jpql = new StringBuffer("from Node where id =:id");
-		parameter = new HashMap<String, Object>();
-		parameter.put("id", "value");
 		pager = baseDao.findNavigator(pager, jpql.toString(), parameter);
 		return pager;
 	}

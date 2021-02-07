@@ -1,5 +1,6 @@
 package com.pepper.service.emap.node.impl;
 
+import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.node.NodeGroupDao;
 import com.pepper.model.emap.node.NodeGroup;
@@ -40,5 +41,10 @@ public class NodeGroupServiceImpl extends BaseServiceImpl<NodeGroup> implements 
     @Override
     public List<String> findNodeGroupCodeByNodeId(String nodeId) {
         return nodeGroupDao.findNodeGroupCodeByNodeId(nodeId);
+    }
+
+    @Override
+    public Pager<NodeGroup> findNavigator(Pager<NodeGroup> pager, String code, String name) {
+        return nodeGroupDao.findNavigator(pager,code,name);
     }
 }

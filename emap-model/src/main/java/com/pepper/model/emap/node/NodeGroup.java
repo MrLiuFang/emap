@@ -26,4 +26,12 @@ public class NodeGroup extends BaseModel {
 
     @Column(name = "node_id")
     private String nodeId;
+
+    public NodeGroup() {
+    }
+
+    public NodeGroup(String name, String code) {
+        this.name = name;
+        this.code = code;
+    }
 }
