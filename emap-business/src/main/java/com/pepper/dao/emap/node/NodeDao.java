@@ -27,7 +27,7 @@ public interface NodeDao extends BaseDao<Node> , NodeDaoEx<Node> {
 	 * @return
 	 */
 	@Query("select distinct t2 from EventList t1 join Node t2 on t1.sourceCode = t2.sourceCode join Map t3 on t2.mapId = t3.id"
-			+ " where t1.status <> 'P' AND t2.x <> '' AND t2.x IS NOT NULL AND t2.y <> '' AND t2.y IS NOT NULL and t3.id = ?1  ")
+			+ " where t1.status <> 'P' and t3.id = ?1  ")
 	public List<Node> findByMapIdAndHasEvent(String mapId);
 	
 	/**

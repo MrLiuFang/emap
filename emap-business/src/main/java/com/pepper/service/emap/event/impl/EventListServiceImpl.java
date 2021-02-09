@@ -168,17 +168,18 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 			Optional<Node> optional = nodeDao.findById(nodeGroup.getNodeId());
 			if (optional.isPresent() && !Objects.equals(nodeGroup.getNodeId(),node.getId())){
 				Node node1 = optional.get();
-				if (node1.getZone()) {
+				if (Objects.nonNull(node1.getZone()) && node1.getZone()) {
 					EventList eventList1 = new EventList();
 					eventList1.setMaster(false);
 					eventList1.setSourceCode(node1.getSourceCode());
 					eventList1.setWarningLevel(-1);
 					eventList1.setEventName("关联事件");
+					eventList1.setStatus("W");
 					eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
 					eventList1 = this.save(eventList1);
 					nodeGroupCode.set(nodeGroup.getCode());
 					saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
-				}else if (node1.getOut()) {
+				}else if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
 					try {
 						sendTcp(node1,true);
 					} catch (InterruptedException e) {
@@ -221,47 +222,45 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 	@Override
 	public void send(Node node,String cmd) throws InterruptedException {
-		String host = node.getIp();
+		String host = node.getOutIp();
 		int port =node.getPort();
-		Channel channel;
-		final EventLoopGroup group = new NioEventLoopGroup();
-
-		Bootstrap b = new Bootstrap();
-		b.group(group).channel(NioSocketChannel.class)  // 使用NioSocketChannel来作为连接用的channel类
-				.handler(new ChannelInitializer<SocketChannel>() { // 绑定连接初始化器
-					@Override
-					public void initChannel(SocketChannel socketChannel) throws Exception {
-						System.out.println("正在连接中...");
-//						ChannelPipeline pipeline = socketChannel.pipeline();
-//						ByteBuf delimiter = Unpooled.copiedBuffer("\n".getBytes());
-//						pipeline
-//								.addLast(new DelimiterBasedFrameDecoder(1024,delimiter))
-//								.addLast(new StringDecoder(Charset.forName("UTF-8")))
-//								.addLast(new StringEncoder(Charset.forName("UTF-8")))
-//								.addLast(new ClientHandler());
-
-					}
-				});
-		//发起异步连接请求，绑定连接端口和host信息
-		final ChannelFuture future = b.connect(host, port).sync();
-		String finalCmd = cmd;
-		future.addListener(new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture arg0) throws Exception {
-				if (future.isSuccess()) {
-					System.out.println("连接服务器成功");
-					arg0.channel().writeAndFlush(finalCmd.getBytes());
-				} else {
-					System.out.println("连接服务器失败");
-					future.cause().printStackTrace();
-					group.shutdownGracefully(); //关闭线程组
-				}
-			}
-		});
-		group.shutdownGracefully();
+//		Channel channel;
+//		final EventLoopGroup group = new NioEventLoopGroup();
+//
+//		Bootstrap b = new Bootstrap();
+//		b.group(group).channel(NioSocketChannel.class)  // 使用NioSocketChannel来作为连接用的channel类
+//				.handler(new ChannelInitializer<SocketChannel>() { // 绑定连接初始化器
+//					@Override
+//					public void initChannel(SocketChannel socketChannel) throws Exception {
+//						System.out.println("正在连接中...");
+////						ChannelPipeline pipeline = socketChannel.pipeline();
+////						ByteBuf delimiter = Unpooled.copiedBuffer("\n".getBytes());
+////						pipeline
+////								.addLast(new DelimiterBasedFrameDecoder(1024,delimiter))
+////								.addLast(new StringDecoder(Charset.forName("UTF-8")))
+////								.addLast(new StringEncoder(Charset.forName("UTF-8")))
+////								.addLast(new ClientHandler());
+//
+//					}
+//				});
+//		//发起异步连接请求，绑定连接端口和host信息
+//		final ChannelFuture future = b.connect(host, port).sync();
+//		String finalCmd = cmd;
+//		future.addListener(new ChannelFutureListener() {
+//			@Override
+//			public void operationComplete(ChannelFuture arg0) throws Exception {
+//				if (future.isSuccess()) {
+//					System.out.println("连接服务器成功");
+//					arg0.channel().writeAndFlush(finalCmd.getBytes());
+//				} else {
+//					System.out.println("连接服务器失败");
+//					future.cause().printStackTrace();
+//					group.shutdownGracefully(); //关闭线程组
+//				}
+//			}
+//		});
+//		group.shutdownGracefully();
 	}
-
-
 
 	private void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId,String nodeGroupCode){
 		EventListGroup eventListGroup = new EventListGroup();

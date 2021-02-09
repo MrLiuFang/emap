@@ -118,6 +118,9 @@ public class Node extends BaseModel {
 	@Column(name = "line_path",columnDefinition = " LONGTEXT ")
 	private String line;
 
+	@Column(name = "out_ip")
+	private String outIp;
+
 	@Column(name = "port")
 	private Integer port;
 
@@ -143,10 +146,10 @@ public class Node extends BaseModel {
 	private String disabledIcon;
 
 	@Column(name = "is_zone")
-	private Boolean isZone;
+	private Boolean zone;
 
 	@Column(name = "is_out")
-	private Boolean isOut;
+	private Boolean out;
 
 	@Column(name = "cam_ip")
 	private String camIp;
@@ -192,20 +195,29 @@ public class Node extends BaseModel {
 		this.camCmd = camCmd;
 	}
 
+
 	public Boolean getZone() {
-		return isZone;
+		return zone;
+	}
+
+	public String getOutIp() {
+		return outIp;
+	}
+
+	public void setOutIp(String outIp) {
+		this.outIp = outIp;
 	}
 
 	public void setZone(Boolean zone) {
-		isZone = zone;
+		this.zone = zone;
 	}
 
 	public Boolean getOut() {
-		return isOut;
+		return out;
 	}
 
 	public void setOut(Boolean out) {
-		isOut = out;
+		this.out = out;
 	}
 
 	public Integer getPort() {
