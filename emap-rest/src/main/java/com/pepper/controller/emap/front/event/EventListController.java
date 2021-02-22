@@ -805,7 +805,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 				String cmd = "";
 				Node node1 = nodeService.findById(nodeGroup.getNodeId());
 				if (Objects.nonNull(node1)) {
-					if (node1.getOut()) {
+					if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
 						//查node1是否有两个设备组 如果没有就直接关灯，如果有 就查另外一个组是否有事件 未归档  有 没有归档的事件不光灯，否则关灯
 						List<String> list1 = nodeGroupService.findNodeGroupCodeByNodeId(node1.getId());
 						if (list1.size()>1){
@@ -840,13 +840,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 						}else {
 							try {
 								Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
-								if (node1.getOutPort() == 1) {
+								if (Objects.nonNull(node1.getOutPort()) && node1.getOutPort() == 1) {
 									if (node2.getOutIsOn()) {
 										cmd = cmd1;
 									} else {
 										cmd = cmd0;
 									}
-								} else if (node1.getOutPort() == 2) {
+								} else if (Objects.nonNull(node1.getOutPort()) && node1.getOutPort() == 2) {
 									if (node2.getOutIsOn()) {
 										cmd = cmd2;
 									} else {

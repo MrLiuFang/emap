@@ -203,13 +203,13 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 			return;
 		}
 		Node node1 = nodeService.findFirstByIpAndPortAndIdNot(node.getIp(), node.getPort(), node.getId());
-		if (node.getOutPort() == 1) {
+		if (Objects.nonNull(node.getOutPort()) && node.getOutPort() == 1) {
 			if (node1.getOutIsOn()) {
 				cmd = cmd3;
 			} else {
 				cmd = cmd1;
 			}
-		} else if (node.getOutPort() == 2) {
+		} else if (Objects.nonNull(node.getOutPort()) && node.getOutPort() == 2) {
 			if (node1.getOutIsOn()) {
 				cmd = cmd3;
 			} else {
