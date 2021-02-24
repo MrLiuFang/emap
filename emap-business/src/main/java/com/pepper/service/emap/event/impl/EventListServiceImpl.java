@@ -149,6 +149,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 
 	@Override
+	public List<Map<String, Object>> currentMonthNotRelationNode(Date startDate, Date endDate) {
+		return eventListDao.currentMonthNotRelationNode(startDate, endDate);
+	}
+
+	@Override
 	public List<Map<String, Object>> yearTypeCount(String where, Date startDate, Date endDate) {
 		return eventListDao.yearTypeCount(where,startDate,endDate);
 	}

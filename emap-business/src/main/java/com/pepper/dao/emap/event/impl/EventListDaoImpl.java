@@ -214,7 +214,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		jpql.append(" left join NodeType nt on n.nodeTypeId = nt.id ");
 		jpql.append(" left join Map m on n.mapId = m.id ");
 		jpql.append(" left join BuildingInfo bi on m.buildId = bi.id ");
-		jpql.append(" left join SiteInfo si on si.id = bi.siteInfoId ");
+//		jpql.append(" left join SiteInfo si on si.id = bi.siteInfoId ");
 		jpql.append(" left join AdminUser au on au.id = el.operator ");
 		jpql.append(" left join ActionList al on el.id = al.eventListId ");
 		jpql.append(" left join EventDispatch ed on el.id = ed.eventListId ");
@@ -317,10 +317,10 @@ public class EventListDaoImpl  implements EventListDaoEx {
 			jpql.append(" and bi.name like :buildName ");
 			searchParameter.put("buildName", "%"+buildName+"%");
 		}
-		if(StringUtils.hasText(siteName)) {
-			jpql.append(" and si.name like :siteName ");
-			searchParameter.put("siteName", "%"+siteName+"%");
-		}
+//		if(StringUtils.hasText(siteName)) {
+//			jpql.append(" and si.name like :siteName ");
+//			searchParameter.put("siteName", "%"+siteName+"%");
+//		}
 		
 		if(StringUtils.hasText(operatorId)) {
 			jpql.append(" and au.id = :operator ");
