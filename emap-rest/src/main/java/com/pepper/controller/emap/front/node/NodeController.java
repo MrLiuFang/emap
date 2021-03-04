@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
+import javax.persistence.Column;
 import javax.servlet.ServletOutputStream;
 
 import com.pepper.model.emap.map.MapImageUrl;
@@ -147,6 +148,21 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		excelColumn.add(ExcelColumn.build("readerId", "readerId"));
 		excelColumn.add(ExcelColumn.build("readerIo", "readerIo"));
 		excelColumn.add(ExcelColumn.build("remark", "remark"));
+		excelColumn.add(ExcelColumn.build("line", "line"));
+		excelColumn.add(ExcelColumn.build("outIp", "outIp"));
+		excelColumn.add(ExcelColumn.build("port", "port"));
+		excelColumn.add(ExcelColumn.build("inPort", "inPort"));
+		excelColumn.add(ExcelColumn.build("outPort", "outPort"));
+//		excelColumn.add(ExcelColumn.build("icon", "icon"));
+//		excelColumn.add(ExcelColumn.build("alarmIcon", "alarmIcon"));
+//		excelColumn.add(ExcelColumn.build("problemIcon", "problemIcon"));
+//		excelColumn.add(ExcelColumn.build("disabledIcon", "disabledIcon"));
+		excelColumn.add(ExcelColumn.build("zone", "zone"));
+		excelColumn.add(ExcelColumn.build("out", "out"));
+		excelColumn.add(ExcelColumn.build("camIp", "camIp"));
+		excelColumn.add(ExcelColumn.build("camPort", "camPort"));
+		excelColumn.add(ExcelColumn.build("camCmd", "camCmd"));
+
 		new ExportExcelUtil().export((Collection<?>) pager.getData().get("node"), outputStream, excelColumn);
 	}
 
@@ -523,10 +539,20 @@ public class NodeController extends BaseControllerImpl implements BaseController
 				}
 //			}
 			node.setRemark(getCellValue(row.getCell(22)).toString());
+			node.setLine(getCellValue(row.getCell(23)).toString());
+			node.setOutIp(getCellValue(row.getCell(24)).toString());
+			node.setPort(StringUtils.hasText(getCellValue(row.getCell(25)).toString())?Integer.valueOf(getCellValue(row.getCell(25)).toString()):null);
+			node.setInPort(StringUtils.hasText(getCellValue(row.getCell(26)).toString())?Integer.valueOf(getCellValue(row.getCell(26)).toString()):null);
+			node.setOutPort(StringUtils.hasText(getCellValue(row.getCell(27)).toString())?Integer.valueOf(getCellValue(row.getCell(27)).toString()):null);
+			node.setZone(StringUtils.hasText(getCellValue(row.getCell(28)).toString())?Boolean.valueOf(getCellValue(row.getCell(28)).toString()):null);
+			node.setOut(StringUtils.hasText(getCellValue(row.getCell(29)).toString())?Boolean.valueOf(getCellValue(row.getCell(29)).toString()):null);
+			node.setOutIp(getCellValue(row.getCell(30)).toString());
+			node.setCamPort(getCellValue(row.getCell(31)).toString());
+			node.setCamCmd(getCellValue(row.getCell(32)).toString());
 			Node oldNode = nodeService.findByCode(node.getCode());
 			if (Objects.nonNull(oldNode)) {
 				node.setId(oldNode.getId());
-				String isDelete = getCellValue(row.getCell(23)).toString();
+				String isDelete = getCellValue(row.getCell(33)).toString();
 				if(Objects.equals(isDelete.trim(), "是")) {
 					nodeService.deleteById(oldNode.getId());
 					continue;
@@ -641,7 +667,37 @@ public class NodeController extends BaseControllerImpl implements BaseController
 		if (!getCellValue(row.getCell(22)).toString().equals("remark")) {
 			return false;
 		}
-		if (!getCellValue(row.getCell(23)).toString().equals("isDelete")) {
+		if (!getCellValue(row.getCell(23)).toString().equals("line")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(24)).toString().equals("outIp")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(25)).toString().equals("port")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(26)).toString().equals("inPort")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(27)).toString().equals("outPort")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(28)).toString().equals("zone")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(29)).toString().equals("out")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(30)).toString().equals("camIp")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(31)).toString().equals("camPort")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(32)).toString().equals("camCmd")) {
+			return false;
+		}
+		if (!getCellValue(row.getCell(33)).toString().equals("isDelete")) {
 			return false;
 		}
 		return true;

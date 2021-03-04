@@ -135,10 +135,10 @@ public class EventScheduler {
 			//特级
 			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
-					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent());
+//					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent());
 					eventList.setIsSpecial(true);
 					eventListService.update(eventList);
-					send(eventList,eventRule,user);
+//					send(eventList,eventRule,user);
 					return ;
 				}else {
 					eventList.setIsNotFoundEmployee(true);
@@ -156,28 +156,28 @@ public class EventScheduler {
 				Integer  time = Integer.valueOf(simpleDateFormat.format(new Date()).replaceFirst("^0*", "").replace(":", ""));
 				if(to<from) {
 					if((time>=from&&time<=2359)||(time<=to&&time>=1)) {
-						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
-						send(eventList,eventRule,user);
+//						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+//						send(eventList,eventRule,user);
 						return ;
 					}
 				}else {
 					if(time>=from&&time<=to) {
-						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
-						send(eventList,eventRule,user);
+//						AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+//						send(eventList,eventRule,user);
 						return ;
 					}
 				}
 			}
 			//紧急
 			if(eventRule.getWarningLevel()!=null && eventList.getWarningLevel()>=eventRule.getWarningLevel()) {
-				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
-				send(eventList,eventRule,user);
+//				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+//				send(eventList,eventRule,user);
 				return ;
 			}
 			
 			if(eventList.getCreateDate()!= null && eventRule.getTimeOut() != null && (new Date().getTime() - eventList.getCreateDate().getTime())/1000>eventRule.getTimeOut()) {
-				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
-				send(eventList,eventRule,user);
+//				AdminUser user = assignment(eventRule.getDepartmentId(),eventList,eventRule.getPushContent());
+//				send(eventList,eventRule,user);
 				return ;
 			}
 			

@@ -12,6 +12,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -602,7 +607,8 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 	@RequestMapping(value = "/nodeTypeEventStat")
 	@ResponseBody
 	public Object nodeTypeEventStat(String nodeTypeId,String mapId) {
-		return findNodeTypeEventStat(nodeTypeId,mapId);
+		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
+		return findNodeTypeEventStat(nodeTypeId,mapId,pager);
 	}
 	
 	@RequestMapping(value = "/nodeTypeEventStat/export")
@@ -636,7 +642,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		table.addCell(new Paragraph("設備數量", FontChinese));
 		table.addCell(new Paragraph("當天發生事件的設備數量", FontChinese));
 		table.addCell(new Paragraph("一周内發生事件的設備數量", FontChinese));
-		List<Map<String,Object>> list = findNodeTypeEventStat(nodeTypeId,mapId).getResults();
+		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
+		pager.setPageSize(Integer.MAX_VALUE);
+		List<Map<String,Object>> list = findNodeTypeEventStat(nodeTypeId,mapId,pager).getResults();
 		for (Map<String,Object> map : list) {
 			table.addCell(new Paragraph(map.get("nodeTypeName").toString(), FontChinese));
 			table.addCell(new Paragraph(map.get("mapName").toString(), FontChinese));
@@ -810,18 +818,22 @@ public class ReportController extends BaseControllerImpl implements BaseControll
         outputStream.close();
 		return null;
 	}
-	
-	private Pager<Map<String,Object>> findNodeTypeEventStat(String nodeTypeId,String mapId){
-		Pager<Map<String,Object>> pager = new Pager<Map<String,Object>>();
+
+	private Pager<Map<String,Object>> findNodeTypeEventStat(String nodeTypeId,String mapId,Pager pager ){
+
 		pager = reportService.findNodeTypeAndMap(pager,nodeTypeId, mapId);
 		List<Map<String,Object>> retusnList = new ArrayList<Map<String,Object>>();
-		for(Map<String,Object> map : pager.getResults()){
+		for(Object object : pager.getResults()){
+			Map<String,Object> map = (Map<String, Object>) object;
 			Map<String,Object> returnMap = new HashMap<String, Object>();
 			returnMap.put("nodeTypeName", map.get("nodeTypeName"));
 			returnMap.put("mapName", map.get("mapName"));
 			returnMap.put("nodeCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString()));
-			returnMap.put("dayEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString()));
-			returnMap.put("weekEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString()));
+			LocalDateTime today_start = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+			LocalDateTime today_end = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+			returnMap.put("dayEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString(),Date.from( today_start.atZone( ZoneId.systemDefault()).toInstant()),Date.from( today_end.atZone( ZoneId.systemDefault()).toInstant())));
+			LocalDateTime day7 = today_start.minus( 7, ChronoUnit.DAYS );
+			returnMap.put("weekEventCount", reportService.findNodeCout(map.get("nodeTypeId").toString(), map.get("mapId").toString(),Date.from( day7.atZone( ZoneId.systemDefault()).toInstant()),Date.from( today_end.atZone( ZoneId.systemDefault()).toInstant())));
 			retusnList.add(returnMap);
 		}
 		pager.setResults(retusnList);

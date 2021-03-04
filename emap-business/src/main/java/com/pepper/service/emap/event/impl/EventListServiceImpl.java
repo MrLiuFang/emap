@@ -1,11 +1,13 @@
 package com.pepper.service.emap.event.impl;
 
 import java.nio.channels.Channel;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Resource;
 
+import com.alibaba.druid.sql.visitor.functions.If;
 import com.pepper.dao.emap.node.NodeDao;
 import com.pepper.dao.emap.node.NodeGroupDao;
 import com.pepper.model.emap.event.EventListGroup;
@@ -14,10 +16,16 @@ import com.pepper.model.emap.node.NodeGroup;
 import com.pepper.service.emap.event.EventListGroupService;
 import com.pepper.service.emap.node.NodeService;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.domain.Page;
@@ -173,18 +181,17 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 			Optional<Node> optional = nodeDao.findById(nodeGroup.getNodeId());
 			if (optional.isPresent() && !Objects.equals(nodeGroup.getNodeId(),node.getId())){
 				Node node1 = optional.get();
-				if (Objects.nonNull(node1.getZone()) && node1.getZone()) {
-					EventList eventList1 = new EventList();
-					eventList1.setMaster(false);
-					eventList1.setSourceCode(node1.getSourceCode());
-					eventList1.setWarningLevel(-1);
-					eventList1.setEventName("关联事件");
-					eventList1.setStatus("W");
-					eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
-					eventList1 = this.save(eventList1);
-					nodeGroupCode.set(nodeGroup.getCode());
-					saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
-				}else if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
+				EventList eventList1 = new EventList();
+				eventList1.setMaster(false);
+				eventList1.setSourceCode(node1.getSourceCode());
+				eventList1.setWarningLevel(-1);
+				eventList1.setEventName("关联事件");
+				eventList1.setStatus("W");
+				eventList1.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
+				eventList1 = this.save(eventList1);
+				nodeGroupCode.set(nodeGroup.getCode());
+				saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
+				if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
 					try {
 						sendTcp(node1,true);
 					} catch (InterruptedException e) {
@@ -204,18 +211,18 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		String cmd2 = "000100000008010F006400040102";
 		String cmd3 = "000100000008010F006400040103";
 		String cmd = "";
-		if (Objects.isNull(node.getPort()) || !StringUtils.hasText(node.getIp())) {
+		if (Objects.isNull(node.getPort()) || !StringUtils.hasText(node.getOutIp())) {
 			return;
 		}
-		Node node1 = nodeService.findFirstByIpAndPortAndIdNot(node.getIp(), node.getPort(), node.getId());
+		Node node1 = nodeService.findFirstByIpAndPortAndIdNot(node.getOutIp(), node.getPort(), node.getId());
 		if (Objects.nonNull(node.getOutPort()) && node.getOutPort() == 1) {
-			if (node1.getOutIsOn()) {
+			if (Objects.nonNull(node1) && Objects.isNull(node1.getOutIsOn()) && node1.getOutIsOn()) {
 				cmd = cmd3;
 			} else {
 				cmd = cmd1;
 			}
 		} else if (Objects.nonNull(node.getOutPort()) && node.getOutPort() == 2) {
-			if (node1.getOutIsOn()) {
+			if (Objects.nonNull(node1) && node1.getOutIsOn()) {
 				cmd = cmd3;
 			} else {
 				cmd = cmd2;
@@ -227,44 +234,83 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 	@Override
 	public void send(Node node,String cmd) throws InterruptedException {
-		String host = node.getOutIp();
-		int port =node.getPort();
-		Channel channel;
-		final EventLoopGroup group = new NioEventLoopGroup();
+		try {
+			System.out.println("开始发送TCP");
+			String host = node.getOutIp();
+			int port =node.getPort();
+			System.out.println("host->"+host+":"+port);
+			// 首先，netty通过ServerBootstrap启动服务端
+			Bootstrap client = new Bootstrap();
 
-		Bootstrap b = new Bootstrap();
-		b.group(group).channel(NioSocketChannel.class)  // 使用NioSocketChannel来作为连接用的channel类
-				.handler(new ChannelInitializer<SocketChannel>() { // 绑定连接初始化器
-					@Override
-					public void initChannel(SocketChannel socketChannel) throws Exception {
-						System.out.println("正在连接中...");
+			//第1步 定义线程组，处理读写和链接事件，没有了accept事件
+			EventLoopGroup group = new NioEventLoopGroup();
+			client.group(group );
+
+			//第2步 绑定客户端通道
+			client.channel(NioSocketChannel.class);
+
+			//第3步 给NIoSocketChannel初始化handler， 处理读写事件
+			client.handler(new ChannelInitializer<NioSocketChannel>() {  //通道是NioSocketChannel
+				@Override
+				protected void initChannel(NioSocketChannel ch) throws Exception {
+					//字符串编码器，一定要加在SimpleClientHandler 的上面
+					ch.pipeline().addLast(new StringEncoder());
+					ch.pipeline().addLast(new DelimiterBasedFrameDecoder(
+							Integer.MAX_VALUE, Delimiters.lineDelimiter()[0]));
+					//找到他的管道 增加他的handler
+					ch.pipeline().addLast(new ClientHandler());
+				}
+			});
+
+			//连接服务器
+			ChannelFuture future = client.connect(host, port).sync();
+			System.out.println("发送指令："+cmd);
+			ByteBuf buff = Unpooled.buffer();
+			// 对接需要16进制
+			buff.writeBytes(ConvertCode.hexString2Bytes(cmd));
+			future.channel().writeAndFlush(buff);
+			group.shutdownGracefully();
+
+
+//			Channel channel;
+//			final EventLoopGroup group = new NioEventLoopGroup();
+//
+//			Bootstrap b = new Bootstrap();
+//			b.group(group).channel(NioSocketChannel.class)  // 使用NioSocketChannel来作为连接用的channel类
+//					.handler(new ChannelInitializer<SocketChannel>() { // 绑定连接初始化器
+//						@Override
+//						public void initChannel(SocketChannel socketChannel) throws Exception {
+//							System.out.println("正在连接中...");
 //						ChannelPipeline pipeline = socketChannel.pipeline();
-//						ByteBuf delimiter = Unpooled.copiedBuffer("\n".getBytes());
+////						ByteBuf delimiter = Unpooled.copiedBuffer("\n".getBytes());
 //						pipeline
-//								.addLast(new DelimiterBasedFrameDecoder(1024,delimiter))
+////								.addLast(new DelimiterBasedFrameDecoder(1024,delimiter))
 //								.addLast(new StringDecoder(Charset.forName("UTF-8")))
 //								.addLast(new StringEncoder(Charset.forName("UTF-8")))
 //								.addLast(new ClientHandler());
+//
+//						}
+//					});
+//			//发起异步连接请求，绑定连接端口和host信息
+//			final ChannelFuture future = b.connect(host, port).sync();
+//			String finalCmd = cmd;
+//			future.addListener(new ChannelFutureListener() {
+//				@Override
+//				public void operationComplete(ChannelFuture arg0) throws Exception {
+//					if (future.isSuccess()) {
+//						System.out.println("连接服务器成功");
+//						arg0.channel().writeAndFlush(finalCmd.getBytes());
+////						group.shutdownGracefully();
+//					} else {
+//						System.out.println("连接服务器失败");
+//						future.cause().printStackTrace();
+//						group.shutdownGracefully(); //关闭线程组
+//					}
+//				}
+//			});
 
-					}
-				});
-		//发起异步连接请求，绑定连接端口和host信息
-		final ChannelFuture future = b.connect(host, port).sync();
-		String finalCmd = cmd;
-		future.addListener(new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture arg0) throws Exception {
-				if (future.isSuccess()) {
-					System.out.println("连接服务器成功");
-					arg0.channel().writeAndFlush(finalCmd.getBytes());
-				} else {
-					System.out.println("连接服务器失败");
-					future.cause().printStackTrace();
-					group.shutdownGracefully(); //关闭线程组
-				}
-			}
-		});
-		group.shutdownGracefully();
+		}catch (Exception ex){
+		}
 	}
 
 	private void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId,String nodeGroupCode){

@@ -817,13 +817,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 									if (Objects.nonNull(list2) && list2.size()<=0){
 										Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
 										if (node1.getOutPort() == 1) {
-											if (node2.getOutIsOn()) {
+											if (Objects.nonNull(node2) && Objects.nonNull(node2) && node2.getOutIsOn()) {
 												cmd4 = cmd1;
 											} else {
 												cmd4 = cmd0;
 											}
 										} else if (node1.getOutPort() == 2) {
-											if (node2.getOutIsOn()) {
+											if (Objects.nonNull(node2) && Objects.nonNull(node2) &&  node2.getOutIsOn()) {
 												cmd4 = cmd2;
 											} else {
 												cmd4 = cmd0;
@@ -841,13 +841,13 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 							try {
 								Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
 								if (Objects.nonNull(node1.getOutPort()) && node1.getOutPort() == 1) {
-									if (node2.getOutIsOn()) {
+									if (Objects.nonNull(node2) && Objects.nonNull(node2) && node2.getOutIsOn()) {
 										cmd = cmd1;
 									} else {
 										cmd = cmd0;
 									}
 								} else if (Objects.nonNull(node1.getOutPort()) && node1.getOutPort() == 2) {
-									if (node2.getOutIsOn()) {
+									if (Objects.nonNull(node2) && Objects.nonNull(node2) && node2.getOutIsOn()) {
 										cmd = cmd2;
 									} else {
 										cmd = cmd0;
