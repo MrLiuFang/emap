@@ -41,5 +41,5 @@ public interface NodeDao extends BaseDao<Node> , NodeDaoEx<Node> {
 	
 	public List<Node> findByNameLike(String name);
 
-	public Node findFirstByIpAndPortAndIdNot(String ip,Integer port,String id);
+	public Node findFirstByOutIpAndPortAndIdNot(String ip, Integer port, String id);
 }

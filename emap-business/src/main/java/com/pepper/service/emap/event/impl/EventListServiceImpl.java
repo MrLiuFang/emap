@@ -1,13 +1,11 @@
 package com.pepper.service.emap.event.impl;
 
-import java.nio.channels.Channel;
-import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Resource;
 
-import com.alibaba.druid.sql.visitor.functions.If;
 import com.pepper.dao.emap.node.NodeDao;
 import com.pepper.dao.emap.node.NodeGroupDao;
 import com.pepper.model.emap.event.EventListGroup;
@@ -20,11 +18,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
-import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.dubbo.config.annotation.Service;
@@ -37,6 +33,8 @@ import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventListDao;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.service.emap.event.EventListService;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service(interfaceClass=EventListService.class)
@@ -193,7 +191,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 				saveEventListGroup(eventList1.getId(),eventList1.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
 				if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
 					try {
-						sendTcp(node1,true);
+						sendTcp(node1,true,nodeGroup.getCode());
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -205,7 +203,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),true,eventGroupId,node.getId(),nodeGroupCode.get());
 	}
 
-	public void sendTcp(Node node,Boolean outIsOn) throws InterruptedException {
+	public void sendTcp(Node node,Boolean outIsOn,String nodeGroupCode) throws InterruptedException {
 		String cmd0 = "000100000008010F006400040100";
 		String cmd1 = "000100000008010F006400040101";
 		String cmd2 = "000100000008010F006400040102";
@@ -214,19 +212,19 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		if (Objects.isNull(node.getPort()) || !StringUtils.hasText(node.getOutIp())) {
 			return;
 		}
-		Node node1 = nodeService.findFirstByIpAndPortAndIdNot(node.getOutIp(), node.getPort(), node.getId());
-		if (Objects.nonNull(node.getOutPort()) && node.getOutPort() == 1) {
-			if (Objects.nonNull(node1) && Objects.isNull(node1.getOutIsOn()) && node1.getOutIsOn()) {
-				cmd = cmd3;
-			} else {
-				cmd = cmd1;
-			}
-		} else if (Objects.nonNull(node.getOutPort()) && node.getOutPort() == 2) {
-			if (Objects.nonNull(node1) && node1.getOutIsOn()) {
-				cmd = cmd3;
-			} else {
-				cmd = cmd2;
-			}
+		AtomicInteger outPort = new AtomicInteger(0);
+		List<Integer> list = this.nodeGroupDao.findAllOutPortOn(node.getOutIp(), node.getPort());
+		list.forEach(m->{
+			outPort.set(outPort.get() + m);
+		});
+		if (outPort.get() == 0){
+			cmd = cmd0;
+		}else if (outPort.get() == 1){
+			cmd = cmd1;
+		}else if (outPort.get() == 2){
+			cmd = cmd2;
+		}else if (outPort.get() == 3){
+			cmd = cmd3;
 		}
 		send(node,cmd);
 		node.setOutIsOn(outIsOn);
@@ -313,7 +311,8 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		}
 	}
 
-	private void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId,String nodeGroupCode){
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId,String nodeGroupCode){
 		EventListGroup eventListGroup = new EventListGroup();
 		eventListGroup.setEventId(eventId);
 		eventListGroup.setLevel(warningLevel);

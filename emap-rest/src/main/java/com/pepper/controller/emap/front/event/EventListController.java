@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -727,7 +728,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	@RequestMapping("/workbench/filed")
 	@ResponseBody
 	@Authorize(authorizeResources = false)
-	public Object filed(@RequestBody Map<String,Object> map) {
+	public Object filed(@RequestBody Map<String,Object> map) throws InterruptedException {
 		ResultData resultData = new ResultData();
 		if(map.containsKey("helpList")) {
 			Map<String,Object> helpList = (Map<String, Object>) map.get("helpList");
@@ -800,69 +801,22 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			String cmd1 = "000100000008010F006400040101";
 			String cmd2 = "000100000008010F006400040102";
 			String cmd3 = "000100000008010F006400040103";
-
-			listNodeGroup.forEach(nodeGroup -> {
-				String cmd = "";
-				Node node1 = nodeService.findById(nodeGroup.getNodeId());
-				if (Objects.nonNull(node1)) {
-					if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
-						//查node1是否有两个设备组 如果没有就直接关灯，如果有 就查另外一个组是否有事件 未归档  有 没有归档的事件不光灯，否则关灯
-						List<String> list1 = nodeGroupService.findNodeGroupCodeByNodeId(node1.getId());
-						if (list1.size()>1){
-							list1.forEach(s->{
-								String cmd4 = "";
-								if (!Objects.equals(s,nodeGroup.getCode())){
-									//查询其它设备组的事件
-									List<EventListGroup> list2 = eventListGroupService.findAllByNodeGroupCodeAndStatusNot( s,"P");
-									if (Objects.nonNull(list2) && list2.size()<=0){
-										Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
-										if (node1.getOutPort() == 1) {
-											if (Objects.nonNull(node2) && Objects.nonNull(node2) && node2.getOutIsOn()) {
-												cmd4 = cmd1;
-											} else {
-												cmd4 = cmd0;
-											}
-										} else if (node1.getOutPort() == 2) {
-											if (Objects.nonNull(node2) && Objects.nonNull(node2) &&  node2.getOutIsOn()) {
-												cmd4 = cmd2;
-											} else {
-												cmd4 = cmd0;
-											}
-										}
-										try {
-											eventListService.send(node1,cmd4);
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
-									}
-								}
-							});
-						}else {
-							try {
-								Node node2 = nodeService.findFirstByIpAndPortAndIdNot(node1.getIp(), node1.getPort(), node1.getId());
-								if (Objects.nonNull(node1.getOutPort()) && node1.getOutPort() == 1) {
-									if (Objects.nonNull(node2) && Objects.nonNull(node2) && node2.getOutIsOn()) {
-										cmd = cmd1;
-									} else {
-										cmd = cmd0;
-									}
-								} else if (Objects.nonNull(node1.getOutPort()) && node1.getOutPort() == 2) {
-									if (Objects.nonNull(node2) && Objects.nonNull(node2) && node2.getOutIsOn()) {
-										cmd = cmd2;
-									} else {
-										cmd = cmd0;
-									}
-								}
-								eventListService.send(node1,cmd);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						}
-						node.setOutIsOn(false);
-						nodeService.update(node);
-					}
-				}
+			String cmd = "";
+			AtomicInteger outPort = new AtomicInteger(0);
+			List<Integer> list1 = nodeGroupService.findAllOutPortOn(node.getOutIp(), node.getPort());
+			list1.forEach(m->{
+				outPort.set(outPort.get() + m);
 			});
+			if (outPort.get() == 0){
+				cmd = cmd0;
+			}else if (outPort.get() == 1){
+				cmd = cmd1;
+			}else if (outPort.get() == 2){
+				cmd = cmd2;
+			}else if (outPort.get() == 3){
+				cmd = cmd3;
+			}
+			eventListService.send(node,cmd);
 			node.setStatusUniversity(1);
 			nodeService.update(node);
 		}

@@ -23,4 +23,6 @@ public interface NodeGroupService extends BaseService<NodeGroup> {
     public List<String> findNodeGroupCodeByNodeId(String nodeId);
 
     public Pager<NodeGroup> findNavigator(Pager<NodeGroup> pager, String code, String name );
+
+    public List<Integer> findAllOutPortOn(String outIp, Integer port);
 }

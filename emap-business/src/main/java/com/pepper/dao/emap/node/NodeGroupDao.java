@@ -5,6 +5,7 @@ import com.pepper.model.emap.node.NodeGroup;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description:
@@ -22,5 +23,9 @@ public interface NodeGroupDao extends BaseDao<NodeGroup> ,NodeGroupDaoEx {
 
     @Query(" select code from NodeGroup where nodeId =:nodeId group by code")
     public List<String> findNodeGroupCodeByNodeId(String nodeId);
+
+    @Query( " select distinct nf.outPort  from EventListGroup eg join Node nf on eg.nodeId = nf.id\n" +
+            " where nf.outIp = :outIp and nf.port = :port and eg.status <> 'P'" )
+    public List<Integer> findAllOutPortOn(String outIp, Integer port);
 
 }

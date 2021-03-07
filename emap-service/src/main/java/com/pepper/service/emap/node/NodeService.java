@@ -48,7 +48,7 @@ public interface NodeService extends BaseService<Node> {
 
 	List<Node> findByNameLike(String name);
 
-	public Node findFirstByIpAndPortAndIdNot(String ip,Integer port,String id);
+	public Node findFirstByOutIpAndPortAndIdNot(String ip, Integer port, String id);
 
 	Node findFirstBySourceCode(String sourceCode);
 }

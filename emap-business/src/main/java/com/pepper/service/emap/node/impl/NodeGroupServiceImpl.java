@@ -47,4 +47,9 @@ public class NodeGroupServiceImpl extends BaseServiceImpl<NodeGroup> implements 
     public Pager<NodeGroup> findNavigator(Pager<NodeGroup> pager, String code, String name) {
         return nodeGroupDao.findNavigator(pager,code,name);
     }
+
+    @Override
+    public List<Integer> findAllOutPortOn(String outIp, Integer port) {
+        return nodeGroupDao.findAllOutPortOn(outIp,port);
+    }
 }

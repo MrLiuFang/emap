@@ -1,17 +1,13 @@
 package com.pepper.service.emap.node.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Service;
-import org.springframework.util.StringUtils;
 
 import com.pepper.core.Pager;
 import com.pepper.core.base.impl.BaseServiceImpl;
-import com.pepper.core.constant.SearchConstant;
 import com.pepper.dao.emap.node.NodeDao;
 import com.pepper.model.emap.node.Node;
 import com.pepper.service.emap.node.NodeService;
@@ -56,8 +52,8 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 	}
 
 	@Override
-	public Node findFirstByIpAndPortAndIdNot(String ip, Integer port, String id) {
-		return nodeDao.findFirstByIpAndPortAndIdNot(ip,port,id);
+	public Node findFirstByOutIpAndPortAndIdNot(String ip, Integer port, String id) {
+		return nodeDao.findFirstByOutIpAndPortAndIdNot(ip,port,id);
 	}
 
 	@Override
