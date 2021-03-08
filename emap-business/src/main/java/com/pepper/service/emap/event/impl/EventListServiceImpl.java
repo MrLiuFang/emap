@@ -233,10 +233,15 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	@Override
 	public void send(Node node,String cmd) throws InterruptedException {
 		try {
+
 			System.out.println("开始发送TCP");
 			String host = node.getOutIp();
 			int port =node.getPort();
 			System.out.println("host->"+host+":"+port);
+			if (Objects.isNull(port) || !StringUtils.hasText(host)) {
+				System.out.println("ip/端口错误，终止发送");
+				return;
+			}
 			// 首先，netty通过ServerBootstrap启动服务端
 			Bootstrap client = new Bootstrap();
 
