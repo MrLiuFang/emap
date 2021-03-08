@@ -9,10 +9,12 @@ import javax.persistence.Table;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.pepper.core.base.BaseModel;
+import org.hibernate.annotations.Where;
 
 @Entity()
 @Table(name = "t_event_list")
 @DynamicUpdate(true)
+@Where(clause = " warning_level > -1 ")
 public class EventList extends BaseModel  {
 
 	/**

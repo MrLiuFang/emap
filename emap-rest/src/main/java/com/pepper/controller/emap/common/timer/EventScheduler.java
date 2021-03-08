@@ -41,8 +41,8 @@ import com.pepper.service.emap.message.MessageService;
 import com.pepper.service.emap.node.NodeService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 
-//@Component
-//@Order(value=Ordered.LOWEST_PRECEDENCE)
+@Component
+@Order(value=Ordered.LOWEST_PRECEDENCE)
 public class EventScheduler {
 	
 	@Resource
@@ -86,7 +86,7 @@ public class EventScheduler {
 		if(!environment.getProperty("scheduler.enabled", "true").equals("true")) {
 			return;
 		}
-		List<EventList> list = eventListService.findByStatusOrStatus(null, "N");
+		List<EventList> list = eventListService.findByStatusOrStatus(null, "W");
 		for(EventList eventList : list) {
 			eventList.setIsUrgent(eventList.getWarningLevel()>=getUrgentWarningLevel(eventList));
 			String sourceCode = eventList.getSourceCode();

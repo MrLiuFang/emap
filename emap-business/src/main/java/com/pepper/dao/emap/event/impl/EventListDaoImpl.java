@@ -41,7 +41,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		jpql.append(" select el.id from  EventList el where el.status = 'N'   AND el.warningLevel  " ).append(isUrgent?">=":"<");
 		jpql.append(" (select distinct er.warningLevel from EventRule er join Node n on n.nodeTypeId = er.nodeTypeId where el.sourceCode=n.sourceCode and t1.id=el.id )   ");
 		jpql.append(" and el.id not in (select t2.id from EventList t2 join Node t3 on t2.sourceCode = t3.sourceCode join EventRule t4 on t3.id = t4.nodeId where t2.status = 'N'  )   ");
-		jpql.append(" ) and t1.sourceCode in (:sourceCode) order by createDate desc   ");
+		jpql.append(" ) and t1.sourceCode in (:sourceCode) and  t1.warningLevel >-1 order by createDate desc   ");
 		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
 	}
 	
@@ -54,7 +54,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		if(java.util.Objects.nonNull(isFinish) && isFinish ) {
 			jpql.append("  join ActionList t3 on t1.id = t3.eventListId ");
 		}
-		jpql.append("  where 1=1  ");
+		jpql.append("  where 1=1 and  t1.warningLevel >-1 ");
 		if(java.util.Objects.nonNull(isFinish) &&isFinish ) {
 			jpql.append(" and t3.operator = :operator  ");
 			searchParameter.put("operator", currentHandleUser);
@@ -104,7 +104,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ; 
 		StringBuffer jpql = new StringBuffer();
 		jpql.append("select  distinct el from  EventList el join EventDispatch ed on el.id = ed.eventListId join Node n on el.sourceCode = n.sourceCode  "
-				+ " where ed.dispatchFrom = :dispatchFrom and ed.isEmployeeTransfer = true  ");
+				+ " where ed.dispatchFrom = :dispatchFrom and ed.isEmployeeTransfer = true and  el.warningLevel >-1  ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		searchParameter.put("dispatchFrom", dispatchFrom);
 		if(StringUtils.hasText(nodeName)) {
@@ -270,7 +270,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 //			jpql.append(" join ActionList al on el.id = al.eventListId ");
 //		}
 		
-		jpql.append(" where 1=1 ");
+		jpql.append(" where 1=1 and  el.warningLevel >-1");
 		
 		if(StringUtils.hasText(departmentId)) {
 			jpql.append(" and (al.departmentId = :departmentId or ed.departmentId =:departmentId) ");
@@ -400,7 +400,7 @@ public class EventListDaoImpl  implements EventListDaoEx {
 	@Override
 	public List<Map<String,Object>> yearTypeCount(String where,Date startDate,Date endDate) {
 		List<Object> pararms = new ArrayList<Object>();
-		String sql = "select date_format( create_date, '%Y-%m' ) AS create_date,  count(1) as count from t_event_list where 1=1    ";
+		String sql = "select date_format( create_date, '%Y-%m' ) AS create_date,  count(1) as count from t_event_list where 1=1 and warning_level >-1  ";
 		if(Objects.equals(where,"isSpecial")){
 			sql += " and is_special is true ";
 		}
