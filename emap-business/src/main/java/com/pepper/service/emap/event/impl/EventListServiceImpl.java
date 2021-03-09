@@ -1,5 +1,6 @@
 package com.pepper.service.emap.event.impl;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -214,9 +215,13 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		}
 		AtomicInteger outPort = new AtomicInteger(0);
 		List<Integer> list = this.nodeGroupDao.findAllOutPortOn(node.getOutIp(), node.getPort());
-		list.forEach(m->{
-			outPort.set(outPort.get() + m);
-		});
+		if (Objects.nonNull(list) && list.size()>0) {
+			list.forEach(m -> {
+				if (Objects.nonNull(m)) {
+					outPort.set(outPort.get() + m);
+				}
+			});
+		}
 		if (outPort.get() == 0){
 			cmd = cmd0;
 		}else if (outPort.get() == 1){
@@ -314,6 +319,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 
 		}catch (Exception ex){
 		}
+	}
+
+	@Override
+	public void updateStatus(String id) {
+		this.eventListDao.updateStatus(id);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)

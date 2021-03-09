@@ -7,6 +7,7 @@ import java.util.Map;
 import com.pepper.core.Pager;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.model.emap.event.HelpList;
+import org.hibernate.annotations.Where;
 
 /**
  * 
@@ -64,4 +65,6 @@ public interface EventListDaoEx {
 	 * @return
 	 */
 	public List<Map<String,Object>> yearTypeCount(String where, Date startDate, Date endDate);
+
+	void updateStatus(String id);
 }

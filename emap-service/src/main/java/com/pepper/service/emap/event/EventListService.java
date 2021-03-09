@@ -114,4 +114,5 @@ public interface EventListService extends BaseService<EventList> {
 	public void sendTcp(Node node,Boolean outIsOn,String nodeGroupCode) throws InterruptedException;
 
 	public void send(Node node,String cmd) throws InterruptedException;
+	void updateStatus(String id);
 }

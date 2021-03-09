@@ -792,9 +792,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 			List<EventListGroup> list = eventListGroupService.findAllByEventId(map.get("id").toString());
 			list.forEach(eventListGroup -> {
-				EventList eventList1 = this.eventListService.findById(eventListGroup.getEventId());
-				eventList1.setStatus("P");
-				eventListService.update(eventList1);
+				eventListService.updateStatus(eventListGroup.getEventId());
 				eventListGroup.setStatus("P");
 				eventListGroupService.update(eventListGroup);
 			});

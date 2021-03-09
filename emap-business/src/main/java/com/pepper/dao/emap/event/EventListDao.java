@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.annotations.Where;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -67,4 +68,8 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	public List<Map<String,Object>> currentMonthNotRelationNode(Date startDate,Date endDate);
 
 	public Integer deleteByCreateDateLessThanEqual(Date createDate);
+
+	@Where(clause="")
+	EventList findFirstById(String id);
+
 }

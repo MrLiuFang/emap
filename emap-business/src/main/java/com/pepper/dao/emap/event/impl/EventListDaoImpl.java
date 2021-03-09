@@ -423,6 +423,11 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		return this.jdbcTemplate.queryForList(sql,pararms.toArray());
 	}
 
+	@Override
+	public void updateStatus(String id) {
+		this.baseDao.update("update EventList e set e.status = 'P' where id ='"+id+"'");
+	}
+
 	public List<String> userNode(String userId){
 		StringBuffer jqpl = new StringBuffer();
 		jqpl.append(" select distinct new map(t1.sourceCode as source_code) from Node t1 join Map t2 on t1.mapId = t2.id ");
