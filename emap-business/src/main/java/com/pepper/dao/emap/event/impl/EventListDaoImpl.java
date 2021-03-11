@@ -388,7 +388,8 @@ public class EventListDaoImpl  implements EventListDaoEx {
 		}else {
 			jpql.append(" order by   el.createDate desc ");
 		}
-		return baseDao.findNavigator(pager, jpql.toString(), searchParameter);
+		pager = baseDao.findNavigator(pager, jpql.toString(), searchParameter);
+		return pager;
 	}
 
 	@Override

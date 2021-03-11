@@ -1020,10 +1020,10 @@ public class EventListController extends BaseControllerImpl implements BaseContr
             if(currentMonthCount>0 && previousMonthCount>0){
                 chainRatio = (currentMonthCount-previousMonthCount)/previousMonthCount;
             }
-            if(currentMonthCount<=0){
+            if(currentMonthCount<=0 && previousMonthCount>0){
                 chainRatio = -100;
             }
-            if(previousMonthCount<=0){
+            if(previousMonthCount<=0 && currentMonthCount >0){
                 chainRatio = 100;
             }
             returnMap.put(type ,chainRatio);

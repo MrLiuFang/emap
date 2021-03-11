@@ -518,8 +518,8 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 	public Object historyEventList(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 		, String departmentId){
 		Pager<EventList> pager = new Pager<EventList>();
-		List<EventListVo> list = list(event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId,pager);
-		pager.setData("historyEvent",  list);
+		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
+		pager.setData("historyEvent",  convertHistoryEventList(pager.getResults()));
 		pager.setResults(null);
 //		systemLogService.log("event historyEventList ", this.request.getRequestURL().toString());
 		return pager;
@@ -550,7 +550,7 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 		new ExportExcelUtil().export(list, outputStream, excelColumn);
 	}
 
-	private List<EventListVo> list(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
+	public List<EventListVo> list(String event,Integer warningLevel,String node,String nodeTypeId,String mapName,String buildName,String siteName,String operatorId,String status,String eventId,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date startDate,@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")Date endDate
 			, String departmentId,Pager<EventList> pager){
 		pager = this.eventListService.historyEventList(pager, event, warningLevel, node, nodeTypeId, mapName, buildName, siteName, operatorId, status, eventId, startDate, endDate,departmentId);
 
