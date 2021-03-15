@@ -25,7 +25,7 @@ public interface NodeGroupDao extends BaseDao<NodeGroup> ,NodeGroupDaoEx {
     public List<String> findNodeGroupCodeByNodeId(String nodeId);
 
     @Query( " select distinct nf.outPort  from EventListGroup eg join Node nf on eg.nodeId = nf.id\n" +
-            " where nf.outIp = :outIp and nf.port = :port and eg.status <> 'P'" )
+            " where nf.outIp = :outIp and nf.port = :port and eg.status <> 'P' and nf.outPort>0 " )
     public List<Integer> findAllOutPortOn(String outIp, Integer port);
 
 }
