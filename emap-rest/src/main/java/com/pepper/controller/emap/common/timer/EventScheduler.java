@@ -146,7 +146,7 @@ public class EventScheduler {
 					return ;
 				}
 			}
-			eventList.setIsSpecial(false);
+//			eventList.setIsSpecial(false);
 			eventListService.update(eventList);
 
 			if(StringUtils.hasText(eventRule.getFromDateTime())&&StringUtils.hasText(eventRule.getToDateTime())) {
