@@ -133,7 +133,7 @@ public class EventScheduler {
 	private void eventRule(EventList eventList,EventRule eventRule) {		
 		try {
 			//特级
-			if(eventRule.getSpecialWarningLevel()!=null&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
+			if(eventRule.getSpecialWarningLevel()!=null&&eventRule.getSpecialWarningLevel()>0&&eventList.getWarningLevel()>=eventRule.getSpecialWarningLevel()) {
 				if(StringUtils.hasText(eventRule.getSpecialDepartmentId())) {
 //					AdminUser user = assignment(eventRule.getSpecialDepartmentId(),eventList,eventRule.getPushContent());
 					eventList.setIsSpecial(true);
