@@ -198,10 +198,19 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 					}
 				}
 				updateNodeStatus(node1);
+			}else {
+				Node node1 = optional.get();
+				saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
+				if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
+					try {
+						sendTcp(node1,true,nodeGroup.getCode());
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				updateNodeStatus(node1);
 			}
 		});
-		updateNodeStatus(node);
-		saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),true,eventGroupId,node.getId(),nodeGroupCode.get());
 	}
 
 	public void sendTcp(Node node,Boolean outIsOn,String nodeGroupCode) throws InterruptedException {
