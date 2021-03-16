@@ -200,7 +200,7 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 				updateNodeStatus(node1);
 			}else {
 				Node node1 = optional.get();
-				saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),false,eventGroupId,node1.getId(),nodeGroup.getCode());
+				saveEventListGroup(eventList.getId(),eventList.getWarningLevel(),true,eventGroupId,node1.getId(),nodeGroup.getCode());
 				if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
 					try {
 						sendTcp(node1,true,nodeGroup.getCode());

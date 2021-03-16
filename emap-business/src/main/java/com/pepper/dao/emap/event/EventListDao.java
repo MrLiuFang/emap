@@ -51,7 +51,7 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	@Query("select  count(t1.id)  from EventList t1  where t1.isSpecial is true  and t1.createDate>= ?1 and t1.createDate<= ?2 and t1.warningLevel >-1 ")
 	public Integer todaySpecialCount(Date startDate,Date endDate);
 
-	@Query("select  count(t1.id)  from EventList t1  where t1.isUrgent is true  and t1.createDate>= ?1 and t1.createDate<= ?2 and  t1.warningLevel >-1 ")
+	@Query("select  count(t1.id)  from EventList t1  where t1.isUrgent is true and t1.isSpecial is null  and t1.createDate>= ?1 and t1.createDate<= ?2 and  t1.warningLevel >-1 ")
 	public Integer todayUrgentCount(Date startDate,Date endDate);
 
 	@Query("select  count(t1.id)  from EventList t1  where t1.isUrgent is not true and t1.isSpecial is not true   and t1.createDate>= ?1 and t1.createDate<= ?2 and  t1.warningLevel >-1 ")
