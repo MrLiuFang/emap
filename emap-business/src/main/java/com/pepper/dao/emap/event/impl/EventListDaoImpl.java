@@ -402,15 +402,15 @@ public class EventListDaoImpl  implements EventListDaoEx {
 	public List<Map<String,Object>> yearTypeCount(String where,Date startDate,Date endDate) {
 		List<Object> pararms = new ArrayList<Object>();
 		String sql = "select date_format( create_date, '%Y-%m' ) AS create_date,  count(1) as count from t_event_list where 1=1 and warning_level >-1  ";
-		if(Objects.equals(where,"isSpecial")){
-			sql += " and is_special is true ";
-		}
-		if(Objects.equals(where,"isUrgent")){
-			sql += " and is_urgent is true ";
-		}
-		if(Objects.equals(where,"ordinary")){
-			sql += " and is_urgent is null and is_special is null ";
-		}
+//		if(Objects.equals(where,"isSpecial")){
+//			sql += " and is_special is true ";
+//		}
+//		if(Objects.equals(where,"isUrgent")){
+//			sql += " and is_urgent is true ";
+//		}
+//		if(Objects.equals(where,"ordinary")){
+//			sql += " and is_urgent is null and is_special is null ";
+//		}
 		if(Objects.nonNull(startDate)){
 			sql += " and create_date >= ? ";
 			pararms.add(startDate);

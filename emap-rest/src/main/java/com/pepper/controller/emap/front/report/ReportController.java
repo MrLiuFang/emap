@@ -265,7 +265,8 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 //		}else {
 //			table = new PdfPTable(columnFilterList.size()>0?columnFilterList.size():11);
 //		}
-		int i = columnFilterList.size()>0?columnFilterList.size()+(isGroupExport?1:0):11;
+//		int i = columnFilterList.size()>0?columnFilterList.size()+(isGroupExport?1:0):8;
+		int i =8;
 		table = new PdfPTable(i);
 		table.setWidthPercentage(100);
 		PdfPCell cellTitle = new PdfPCell(new Paragraph("事件清單", new Font(bfChinese,24)));
@@ -286,9 +287,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("operator")) {
 				table.addCell(new Paragraph("操作員", FontChinese));
 			}
-			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("currentHandleUser")) {
-				table.addCell(new Paragraph("處理人", FontChinese));
-			}
+//			if(StringUtils.hasText(groupFilter)&&groupFilter.equals("currentHandleUser")) {
+//				table.addCell(new Paragraph("處理人", FontChinese));
+//			}
 			for(String str:new String[]{"nodeType","warningLevel","operator","currentHandleUser"}) {
 				if(columnFilterList.size()>0&&columnFilterList.contains(str)) {
 					if("nodeType".equals(str)) {
@@ -297,9 +298,10 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 						table.addCell(new Paragraph("警告級別", FontChinese));
 					}else if("operator".equals(str)) {
 						table.addCell(new Paragraph("操作員", FontChinese));
-					}else if("currentHandleUser".equals(str)) {
-						table.addCell(new Paragraph("處理人", FontChinese));
 					}
+//					else if("currentHandleUser".equals(str)) {
+//						table.addCell(new Paragraph("處理人", FontChinese));
+//					}
 
 				}
 
@@ -315,9 +317,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			if(columnFilterList.size()>0&&columnFilterList.contains("operator")) {
 				table.addCell(new Paragraph("操作員", FontChinese));
 			}
-			if(columnFilterList.size()>0&&columnFilterList.contains("currentHandleUser")) {
-				table.addCell(new Paragraph("處理人", FontChinese));
-			}
+//			if(columnFilterList.size()>0&&columnFilterList.contains("currentHandleUser")) {
+//				table.addCell(new Paragraph("處理人", FontChinese));
+//			}
 		}
 
 		if(columnFilterList.size()>0&&columnFilterList.contains("eventDate")) {
@@ -332,12 +334,12 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 		if(columnFilterList.size()>0&&columnFilterList.contains("isRoutine")) {
 			table.addCell(new Paragraph("常規", FontChinese));
 		}
-		if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
-			table.addCell(new Paragraph("緊急", FontChinese));
-		}
-		if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
-			table.addCell(new Paragraph("特急", FontChinese));
-		}
+//		if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
+//			table.addCell(new Paragraph("緊急", FontChinese));
+//		}
+//		if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
+//			table.addCell(new Paragraph("特急", FontChinese));
+//		}
 
 		if(columnFilterList.size()>0&&columnFilterList.contains("status")) {
 			table.addCell(new Paragraph("狀態",FontChinese));
@@ -385,19 +387,20 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 							map.put(eventListVo.getOperatorVo().getName(), tempList);
 						}
 					}
-				}else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("currentHandleUser")) {
-					if(eventListVo.getCurrentHandleUserVo()!=null) {
-						List<EventListVo> tempList ;
-						if(map.containsKey(eventListVo.getCurrentHandleUserVo().getName())) {
-							tempList = map.get(eventListVo.getCurrentHandleUserVo().getName());
-							tempList.add(eventListVo);
-						}else {
-							tempList = new ArrayList<EventListVo>();
-							tempList.add(eventListVo);
-							map.put(eventListVo.getCurrentHandleUserVo().getName(), tempList);
-						}
-					}
 				}
+//				else if(StringUtils.hasText(groupFilter)&&groupFilter.equals("currentHandleUser")) {
+//					if(eventListVo.getCurrentHandleUserVo()!=null) {
+//						List<EventListVo> tempList ;
+//						if(map.containsKey(eventListVo.getCurrentHandleUserVo().getName())) {
+//							tempList = map.get(eventListVo.getCurrentHandleUserVo().getName());
+//							tempList.add(eventListVo);
+//						}else {
+//							tempList = new ArrayList<EventListVo>();
+//							tempList.add(eventListVo);
+//							map.put(eventListVo.getCurrentHandleUserVo().getName(), tempList);
+//						}
+//					}
+//				}
 			}
 		}else {
 			map.put("1", list);
@@ -408,7 +411,8 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 			if(isGroupExport!=null && isGroupExport)
 			{
 				PdfPCell cell =new PdfPCell(new Paragraph(key,FontChinese));
-				cell.setRowspan(listTemp.size());
+//				cell.setRowspan(listTemp.size());
+				cell.setRowspan(8);
 				table.addCell(cell);
 			}
 			for (EventListVo eventListVo :listTemp) {
@@ -425,9 +429,10 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 								table.addCell(new Paragraph(eventListVo.getWarningLevel().toString(), FontChinese));
 							}else if("operator".equals(str)) {
 								table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
-							}else if("currentHandleUser".equals(str)) {
-								table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
 							}
+//							else if("currentHandleUser".equals(str)) {
+//								table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
+//							}
 						}
 					}
 				}else {
@@ -444,9 +449,9 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 					if(columnFilterList.size()>0&&columnFilterList.contains("operator")) {
 						table.addCell(new Paragraph(eventListVo.getOperatorVo() == null ? "" : eventListVo.getOperatorVo().getName(), FontChinese));
 					}
-					if(columnFilterList.size()>0&&columnFilterList.contains("currentHandleUser")) {
-						table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
-					}
+//					if(columnFilterList.size()>0&&columnFilterList.contains("currentHandleUser")) {
+//						table.addCell(new Paragraph(eventListVo.getCurrentHandleUserVo() == null ? "" : eventListVo.getCurrentHandleUserVo().getName(), FontChinese));
+//					}
 				}
 
 				if(columnFilterList.size()>0&&columnFilterList.contains("eventDate")) {
@@ -461,12 +466,12 @@ public class ReportController extends BaseControllerImpl implements BaseControll
 				if(columnFilterList.size()>0&&columnFilterList.contains("isRoutine")) {
 					table.addCell(new Paragraph((!Objects.equals(eventListVo.getIsUrgent(),true) && !Objects.equals(eventListVo.getIsSpecial(),true)) ? "是" : "否",FontChinese));
 				}
-				if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
-					table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",FontChinese));
-				}
-				if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
-					table.addCell(new Paragraph(eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
-				}
+//				if(columnFilterList.size()>0&&columnFilterList.contains("isUrgent")) {
+//					table.addCell(new Paragraph(eventListVo.getIsUrgent() == null ? "否" : eventListVo.getIsUrgent() ? "是" : "否",FontChinese));
+//				}
+//				if(columnFilterList.size()>0&&columnFilterList.contains("isSpecial")) {
+//					table.addCell(new Paragraph(eventListVo.getIsSpecial() == null ? "否" : eventListVo.getIsSpecial() ? "是" : "否", FontChinese));
+//				}
 
 				if(columnFilterList.size()>0&&columnFilterList.contains("status")) {
 					String s = "";

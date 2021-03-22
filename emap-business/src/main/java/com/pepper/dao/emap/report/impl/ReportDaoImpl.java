@@ -61,7 +61,7 @@ public class ReportDaoImpl implements ReportDaoEx {
 		StringBuffer jpql = new StringBuffer();
 		jpql.append(" select new map( count(t1.id) as nodeCount ) "
 				+ "from Node t1 join NodeType t2 on t1.nodeTypeId = t2.id join Map t3 on t1.mapId = t3.id" +
-				" join EventList t4 on t1.sourceCode = t4.sourceCode  where 1=1 ");
+				" join EventList t4 on t1.sourceCode = t4.sourceCode  where 1=1 and t4.warningLevel > -1 ");
 		Map<String,Object> searchParameter = new HashMap<String, Object>();
 		if(StringUtils.hasText(nodeTypeId)) {
 			jpql.append(" and t2.id = :nodeTypeId ");
