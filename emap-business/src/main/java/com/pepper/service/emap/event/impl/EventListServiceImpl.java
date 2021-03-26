@@ -246,50 +246,55 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 	}
 	@Override
 	public void send(Node node,String cmd) throws InterruptedException {
-		try {
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				try {
+					System.out.println("开始发送TCP");
+					String host = node.getOutIp();
+					int port =node.getPort();
+					System.out.println("host->"+host+":"+port);
+					if (Objects.isNull(port) || !StringUtils.hasText(host)) {
+						System.out.println("ip/端口错误，终止发送");
+						return;
+					}
+					// 首先，netty通过ServerBootstrap启动服务端
+					Bootstrap client = new Bootstrap();
 
-			System.out.println("开始发送TCP");
-			String host = node.getOutIp();
-			int port =node.getPort();
-			System.out.println("host->"+host+":"+port);
-			if (Objects.isNull(port) || !StringUtils.hasText(host)) {
-				System.out.println("ip/端口错误，终止发送");
-				return;
-			}
-			// 首先，netty通过ServerBootstrap启动服务端
-			Bootstrap client = new Bootstrap();
+					//第1步 定义线程组，处理读写和链接事件，没有了accept事件
+					EventLoopGroup group = new NioEventLoopGroup();
+					client.group(group );
 
-			//第1步 定义线程组，处理读写和链接事件，没有了accept事件
-			EventLoopGroup group = new NioEventLoopGroup();
-			client.group(group );
+					//第2步 绑定客户端通道
+					client.channel(NioSocketChannel.class);
 
-			//第2步 绑定客户端通道
-			client.channel(NioSocketChannel.class);
+					//第3步 给NIoSocketChannel初始化handler， 处理读写事件
+					client.handler(new ChannelInitializer<NioSocketChannel>() {  //通道是NioSocketChannel
+						@Override
+						protected void initChannel(NioSocketChannel ch) throws Exception {
+							//字符串编码器，一定要加在SimpleClientHandler 的上面
+							ch.pipeline().addLast(new StringEncoder());
+							ch.pipeline().addLast(new DelimiterBasedFrameDecoder(
+									Integer.MAX_VALUE, Delimiters.lineDelimiter()[0]));
+							//找到他的管道 增加他的handler
+							ch.pipeline().addLast(new ClientHandler());
+						}
+					});
 
-			//第3步 给NIoSocketChannel初始化handler， 处理读写事件
-			client.handler(new ChannelInitializer<NioSocketChannel>() {  //通道是NioSocketChannel
-				@Override
-				protected void initChannel(NioSocketChannel ch) throws Exception {
-					//字符串编码器，一定要加在SimpleClientHandler 的上面
-					ch.pipeline().addLast(new StringEncoder());
-					ch.pipeline().addLast(new DelimiterBasedFrameDecoder(
-							Integer.MAX_VALUE, Delimiters.lineDelimiter()[0]));
-					//找到他的管道 增加他的handler
-					ch.pipeline().addLast(new ClientHandler());
+					//连接服务器
+					ChannelFuture future = client.connect(host, port).sync();
+					System.out.println("发送指令："+cmd);
+					ByteBuf buff = Unpooled.buffer();
+					// 对接需要16进制
+					buff.writeBytes(ConvertCode.hexString2Bytes(cmd));
+					future.channel().writeAndFlush(buff);
+					group.shutdownGracefully();
+				}catch (Exception ex){
+					ex.printStackTrace();
 				}
-			});
-
-			//连接服务器
-			ChannelFuture future = client.connect(host, port).sync();
-			System.out.println("发送指令："+cmd);
-			ByteBuf buff = Unpooled.buffer();
-			// 对接需要16进制
-			buff.writeBytes(ConvertCode.hexString2Bytes(cmd));
-			future.channel().writeAndFlush(buff);
-			group.shutdownGracefully();
-		}catch (Exception ex){
-			ex.printStackTrace();
-		}
+			}
+		};
+		new Thread(runnable).start();
 	}
 
 	@Override

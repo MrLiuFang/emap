@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface EventListGroupDao extends BaseDao<EventListGroup> {
 
-    @Query(" select t1 from EventListGroup t1 where t1.eventGroupId = (select t2.eventGroupId from EventListGroup t2 where t2.eventId = :eventId )")
+    @Query(" select distinct t1 from EventListGroup t1 where t1.eventGroupId in (select distinct t2.eventGroupId from EventListGroup t2 where t2.eventId = :eventId )")
     public List<EventListGroup> findAllByEventId(String eventId);
 
     public List<EventListGroup> findAllByNodeGroupCodeAndStatusNot(String nodeGroupCode,String status);
