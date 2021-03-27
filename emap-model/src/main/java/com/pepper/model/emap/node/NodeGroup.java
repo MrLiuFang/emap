@@ -27,6 +27,9 @@ public class NodeGroup extends BaseModel {
     @Column(name = "node_id")
     private String nodeId;
 
+    @Column(name = "is_master")
+    private Boolean isMaster;
+
     public NodeGroup() {
     }
 
@@ -34,4 +37,5 @@ public class NodeGroup extends BaseModel {
         this.name = name;
         this.code = code;
     }
+
 }

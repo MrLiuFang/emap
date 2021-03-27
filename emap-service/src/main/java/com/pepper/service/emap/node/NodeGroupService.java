@@ -25,4 +25,6 @@ public interface NodeGroupService extends BaseService<NodeGroup> {
     public Pager<NodeGroup> findNavigator(Pager<NodeGroup> pager, String code, String name );
 
     public List<Integer> findAllOutPortOn(String outIp, Integer port);
+
+    public NodeGroup find(String nodeId,Boolean isMaster);
 }

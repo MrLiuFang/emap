@@ -52,4 +52,9 @@ public class NodeGroupServiceImpl extends BaseServiceImpl<NodeGroup> implements 
     public List<Integer> findAllOutPortOn(String outIp, Integer port) {
         return nodeGroupDao.findAllOutPortOn(outIp,port);
     }
+
+    @Override
+    public NodeGroup find(String nodeId, Boolean isMaster) {
+        return nodeGroupDao.findFirstByNodeIdAndIsMaster(nodeId, isMaster);
+    }
 }

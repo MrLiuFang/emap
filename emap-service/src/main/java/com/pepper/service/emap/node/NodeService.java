@@ -51,4 +51,6 @@ public interface NodeService extends BaseService<Node> {
 	public Node findFirstByOutIpAndPortAndIdNot(String ip, Integer port, String id);
 
 	Node findFirstBySourceCode(String sourceCode);
+
+	public Node findNodeGroupMaster(String code);
 }

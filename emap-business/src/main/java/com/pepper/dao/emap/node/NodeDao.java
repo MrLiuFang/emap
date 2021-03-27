@@ -43,4 +43,7 @@ public interface NodeDao extends BaseDao<Node> , NodeDaoEx<Node> {
 	public List<Node> findByNameLike(String name);
 
 	public Node findFirstByOutIpAndPortAndIdNot(String ip, Integer port, String id);
+
+	@Query(" select n from Node n join NodeGroup ng on n.id = ng.nodeId where ng.code = :code and ng.isMaster = true ")
+	public Node findNodeGroupMaster(String code);
 }

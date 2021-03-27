@@ -61,5 +61,10 @@ public class NodeServiceImpl extends BaseServiceImpl<Node> implements NodeServic
 		return nodeDao.findFirstBySourceCode(sourceCode);
 	}
 
+	@Override
+	public Node findNodeGroupMaster(String code) {
+		return nodeDao.findNodeGroupMaster(code);
+	}
+
 
 }

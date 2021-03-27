@@ -1,17 +1,16 @@
 package com.pepper.controller.emap.front.node;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.pepper.controller.emap.core.ResultData;
 import com.pepper.core.Pager;
-import com.pepper.core.constant.SearchConstant;
+import com.pepper.core.exception.BusinessException;
 import com.pepper.model.emap.node.Node;
-import com.pepper.model.emap.node.NodeClassify;
 import com.pepper.model.emap.node.NodeGroup;
 import com.pepper.service.emap.node.NodeGroupService;
 import com.pepper.service.emap.node.NodeService;
-import groovy.util.IFileNameFinder;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @description:
@@ -42,13 +42,29 @@ public class NodeGroupController {
         if (StringUtils.hasText(nodeGroupDto.getCode())){
             nodeGroupService.deleteAllByCode(nodeGroupDto.getCode());
         }
-        nodeGroupDto.getNodeIds().forEach(s -> {
+        AtomicInteger i = new AtomicInteger();
+        nodeGroupDto.getNodeIds().forEach(ids -> {
             NodeGroup nodeGroup = new NodeGroup();
             nodeGroup.setCode(nodeGroupDto.getCode());
             nodeGroup.setName(nodeGroupDto.getName());
-            nodeGroup.setNodeId(s);
+            nodeGroup.setIsMaster(Objects.equals(ids.getIsMaster(),true));
+            if (Objects.equals(ids.getIsMaster(),true)){
+                i.set(i.getAndIncrement()+1);
+                NodeGroup tmp = nodeGroupService.find(ids.getId(),true);
+                if (Objects.nonNull(tmp)){
+                    Node node = nodeService.findById(ids.getId());
+                    new BusinessException(node.getName()+"("+node.getSource()+")在其它联动组已是主设备");
+                }
+            }
+            nodeGroup.setNodeId(ids.getId());
             list.add(nodeGroup);
         });
+        if (i.getAndIncrement()>1){
+            new BusinessException("联动组不能有两个/以上主设备");
+        }
+        if (i.getAndIncrement()<=0){
+            new BusinessException("请选择主设备");
+        }
         if (list.size()>0) {
             nodeGroupService.saveAll(list);
         }
@@ -58,9 +74,20 @@ public class NodeGroupController {
     @RequestMapping("/list")
     public Object list(String code,String name){
         ResultData resultData = new ResultData();
-        Pager<NodeGroup> pager = new Pager<NodeGroup>();
+        Pager pager = new Pager();
         pager = nodeGroupService.findNavigator(pager,code,name);
-        pager.setData("nodeGroup",pager.getResults());
+        List<NodeGroup>  list  = pager.getResults();
+        List<PageNodeGroupVo> returnList = new ArrayList<>();
+        list.forEach(g->{
+            PageNodeGroupVo groupVo = new PageNodeGroupVo();
+            BeanUtils.copyProperties(g,groupVo);
+            Node node = nodeService.findNodeGroupMaster(g.getCode());
+            if (Objects.nonNull(node)){
+                groupVo.setMasterNodeName(node.getName());
+            }
+            returnList.add(groupVo);
+        });
+        pager.setData("nodeGroup",returnList);
         pager.setResults(null);
         return pager;
     }
@@ -70,12 +97,15 @@ public class NodeGroupController {
         ResultData resultData = new ResultData();
         NodeGroupVo nodeGroupVo = new NodeGroupVo();
         List<NodeGroup> list = nodeGroupService.find(code);
-        List<Node> nodes = new ArrayList<Node>();
+        List<NodeGroupVo.NodeVo> nodes = new ArrayList<NodeGroupVo.NodeVo>();
         list.forEach(nodeGroup -> {
             nodeGroupVo.setCode(nodeGroup.getCode());
             nodeGroupVo.setName(nodeGroup.getName());
             Node node = nodeService.findById(nodeGroup.getNodeId());
-            nodes.add(node);
+            NodeGroupVo.NodeVo nodeVo = new NodeGroupVo.NodeVo();
+            BeanUtils.copyProperties(node,nodeVo);
+            nodeVo.setIsMaster(nodeGroup.getIsMaster());
+            nodes.add(nodeVo);
         });
         nodeGroupVo.setNodes(nodes);
         resultData.setData("nodeGroup",nodeGroupVo);
@@ -83,6 +113,17 @@ public class NodeGroupController {
     }
 
 }
+
+@Data
+class PageNodeGroupVo{
+
+    private String code;
+
+    private String name;
+
+    private String masterNodeName;
+}
+
 @Data
 class NodeGroupDto{
 
@@ -90,14 +131,28 @@ class NodeGroupDto{
 
     private String name;
 
-    private List<String> nodeIds;
+    private List<NodeIds> nodeIds;
+
+    @Data
+    public static class NodeIds {
+
+        private String id;
+        private Boolean isMaster;
+    }
+
 }
-@Data
+
+@Data@JsonIgnoreProperties({"isMaster","id","nodeId","createDate","updateDate","createUser","updateUser"})
 class NodeGroupVo extends NodeGroup{
     private String code;
 
     private String name;
 
-    private List<Node> nodes;
+    private List<NodeVo> nodes;
+
+    @Data
+    public static class NodeVo extends Node{
+        private Boolean isMaster;
+    }
 }
 
