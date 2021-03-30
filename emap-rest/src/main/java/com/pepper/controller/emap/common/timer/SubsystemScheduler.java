@@ -44,7 +44,7 @@ public class SubsystemScheduler {
 					continue;
 				}
 				Socket socket = new Socket();
-				socket.connect(new InetSocketAddress(subsystem.getAddress(),  subsystem.getProt()), 500);//设置连接请求超时时间1 s
+				socket.connect(new InetSocketAddress(subsystem.getAddress(),  subsystem.getProt()), 1000);//设置连接请求超时时间1 s
 				if(socket.isConnected()) {
 					subsystem.setIsOnLine(true);
 				}else {
@@ -77,6 +77,8 @@ public class SubsystemScheduler {
 			eventList.setSource(node.getSource());
 			eventList.setSourceCode(node.getSourceCode());
 			eventList.setWarningLevel(5);
+			eventList.setStatus("W");
+			eventList.setOperator("2c92b9ad70710b0b017089c0d8dc047d");
 			eventList.setEventId(UUID.randomUUID().toString());
 			eventList.setEventName("subsystem event");
 			eventListService.save(eventList);

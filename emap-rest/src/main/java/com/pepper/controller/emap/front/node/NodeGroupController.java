@@ -39,19 +39,20 @@ public class NodeGroupController {
     @RequestMapping("/addOrUpdateOrDelete")
     public Object add(@RequestBody NodeGroupDto nodeGroupDto){
         List<NodeGroup> list = new ArrayList<NodeGroup>();
-        if (StringUtils.hasText(nodeGroupDto.getCode())){
+        if (Objects.isNull(nodeGroupDto.getNodeIds()) || nodeGroupDto.getNodeIds().size()<=0){
             nodeGroupService.deleteAllByCode(nodeGroupDto.getCode());
+            return  new ResultData();
         }
-        AtomicInteger i = new AtomicInteger();
+        AtomicInteger i = new AtomicInteger(0);
         nodeGroupDto.getNodeIds().forEach(ids -> {
             NodeGroup nodeGroup = new NodeGroup();
             nodeGroup.setCode(nodeGroupDto.getCode());
             nodeGroup.setName(nodeGroupDto.getName());
             nodeGroup.setIsMaster(Objects.equals(ids.getIsMaster(),true));
             if (Objects.equals(ids.getIsMaster(),true)){
-                i.set(i.getAndIncrement()+1);
+                i.getAndIncrement();
                 NodeGroup tmp = nodeGroupService.find(ids.getId(),true);
-                if (Objects.nonNull(tmp)){
+                if (Objects.nonNull(tmp) && !Objects.equals(tmp.getCode(),nodeGroupDto.getCode())){
                     Node node = nodeService.findById(ids.getId());
                     new BusinessException(node.getName()+"("+node.getSource()+")在其它联动组已是主设备");
                 }
@@ -59,11 +60,14 @@ public class NodeGroupController {
             nodeGroup.setNodeId(ids.getId());
             list.add(nodeGroup);
         });
-        if (i.getAndIncrement()>1){
+        if (i.get()>1){
             new BusinessException("联动组不能有两个/以上主设备");
         }
-        if (i.getAndIncrement()<=0){
+        if (i.get()<=0){
             new BusinessException("请选择主设备");
+        }
+        if (StringUtils.hasText(nodeGroupDto.getCode())){
+            nodeGroupService.deleteAllByCode(nodeGroupDto.getCode());
         }
         if (list.size()>0) {
             nodeGroupService.saveAll(list);
@@ -102,10 +106,14 @@ public class NodeGroupController {
             nodeGroupVo.setCode(nodeGroup.getCode());
             nodeGroupVo.setName(nodeGroup.getName());
             Node node = nodeService.findById(nodeGroup.getNodeId());
-            NodeGroupVo.NodeVo nodeVo = new NodeGroupVo.NodeVo();
-            BeanUtils.copyProperties(node,nodeVo);
-            nodeVo.setIsMaster(nodeGroup.getIsMaster());
-            nodes.add(nodeVo);
+            if (Objects.nonNull(node)) {
+                NodeGroupVo.NodeVo nodeVo = new NodeGroupVo.NodeVo();
+                BeanUtils.copyProperties(node, nodeVo);
+                nodeVo.setIsMaster(nodeGroup.getIsMaster());
+                nodes.add(nodeVo);
+            }else {
+                nodeGroupService.delete(nodeGroup);
+            }
         });
         nodeGroupVo.setNodes(nodes);
         resultData.setData("nodeGroup",nodeGroupVo);
