@@ -47,17 +47,20 @@ public class SubsystemScheduler {
 				socket.connect(new InetSocketAddress(subsystem.getAddress(),  subsystem.getProt()), 1000);//设置连接请求超时时间1 s
 				if(socket.isConnected()) {
 					subsystem.setIsOnLine(true);
+					socket.close();
 				}else {
-					if(Objects.isNull(subsystem.getIsOnLine()) || Objects.equals(subsystem.getIsOnLine(), true)) {
+					EventList eventList = eventListService.findFirstBySourceCodeAndStatusNot(subsystem.getNodeCode(),"P");
+					if(Objects.isNull(eventList)) {
 						if(Objects.nonNull(subsystem.getNodeCode())) {
 							addEvent(subsystem.getNodeCode());
 						}
 					}
 					subsystem.setIsOnLine(false);
-					
+
 				}
 			} catch (IOException e) {
-				if(Objects.isNull(subsystem.getIsOnLine()) || Objects.equals(subsystem.getIsOnLine(), true)) {
+				EventList eventList = eventListService.findFirstBySourceCodeAndStatusNot(subsystem.getNodeCode(),"P");
+				if(Objects.isNull(eventList)) {
 					if(Objects.nonNull(subsystem.getNodeCode())) {
 						addEvent(subsystem.getNodeCode());
 					}
@@ -68,8 +71,8 @@ public class SubsystemScheduler {
 		}
 	}
 	
-	private void addEvent(String nodeCode) {
-		Node node = nodeService.findBySourceCode(nodeCode);
+	private void addEvent(String sourceCode) {
+		Node node = nodeService.findBySourceCode(sourceCode);
 		if(Objects.nonNull(node)) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			EventList eventList = new EventList();

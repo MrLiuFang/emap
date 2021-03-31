@@ -115,4 +115,6 @@ public interface EventListService extends BaseService<EventList> {
 
 	public void send(Node node,String cmd) throws InterruptedException;
 	void updateStatus(String id);
+
+	EventList findFirstBySourceCodeAndStatusNot(String sourceCode,String status);
 }

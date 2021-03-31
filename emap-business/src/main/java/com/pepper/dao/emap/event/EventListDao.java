@@ -72,4 +72,6 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 	@Where(clause="")
 	EventList findFirstById(String id);
 
+	EventList findFirstBySourceCodeAndStatusNot(String sourceCode,String status);
+
 }

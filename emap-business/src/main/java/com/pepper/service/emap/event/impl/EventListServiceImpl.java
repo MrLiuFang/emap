@@ -302,6 +302,11 @@ public class EventListServiceImpl extends BaseServiceImpl<EventList> implements 
 		this.eventListDao.updateStatus(id);
 	}
 
+	@Override
+	public EventList findFirstBySourceCodeAndStatusNot(String sourceCode, String status) {
+		return eventListDao.findFirstBySourceCodeAndStatusNot(sourceCode, status);
+	}
+
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void saveEventListGroup(String eventId,Integer warningLevel,Boolean isMaster,String eventGroupId,String nodeId,String nodeGroupCode){
 		EventListGroup eventListGroup = new EventListGroup();
