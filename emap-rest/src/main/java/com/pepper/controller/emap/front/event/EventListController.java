@@ -789,59 +789,12 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 			eventList.setFiledContent(map.containsKey("filedContent")?Objects.isNull(map.get("filedContent"))?"":map.get("filedContent").toString():"");
 			eventListService.update(eventList);
 			sendEmail(eventList);
-
-			List<EventListGroup> list = eventListGroupService.findAllByEventId(map.get("id").toString());
-			list.forEach(eventListGroup -> {
-				eventListService.updateStatus(eventListGroup.getEventId());
-				eventListGroup.setStatus("P");
-				eventListGroupService.update(eventListGroup);
-			});
-			Node node = nodeService.findFirstBySourceCode(eventList.getSourceCode());
-			List<NodeGroup> listNodeGroup = nodeGroupService.findAllByNodeId(node.getId());
-			listNodeGroup.forEach(nodeGroup -> {
-				String cmd0 = "000100000008010F006400040100";
-				String cmd1 = "000100000008010F006400040101";
-				String cmd2 = "000100000008010F006400040102";
-				String cmd3 = "000100000008010F006400040103";
-				String cmd = "";
-				AtomicInteger outPort = new AtomicInteger(0);
-				Node node1 = nodeService.findById(nodeGroup.getNodeId());
-				if (Objects.nonNull(node1)) {
-					if (Objects.nonNull(node1.getOut()) && node1.getOut()) {
-						List<Integer> list1 = nodeGroupService.findAllOutPortOn(node1.getOutIp(), node1.getPort());
-						if (Objects.nonNull(list1) && list1.size()>0) {
-							list1.forEach(m -> {
-								if (Objects.nonNull(m)) {
-									outPort.set(outPort.get() + m);
-								}
-							});
-						}
-						if (outPort.get() == 0){
-							cmd = cmd0;
-						}else if (outPort.get() == 1){
-							cmd = cmd1;
-						}else if (outPort.get() == 2){
-							cmd = cmd2;
-						}else if (outPort.get() == 3){
-							cmd = cmd3;
-						}
-						try {
-							eventListService.send(node1,cmd);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						node1.setOutIsOn(false);
-					}
-				}
-				node1.setStatusUniversity(1);
-				nodeService.update(node1);
-			});
-			node.setStatusUniversity(1);
-			nodeService.update(node);
+			eventListService.filed(map.get("id").toString(),eventList.getSourceCode());
 		}
 		systemLogService.log("event filed", this.request.getRequestURL().toString());
 		return resultData;
 	}
+
 	
 	@RequestMapping("/workbench/eventListHelpList")
 	@ResponseBody

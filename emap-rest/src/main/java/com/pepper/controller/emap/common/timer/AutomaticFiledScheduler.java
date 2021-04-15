@@ -48,6 +48,7 @@ public class AutomaticFiledScheduler {
             if(time>= Long.valueOf(sutomaticFiled)*1000L){
                 eventList.setStatus("P");
                 eventListService.update(eventList);
+                eventListService.filed(eventList.getEventId(),eventList.getSourceCode());
             }
         }
     }
