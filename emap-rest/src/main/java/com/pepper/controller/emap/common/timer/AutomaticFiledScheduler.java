@@ -4,6 +4,7 @@ import com.pepper.model.emap.event.EventList;
 import com.pepper.service.emap.event.EventListService;
 import com.pepper.service.redis.string.serializer.ValueOperationsService;
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
@@ -26,7 +27,7 @@ public class AutomaticFiledScheduler {
     @Resource
     private Environment environment;
 
-    @Reference
+    @Autowired
     private EventListService eventListService;
 
     @Reference

@@ -11,6 +11,7 @@ import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.Reference;
 import org.apache.xmlbeans.impl.inst2xsd.VenetianBlindStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -48,7 +49,7 @@ public class EventScheduler {
 	@Resource
 	private Environment environment;
 
-	@Reference
+	@Autowired
 	private EventListService  eventListService;
 	
 	@Reference

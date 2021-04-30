@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import org.apache.commons.io.FileUtils;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -83,7 +84,7 @@ import it.sauronsoftware.jave.AudioUtils;
 @RequestMapping ( "/app/event" )
 public class EventListController extends BaseControllerImpl implements BaseController {
 
-    @Reference
+    @Autowired
     private EventListService eventListService;
 
     @Reference

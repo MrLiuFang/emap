@@ -101,7 +101,7 @@ import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 @RequestMapping(value = "/front/report")
 public class ReportController extends BaseControllerImpl implements BaseController{
 
-	@Reference
+	@Autowired
 	private EventListService eventListService;
 
 	@Reference

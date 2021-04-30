@@ -26,7 +26,7 @@ import java.util.Objects;
 //@Order(value= Ordered.LOWEST_PRECEDENCE)
 public class CleanScheduler {
 
-    @Reference
+    @Autowired
     private EventListService eventListService;
 
     @Reference

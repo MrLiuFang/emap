@@ -25,7 +25,6 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringEncoder;
 import org.apache.dubbo.config.annotation.Reference;
-import org.apache.dubbo.config.annotation.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,11 +34,12 @@ import com.pepper.core.base.impl.BaseServiceImpl;
 import com.pepper.dao.emap.event.EventListDao;
 import com.pepper.model.emap.event.EventList;
 import com.pepper.service.emap.event.EventListService;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-@Service(interfaceClass=EventListService.class)
+@Service
 public class EventListServiceImpl extends BaseServiceImpl<EventList> implements EventListService {
 	
 	@Resource

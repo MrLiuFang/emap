@@ -19,6 +19,7 @@ import com.pepper.service.emap.event.*;
 import com.pepper.service.emap.node.NodeGroupService;
 import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -76,7 +77,7 @@ import com.pepper.util.MapToBeanUtil;
 @RequestMapping("/front/event")
 public class EventListController extends BaseControllerImpl implements BaseController {
 
-	@Reference
+	@Autowired
 	private EventListService eventListService;
 	
 	@Reference

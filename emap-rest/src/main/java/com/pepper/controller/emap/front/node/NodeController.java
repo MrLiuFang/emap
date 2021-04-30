@@ -104,8 +104,8 @@ public class NodeController extends BaseControllerImpl implements BaseController
 
 	@Reference
 	private SystemLogService systemLogService;
-	
-	@Reference
+
+	@Autowired
 	private EventListService eventListService;
 
 	@Autowired

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,8 +29,8 @@ public class SubsystemScheduler {
 	
 	@Reference
 	private SubsystemService subsystemService;
-	
-	@Reference
+
+	@Autowired
 	private EventListService eventListService;
 	
 	@Reference
