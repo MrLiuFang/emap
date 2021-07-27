@@ -119,4 +119,6 @@ public interface EventListService extends BaseService<EventList> {
 	EventList findFirstBySourceCodeAndStatusNot(String sourceCode,String status);
 
 	public void filed(String id,String sourceCode);
+
+	public EventList findIp();
 }

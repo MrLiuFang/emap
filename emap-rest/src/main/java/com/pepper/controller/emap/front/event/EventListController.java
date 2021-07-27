@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -13,7 +12,6 @@ import com.pepper.controller.emap.util.ExcelColumn;
 import com.pepper.controller.emap.util.ExportExcelUtil;
 import com.pepper.model.console.role.Role;
 import com.pepper.model.emap.event.*;
-import com.pepper.model.emap.node.NodeGroup;
 import com.pepper.service.console.role.RoleService;
 import com.pepper.service.emap.event.*;
 import com.pepper.service.emap.node.NodeGroupService;
@@ -145,6 +143,17 @@ public class EventListController extends BaseControllerImpl implements BaseContr
 
 	@Reference
 	private NodeGroupService nodeGroupService;
+
+	@RequestMapping(value = "/ip")
+	@ResponseBody
+	public Object add() {
+		ResultData resultData = new ResultData();
+		EventList eventList = eventListService.findIp();
+		if (Objects.nonNull(eventList)){
+			resultData.setData("ip",eventList.getEventName());
+		}
+		return resultData;
+	}
 
 	@RequestMapping(value = "/add")
 	@ResponseBody

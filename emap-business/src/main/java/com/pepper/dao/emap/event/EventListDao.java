@@ -74,4 +74,6 @@ public interface EventListDao extends BaseDao<EventList>, EventListDaoEx {
 
 	EventList findFirstBySourceCodeAndStatusNot(String sourceCode,String status);
 
+	public EventList findFirstBySourceCodeOrderByCreateDateDesc(String sourceCode);
+
 }
